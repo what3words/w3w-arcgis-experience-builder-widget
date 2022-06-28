@@ -1,0 +1,7 @@
+{
+  "name": "what3words",
+  "type": "exb-web-extension-repo",
+  "description": "This is a what3words widget",
+  "copyright": "what3words limited",
+  "license": "http://www.apache.org/licenses/LICENSE-2.0"
+}
