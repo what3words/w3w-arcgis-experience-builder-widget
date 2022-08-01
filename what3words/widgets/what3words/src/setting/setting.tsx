@@ -1,46 +1,56 @@
-/**
-  Licensing
+/** @jsx jsx */
+import { React, jsx } from 'jimu-core'
+import { AllWidgetSettingProps } from 'jimu-for-builder'
+import { TextInput } from 'jimu-ui'
+import { MapWidgetSelector, SettingRow, SettingSection } from 'jimu-ui/advanced/setting-components'
+import defaultMessages from './translations/default'
 
-  Copyright 2020 Esri
-
-  Licensed under the Apache License, Version 2.0 (the "License"); You
-  may not use this file except in compliance with the License. You may
-  obtain a copy of the License at
-  http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
-  implied. See the License for the specific language governing
-  permissions and limitations under the License.
-
-  A copy of the license is available in the repository's
-  LICENSE file.
-*/
-import {React, FormattedMessage} from 'jimu-core';
-import {AllWidgetSettingProps} from 'jimu-for-builder';
-import {IMConfig} from '../config';
-import defaultI18nMessages from './translations/default'
-
-export default class Setting extends React.PureComponent<AllWidgetSettingProps<IMConfig>, any>{
-  onP1Change = (evt: React.FormEvent<HTMLInputElement>) => {
+export default class Setting extends React.PureComponent<AllWidgetSettingProps<any>, any> {
+  onMapWidgetSelected = (useMapWidgetIds: string[]) => {
     this.props.onSettingChange({
       id: this.props.id,
-      config: this.props.config.set('p1', evt.currentTarget.value)
-    });
+      useMapWidgetIds: useMapWidgetIds
+    })
   }
 
-  onP2Change = (evt: React.FormEvent<HTMLInputElement>) => {
+  setW3wLocator = (w3wLocator: string) => {
     this.props.onSettingChange({
       id: this.props.id,
-      config: this.props.config.set('p2', evt.currentTarget.value)
-    });
+      config: this.props.config.set('w3wLocator', w3wLocator)
+    })
   }
 
-  render(){
+  render () {
     return <div className="widget-setting-demo">
-      <div><FormattedMessage id="p1" defaultMessage={defaultI18nMessages.p1}/>: <input defaultValue={this.props.config.p1} onChange={this.onP1Change}/></div>
-      <div><FormattedMessage id="p2" defaultMessage={defaultI18nMessages.p2}/>: <input defaultValue={this.props.config.p2} onChange={this.onP2Change}/></div>
+      <SettingSection
+          className="map-selector-section"
+          title={this.props.intl.formatMessage({
+            id: 'selectMapWidget',
+            defaultMessage: defaultMessages.selectMapWidget
+          })}>
+          <SettingRow>
+          <MapWidgetSelector
+            useMapWidgetIds={this.props.useMapWidgetIds}
+            onSelect={this.onMapWidgetSelected}
+          />
+          </SettingRow>
+      </SettingSection>
+      <SettingSection
+          className="map-selector-section"
+          title={this.props.intl.formatMessage({
+            id: 'w3wLocator',
+            defaultMessage: defaultMessages.w3wLocator
+          })}>
+          <SettingRow>
+            <TextInput
+                type="url"
+                allowClear
+                placeholder={defaultMessages.w3wLocator}
+                defaultValue={this.props.config.w3wLocator}
+                onAcceptValue={this.setW3wLocator}
+            />
+          </SettingRow>
+        </SettingSection>
     </div>
   }
 }

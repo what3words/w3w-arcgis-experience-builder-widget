@@ -1,17 +1,16 @@
 {
-  "name": "demo",
-  "label": "Demo (Class)",
+  "name": "w3w-test",
+  "label": "w3w-test",
   "type": "widget",
-  "version": "1.8.0",
-  "exbVersion": "1.8.0",
-  "author": "Esri R&D Center Beijing",
-  "description": "This is the widget used in developer documentation",
+  "version": "1.0.0",
+  "exbVersion": "1.0.0",
+  "author": "Manuela Sabatino",
+  "description": "what3words exp builder app with ArcGIS locator",
   "copyright": "",
   "license": "http://www.apache.org/licenses/LICENSE-2.0",
   "properties": {},
   "translatedLocales": [
-    "en",
-    "zh-cn"
+    "en"
   ],
   "defaultSize": {
     "width": 800,
