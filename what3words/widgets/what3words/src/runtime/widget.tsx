@@ -1,93 +1,71 @@
-/** @jsx jsx */
-import { React, AllWidgetProps, jsx } from 'jimu-core'
-import { JimuMapViewComponent, JimuMapView } from 'jimu-arcgis'
 import Point from 'esri/geometry/Point'
-import { getCurrentAddress, getMarkerGraphic } from './addlocator'
+import { loadArcGISJSAPIModules } from 'jimu-arcgis'
+const w3wIcon = require('../assets/w3wMarker.png')
 
-export default class Widget extends React.PureComponent<AllWidgetProps<any>, any> {
-  mapView: any
+export const getCurrentAddress = (geocodeURL: string, position: Point) => {
+  // const position = getCurrentLocation()
+  if (!position) return Promise.resolve(null)
+  return loadArcGISJSAPIModules(['esri/rest/locator']).then(modules => {
+    const [locator] = modules
+    return locator.locationToAddress(geocodeURL, {
+      location: position
+    }, {
+      query: {}
+    }).then(response => {
+      return Promise.resolve(response.address)
+    }, err => {
+      console.error(err.message)
+      return []
+    })
+  })
+}
 
-  constructor (props) {
-    super(props)
-    const geocodeServiceURL = this.props.config.w3wLocator
+export const getMarkerGraphic = (position: Point) => {
+  if (!position) return Promise.resolve(null)
+  return loadArcGISJSAPIModules(['esri/Graphic', 'esri/symbols/PictureMarkerSymbol']).then(modules => {
+    let Graphic: __esri.GraphicConstructor = null
+    let PictureMarkerSymbol: typeof __esri.PictureMarkerSymbol
+    [Graphic, PictureMarkerSymbol] = modules
+    const symbol = new PictureMarkerSymbol({
+      width: 15,
+      height: 15,
+      url: w3wIcon
+    })
+    return new Graphic({
+      geometry: position,
+      symbol: symbol
+    })
+  })
+}
 
-    this.state = {
-      w3wLocator: geocodeServiceURL,
-      JimuMapView: null,
-      latitude: '',
-      longitude: '',
-      what3words: ''
-    }
+/**
+ * Get current location
+*/
+export const getCurrentLocation = (onSeccess: (position) => void, onError) => {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(onSeccess, onError)
+  } else {
+    onError && onError()
   }
+}
 
-  componentDidMount () {
-    console.log('Component did mount')
+/**
+ * Create point by position
+*/
+export const createPoint = (position: GeolocationPosition): Promise<__esri.Point> => {
+  const coords = position && position.coords
+  if (!coords) {
+    return Promise.resolve(null)
   }
-
-  activeViewChangeHandler = (jmv: JimuMapView) => {
-    if (jmv) {
-      this.mapView = jmv.view
-      this.setState({
-        jimuMapView: jmv
-      })
-      this.setState({
-        w3wLocator: this.props.config.w3wLocator
-      })
-      this.mapView.on('click', async (mapClick) => {
-        this.mapView.graphics.removeAll()
-        const graphic = await getMarkerGraphic(mapClick.mapPoint)
-        const latitude = Math.round(mapClick.mapPoint.latitude * 1000) / 1000
-        const longitude = Math.round(mapClick.mapPoint.longitude * 1000) / 1000
-        const point: Point = this.state.jimuMapView.view.toMap({
-          x: longitude,
-          y: latitude
-        })
-        this.setState({
-          latitude: point.latitude.toFixed(4),
-          longitude: point.longitude.toFixed(4)
-        })
-        this.mapView.popup.open({
-          // Set the popup's title to the coordinates of the location
-          title: 'Reverse geocode: [' + longitude + ', ' + latitude + ']',
-          location: mapClick.mapPoint // Set the location of the popup to the clicked location
-        })
-        console.log(this.mapView.popup.title)
-
-        getCurrentAddress(this.state.w3wLocator, mapClick.mapPoint).then(response => {
-          this.setState({
-            what3words: response
-          })
-          this.mapView.popup.content = 'what3words address: ///' + response
-          console.log(this.mapView.popup.content)
-          this.mapView.graphics.add(graphic)
-        }).catch((error) => {
-          console.log('error: ' + error)
-          // If the promise fails and no result is found, show a generic message
-          this.mapView.popup.content = 'No address was found for this location'
-          this.mapView.graphics.removeAll()
-        })
-      })
-    }
-  }
-
-  componentDidUpdate (prevPops) {
-    console.log('Component did update')
-    //check for the updated geocode service url in config
-  }
-
-  render () {
-    return <div className="widget-starter jimu-widget">
-      <p>This is the starter widget area</p>
-      {this.props.hasOwnProperty('useMapWidgetIds') &&
-        this.props.useMapWidgetIds &&
-        this.props.useMapWidgetIds[0] && (
-          <JimuMapViewComponent
-            useMapWidgetId={this.props.useMapWidgetIds?.[0]}
-            onActiveViewChange={this.activeViewChangeHandler}
-          />
-      )}
-      <p>Lat/Lon: {this.state.latitude} {this.state.longitude}</p>
-      <p>What3words address: {this.state.what3words}</p>
-    </div>
-  }
+  return loadArcGISJSAPIModules(['esri/geometry/Point']).then(modules => {
+    const [Point] = modules
+    return new Point({
+      longitude: coords.longitude,
+      latitude: coords.latitude,
+      z: coords.altitude || null,
+      spatialReference: {
+        wkid: 4326
+      }
+    })
+  })
 }
