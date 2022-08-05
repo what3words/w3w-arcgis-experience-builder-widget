@@ -36,3 +36,28 @@ export const getMarkerGraphic = (position: Point) => {
     })
   })
 }
+
+export const getMapLabelGraphic = (position: Point, what3words: string) => {
+  if (!position) return Promise.resolve(null)
+  return loadArcGISJSAPIModules(['esri/Graphic']).then(modules => {
+    let Graphic: __esri.GraphicConstructor = null;
+    [Graphic] = modules
+    const textSym = {
+      type: 'text',
+      text: what3words,
+      font: { size: 12, weight: 500 },
+      horizontalAlignment: 'left',
+      kerning: true,
+      rotated: false,
+      color: [225, 31, 38, 1],
+      haloColor: 'black',
+      haloSize: '1px',
+      xoffset: 10,
+      yoffset: -4
+    }
+    return new Graphic({
+      geometry: position,
+      symbol: textSym
+    })
+  })
+}

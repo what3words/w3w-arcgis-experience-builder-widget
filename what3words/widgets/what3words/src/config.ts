@@ -5,3 +5,4 @@ export interface Config {
 }
 
 export type IMConfig = ImmutableObject<Config>
+export type IMAddressSettings = ImmutableObject<AddressSettings>

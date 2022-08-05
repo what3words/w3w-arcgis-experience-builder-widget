@@ -1,3 +1,3 @@
 {
-  "w3wLocator": "https://utility.arcgis.com/usrsvcs/servers/6123e8aa30f345b7a1d18db626ad7156/rest/services/what3words_EN_English/GeocodeServer"
+  "w3wLocator": "https://utility.arcgis.com/usrsvcs/servers/<Enter Your Unique Path ID>/rest/services/what3words_EN_English/GeocodeServer"
 }

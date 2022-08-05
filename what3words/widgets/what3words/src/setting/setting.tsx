@@ -1,15 +1,50 @@
 /** @jsx jsx */
-import { React, jsx } from 'jimu-core'
+import { React, jsx, getAppStore } from 'jimu-core'
 import { AllWidgetSettingProps } from 'jimu-for-builder'
-import { TextInput } from 'jimu-ui'
-import { MapWidgetSelector, SettingRow, SettingSection } from 'jimu-ui/advanced/setting-components'
+import AddressSettings from './components/locator-settings'
+import { MapWidgetSelector, SettingCollapse, SettingRow, SettingSection } from 'jimu-ui/advanced/setting-components'
 import defaultMessages from './translations/default'
 
+interface State {
+  isAddressSettingsOpen: boolean
+}
+
 export default class Setting extends React.PureComponent<AllWidgetSettingProps<any>, any> {
+  private readonly isRTL: boolean
+
+  constructor (props) {
+    super(props)
+    this.state = {
+      isAddressSettingsOpen: true
+    }
+
+    this.isRTL = false
+
+    const appState = getAppStore().getState()
+    this.isRTL = appState?.appContext?.isRTL
+  }
+
+  nls = (id: string) => {
+    return this.props.intl.formatMessage({ id: id, defaultMessage: defaultMessages[id] })
+  }
+
   onMapWidgetSelected = (useMapWidgetIds: string[]) => {
     this.props.onSettingChange({
       id: this.props.id,
       useMapWidgetIds: useMapWidgetIds
+    })
+  }
+
+  onToggleAddressSettings = () => {
+    this.setState({
+      isAddressSettingsOpen: !this.state.isAddressSettingsOpen
+    })
+  }
+
+  updateAddressSettings = (property: string, value: string | number) => {
+    this.props.onSettingChange({
+      id: this.props.id,
+      config: this.props.config.setIn(['addressSettings', property], value)
     })
   }
 
@@ -21,7 +56,7 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<a
   }
 
   render () {
-    return <div className="widget-setting-demo">
+    return <div className="widget-what3words-setting">
       <SettingSection
           className="map-selector-section"
           title={this.props.intl.formatMessage({
@@ -35,22 +70,25 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<a
           />
           </SettingRow>
       </SettingSection>
-      <SettingSection
-          className="map-selector-section"
-          title={this.props.intl.formatMessage({
-            id: 'w3wLocator',
-            defaultMessage: defaultMessages.w3wLocator
-          })}>
-          <SettingRow>
-            <TextInput
-                type="url"
-                allowClear
-                placeholder={defaultMessages.w3wLocator}
-                defaultValue={this.props.config.w3wLocator}
-                onAcceptValue={this.setW3wLocator}
+      <SettingSection>
+        <SettingCollapse
+          defaultIsOpen
+          label={this.nls('addressSettingsLabel')}
+          isOpen={this.state.isAddressSettingsOpen}
+          onRequestOpen={() => this.onToggleAddressSettings()}
+          onRequestClose={() => this.onToggleAddressSettings()}>
+          <SettingRow flow='wrap'>
+            <AddressSettings
+              intl={this.props.intl}
+              theme={this.props.theme}
+              portalSelf={this.props.portalSelf}
+              config={this.props.config.addressSettings}
+              isRTL={this.isRTL}
+              onAddressSettingsUpdated={this.updateAddressSettings}
             />
           </SettingRow>
-        </SettingSection>
+        </SettingCollapse>
+      </SettingSection>
     </div>
   }
 }

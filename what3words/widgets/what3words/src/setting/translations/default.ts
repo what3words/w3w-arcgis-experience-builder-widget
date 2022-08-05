@@ -1,4 +1,8 @@
 export default {
-  selectMapWidget: 'Please select your map',
-  w3wLocator: 'Please add your what3words ArcGIS locator',
+  selectMapWidget: 'Select a map',
+  w3wLocator: 'Select your what3words locator',
+  addressSettingsLabel: 'Locator settings',
+  locatorServiceLabel: 'Set locator',
+  alertPopupTitle: 'Select geocode service',
+  invalidLocatorServiceURL: 'Please enter valid geocode service url'
 }

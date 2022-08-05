@@ -1,15 +1,36 @@
 /** @jsx jsx */
-import { React, AllWidgetProps, jsx } from 'jimu-core'
+import { React, AllWidgetProps, jsx, getAppStore } from 'jimu-core'
 import { JimuMapViewComponent, JimuMapView } from 'jimu-arcgis'
 import Point from 'esri/geometry/Point'
-import { getCurrentAddress, getMarkerGraphic } from './addlocator'
+import { getCurrentAddress, getMarkerGraphic, getMapLabelGraphic } from './locator-utils'
+import { getW3WStyle } from './lib/style'
+import defaultMessages from './translations/default'
+
+interface State {
+  w3wLocator: string
+}
 
 export default class Widget extends React.PureComponent<AllWidgetProps<any>, any> {
   mapView: any
+  private _isMounted: boolean
+  private readonly isRTL: boolean
 
   constructor (props) {
     super(props)
-    const geocodeServiceURL = this.props.config.w3wLocator
+    let geocodeServiceURL = this.props.config.w3wLocator
+
+    if (this.props.config?.addressSettings?.geocodeServiceUrl) {
+      geocodeServiceURL = this.props.config.addressSettings.geocodeServiceUrl
+    } else if (this.props.portalSelf && this.props.portalSelf.helperServices && this.props.portalSelf.helperServices.geocode &&
+      this.props.portalSelf.helperServices.geocode.length > 0 && this.props.portalSelf.helperServices.geocode[0].url) { // Use org's first geocode service if available
+      geocodeServiceURL = this.props.portalSelf.helperServices.geocode[0].url
+    }
+
+    this._isMounted = false
+    this.isRTL = false
+
+    const appState = getAppStore().getState()
+    this.isRTL = appState?.appContext?.isRTL
 
     this.state = {
       w3wLocator: geocodeServiceURL,
@@ -20,8 +41,13 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
     }
   }
 
+  nls = (id: string) => {
+    return this.props.intl.formatMessage({ id: id, defaultMessage: defaultMessages[id] })
+  }
+
   componentDidMount () {
     console.log('Component did mount')
+    this._isMounted = true
   }
 
   activeViewChangeHandler = (jmv: JimuMapView) => {
@@ -31,33 +57,36 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
         jimuMapView: jmv
       })
       this.setState({
-        w3wLocator: this.props.config.w3wLocator
+        // w3wLocator: this.props.config.w3wLocator
+        w3wLocator: this.state.w3wLocator
       })
       this.mapView.on('click', async (mapClick) => {
         this.mapView.graphics.removeAll()
         this.mapView.popup.autoOpenEnabled = false
         const graphic = await getMarkerGraphic(mapClick.mapPoint)
-        const latitude = Math.round(mapClick.mapPoint.latitude * 1000) / 1000
-        const longitude = Math.round(mapClick.mapPoint.longitude * 1000) / 1000
+        // const latitude = Math.round(mapClick.mapPoint.latitude * 1000) / 1000
+        // const longitude = Math.round(mapClick.mapPoint.longitude * 1000) / 1000
         const point: Point = this.state.jimuMapView.view.toMap({
-          x: longitude,
-          y: latitude
+          x: mapClick.x,
+          y: mapClick.y
         })
         this.setState({
           latitude: point.latitude.toFixed(4),
           longitude: point.longitude.toFixed(4)
         })
         this.mapView.popup.open({
-          title: 'Reverse geocode for ' + `${latitude}, ${longitude}`,
+          title: 'Reverse geocode for ' + `${this.state.latitude}, ${this.state.longitude}`,
           location: mapClick.mapPoint
         })
 
-        getCurrentAddress(this.state.w3wLocator, mapClick.mapPoint).then(response => {
+        getCurrentAddress(this.state.w3wLocator, mapClick.mapPoint).then(async response => {
           this.setState({
             what3words: response
           })
-          this.mapView.popup.content = 'what3words address:' + `///${response}`
+          const mapLabel = await getMapLabelGraphic(mapClick.mapPoint, this.state.what3words)
+          this.mapView.popup.content = 'what3words address: ' + `///${response}`
           this.mapView.graphics.add(graphic)
+          this.mapView.graphics.add(mapLabel)
         }).catch((error) => {
           console.log('error: ' + error)
           this.mapView.popup.content = 'No address was found for this location'
@@ -70,11 +99,21 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
   componentDidUpdate (prevPops) {
     console.log('Component did update')
     //check for the updated geocode service url in config
+    if (prevPops.config.addressSettings?.geocodeServiceUrl !== this.props.config.addressSettings?.geocodeServiceUrl) {
+      this.setState({
+        locatorURL: this.props.config.addressSettings.geocodeServiceUrl
+      })
+    }
+  }
+
+  componentWillUnmount = () => {
+    console.log('Component will unmount')
+    this._isMounted = false
   }
 
   render () {
-    return <div className="widget-starter jimu-widget">
-      <p>This is the starter widget area</p>
+    return <div css={getW3WStyle(this.props.theme)} className="widget-starter jimu-widget">
+      <h5>Reverse Geocode with your what3words locator</h5>
       {this.props.hasOwnProperty('useMapWidgetIds') &&
         this.props.useMapWidgetIds &&
         this.props.useMapWidgetIds[0] && (
@@ -83,8 +122,13 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
             onActiveViewChange={this.activeViewChangeHandler}
           />
       )}
-      <p>Lat/Lon: {this.state.latitude}, {this.state.longitude}</p>
-      <p>What3words address: {this.state.what3words}</p>
+      <h3 className="w3wBlock">
+          <span className='w3wRed'>///</span>{this.state.what3words}
+      </h3>
+      <div className="w3wCoords">
+        <div className="w3wCoordsProp"><span className='w3wRed w3wCoordsFirstCol'>{defaultMessages.y}:</span><span>{this.state.latitude}</span></div>
+        <div className="w3wCoordsProp"><span className='w3wRed w3wCoordsFirstCol'>{defaultMessages.x}:</span><span>{this.state.longitude}</span></div>
+      </div>
     </div>
   }
 }
