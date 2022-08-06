@@ -45,7 +45,7 @@ export const getMapLabelGraphic = (position: Point, what3words: string) => {
     const textSym = {
       type: 'text',
       text: what3words,
-      font: { size: 12, weight: 500 },
+      font: { size: 12, weight: 'bold' },
       horizontalAlignment: 'left',
       kerning: true,
       rotated: false,

@@ -27,5 +27,14 @@ export function getW3WStyle (theme: ThemeVariables): SerializedStyles {
       .float-right {
         float:right;
       }
+      .actionButton {
+        margin: 2px 2px 0px 2px;
+      }
+      .actionButton {
+        color: #e11f26;
+      }
+      .actionButton:disabled{
+        cursor: default;
+      }
     `
 }

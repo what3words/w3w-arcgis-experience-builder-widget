@@ -1,4 +1,5 @@
 import { ImmutableObject } from 'jimu-core'
+import AddressSettings from './setting/components/locator-settings'
 
 export interface Config {
   w3wLocator: string

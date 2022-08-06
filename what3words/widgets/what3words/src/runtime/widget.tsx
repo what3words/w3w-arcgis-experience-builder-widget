@@ -5,15 +5,19 @@ import Point from 'esri/geometry/Point'
 import { getCurrentAddress, getMarkerGraphic, getMapLabelGraphic } from './locator-utils'
 import { getW3WStyle } from './lib/style'
 import defaultMessages from './translations/default'
+import { Button } from 'reactstrap/lib'
+import { Icon, Popper } from 'jimu-ui'
 
-interface State {
-  w3wLocator: string
-}
+const iconCopy = require('jimu-ui/lib/icons/duplicate.svg')
+const iconZoom = require('jimu-ui/lib/icons/zoom-out-fixed.svg')
+
 
 export default class Widget extends React.PureComponent<AllWidgetProps<any>, any> {
   mapView: any
   private _isMounted: boolean
   private readonly isRTL: boolean
+  zoomScale = 5000
+  what3words: string
 
   constructor (props) {
     super(props)
@@ -37,7 +41,8 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
       JimuMapView: null,
       latitude: '',
       longitude: '',
-      what3words: ''
+      what3words: '',
+      isCopyMessageOpen: false
     }
   }
 
@@ -50,6 +55,39 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
     this._isMounted = true
   }
 
+  onZoomClick = () => {
+    if (this.mapView.graphics.length > 0) {
+      const selectedLocationGraphic = this.mapView.graphics.getItemAt(0)
+      this.mapView.goTo({
+        center: selectedLocationGraphic.geometry,
+        scale: this.zoomScale
+      })
+    }
+  }
+
+  onCopyClick = () => {
+    //clear prev selection
+    if (window.getSelection) {
+      window.getSelection().removeAllRanges()
+    }
+
+    //copy input
+    navigator.clipboard.writeText(this.state.what3words)
+    this.setState({
+      isCopyMessageOpen: true
+    })
+
+    setTimeout(() => {
+      //Remove the existing selection
+      if (window.getSelection) {
+        window.getSelection().removeAllRanges()
+      }
+      this.setState({
+        isCopyMessageOpen: false
+      })
+    }, 500)
+  }
+
   activeViewChangeHandler = (jmv: JimuMapView) => {
     if (jmv) {
       this.mapView = jmv.view
@@ -57,15 +95,12 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
         jimuMapView: jmv
       })
       this.setState({
-        // w3wLocator: this.props.config.w3wLocator
         w3wLocator: this.state.w3wLocator
       })
       this.mapView.on('click', async (mapClick) => {
         this.mapView.graphics.removeAll()
         this.mapView.popup.autoOpenEnabled = false
         const graphic = await getMarkerGraphic(mapClick.mapPoint)
-        // const latitude = Math.round(mapClick.mapPoint.latitude * 1000) / 1000
-        // const longitude = Math.round(mapClick.mapPoint.longitude * 1000) / 1000
         const point: Point = this.state.jimuMapView.view.toMap({
           x: mapClick.x,
           y: mapClick.y
@@ -87,6 +122,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
           this.mapView.popup.content = 'what3words address: ' + `///${response}`
           this.mapView.graphics.add(graphic)
           this.mapView.graphics.add(mapLabel)
+          this.mapView.set({ center: mapClick.mapPoint }) // center to the point
         }).catch((error) => {
           console.log('error: ' + error)
           this.mapView.popup.content = 'No address was found for this location'
@@ -109,6 +145,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
   componentWillUnmount = () => {
     console.log('Component will unmount')
     this._isMounted = false
+    this.mapView.graphics.removeAll()
   }
 
   render () {
@@ -122,6 +159,15 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
             onActiveViewChange={this.activeViewChangeHandler}
           />
       )}
+
+      <Button aria-label={this.nls('copy')} aria-disabled={!this.state.what3words} title={this.nls('copy')} className='float-right actionButton' icon size={'sm'}
+        active={this.state.isCopyMessageOpen} disabled={!this.state.what3words} id={'refCopy' + this.props.id} onClick={this.onCopyClick.bind(this)}>
+        <Icon icon={iconCopy} size={'17'}></Icon>
+      </Button>
+      <Button aria-label={this.nls('zoomTo')} aria-disabled={!this.state.what3words} title={this.nls('zoomTo')} className='float-right actionButton' icon size={'sm'}
+       onClick={this.onZoomClick.bind(this)} disabled={!this.state.what3words}>
+        <Icon icon={iconZoom} size={'17'}></Icon>
+       </Button>
       <h3 className="w3wBlock">
           <span className='w3wRed'>///</span>{this.state.what3words}
       </h3>
@@ -129,6 +175,18 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
         <div className="w3wCoordsProp"><span className='w3wRed w3wCoordsFirstCol'>{defaultMessages.y}:</span><span>{this.state.latitude}</span></div>
         <div className="w3wCoordsProp"><span className='w3wRed w3wCoordsFirstCol'>{defaultMessages.x}:</span><span>{this.state.longitude}</span></div>
       </div>
+      {/* Copy message toast popper */}
+      {this.state.isCopyMessageOpen &&
+        <Popper
+          open={this.state.isCopyMessageOpen}
+          version={0}
+          placement={'bottom'}
+          showArrow={true}
+          reference={'refCopy' + this.props.id}
+          offset={[0, 0]}>
+          <div className={'p-2'}>{this.nls('copySuccessMessage')}</div>
+        </Popper>
+      }
     </div>
   }
 }
