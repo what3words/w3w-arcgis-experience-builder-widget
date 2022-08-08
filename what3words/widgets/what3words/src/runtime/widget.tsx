@@ -5,12 +5,10 @@ import Point from 'esri/geometry/Point'
 import { getCurrentAddress, getMarkerGraphic, getMapLabelGraphic } from './locator-utils'
 import { getW3WStyle } from './lib/style'
 import defaultMessages from './translations/default'
-import { Button } from 'reactstrap/lib'
-import { Icon, Popper } from 'jimu-ui'
+import { Button, Icon, Popper } from 'jimu-ui'
 
 const iconCopy = require('jimu-ui/lib/icons/duplicate.svg')
 const iconZoom = require('jimu-ui/lib/icons/zoom-out-fixed.svg')
-
 
 export default class Widget extends React.PureComponent<AllWidgetProps<any>, any> {
   mapView: any
@@ -109,11 +107,13 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
           latitude: point.latitude.toFixed(4),
           longitude: point.longitude.toFixed(4)
         })
+        // eslint-disable-next-line no-lone-blocks
+        { this.props.config.displayPopupMessage &&
         this.mapView.popup.open({
           title: 'Reverse geocode for ' + `${this.state.latitude}, ${this.state.longitude}`,
           location: mapClick.mapPoint
         })
-
+        }
         getCurrentAddress(this.state.w3wLocator, mapClick.mapPoint).then(async response => {
           this.setState({
             what3words: response
@@ -159,22 +159,27 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
             onActiveViewChange={this.activeViewChangeHandler}
           />
       )}
-
-      <Button aria-label={this.nls('copy')} aria-disabled={!this.state.what3words} title={this.nls('copy')} className='float-right actionButton' icon size={'sm'}
+      {this.props.config.displayCopyButton &&
+      <Button type='tertiary' aria-label={this.nls('copy')} aria-disabled={!this.state.what3words} title={this.nls('copy')} className='float-right actionButton' icon size={'sm'}
         active={this.state.isCopyMessageOpen} disabled={!this.state.what3words} id={'refCopy' + this.props.id} onClick={this.onCopyClick.bind(this)}>
         <Icon icon={iconCopy} size={'17'}></Icon>
       </Button>
-      <Button aria-label={this.nls('zoomTo')} aria-disabled={!this.state.what3words} title={this.nls('zoomTo')} className='float-right actionButton' icon size={'sm'}
+      }
+      {this.props.config.displayZoomButton &&
+      <Button type='tertiary' aria-label={this.nls('zoomTo')} aria-disabled={!this.state.what3words} title={this.nls('zoomTo')} className='float-right actionButton' icon size={'sm'}
        onClick={this.onZoomClick.bind(this)} disabled={!this.state.what3words}>
         <Icon icon={iconZoom} size={'17'}></Icon>
        </Button>
+      }
       <h3 className="w3wBlock">
           <span className='w3wRed'>///</span>{this.state.what3words}
       </h3>
+      {this.props.config.displayCoordinates &&
       <div className="w3wCoords">
         <div className="w3wCoordsProp"><span className='w3wRed w3wCoordsFirstCol'>{defaultMessages.y}:</span><span>{this.state.latitude}</span></div>
         <div className="w3wCoordsProp"><span className='w3wRed w3wCoordsFirstCol'>{defaultMessages.x}:</span><span>{this.state.longitude}</span></div>
       </div>
+      }
       {/* Copy message toast popper */}
       {this.state.isCopyMessageOpen &&
         <Popper

@@ -1,5 +1,5 @@
 export default {
-  _widgetLabel: 'w3w-test',
+  _widgetLabel: 'what3words',
   x: 'Longitude',
   y: 'Latitude',
   copy: 'Copy',

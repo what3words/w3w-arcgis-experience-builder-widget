@@ -8,16 +8,18 @@ export function getW3WStyle (theme: ThemeVariables): SerializedStyles {
         overflow:hidden;
       }
       .w3wRed {
-        color:#e11f26;
+        color:#E11F26;
       }
       .w3wCoords {
-        background:#00456b;
+        background:#0A3049;
         width:100%;
         color:#fff;
+        padding: 5px;
       }
       .w3wCoordsProp {
         display:inline-block;
         margin-right:20px;
+        margin-left: 5px;
       }
       .w3wCoordsFirstCol {
         display:inline-block;
@@ -31,7 +33,7 @@ export function getW3WStyle (theme: ThemeVariables): SerializedStyles {
         margin: 2px 2px 0px 2px;
       }
       .actionButton {
-        color: #e11f26;
+        color: #E11F26;
       }
       .actionButton:disabled{
         cursor: default;

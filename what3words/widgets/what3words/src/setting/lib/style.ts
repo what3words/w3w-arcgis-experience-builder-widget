@@ -46,3 +46,26 @@ export function getAlertPopupStyle (theme: ThemeVariables): SerializedStyles {
     }
   `
 }
+
+export function getWidgetDisplayOptionsStyle (theme: ThemeVariables): SerializedStyles {
+  return css`
+      label {
+        display: inline-flex;
+        margin-left: 5px;
+      }
+      .switch-select {
+        background-color: #01AABB;
+        border-color: #01AABB;
+      }
+      .switch-select .switch-slider {
+        background-color: #000 !important;
+      }
+      .switch-select.checked {
+        background-color: #000;
+        border-color: #01AABB;
+      }
+      .switch-select.checked .switch-slider {
+        background-color: #01AABB !important;
+      }
+  `
+}

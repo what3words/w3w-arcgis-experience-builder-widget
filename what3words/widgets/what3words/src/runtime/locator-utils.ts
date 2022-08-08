@@ -26,8 +26,8 @@ export const getMarkerGraphic = (position: Point) => {
     let PictureMarkerSymbol: typeof __esri.PictureMarkerSymbol
     [Graphic, PictureMarkerSymbol] = modules
     const symbol = new PictureMarkerSymbol({
-      width: 15,
-      height: 15,
+      width: 25,
+      height: 25,
       url: w3wIcon
     })
     return new Graphic({
@@ -44,16 +44,16 @@ export const getMapLabelGraphic = (position: Point, what3words: string) => {
     [Graphic] = modules
     const textSym = {
       type: 'text',
-      text: what3words,
+      text: '///' + what3words,
       font: { size: 12, weight: 'bold' },
       horizontalAlignment: 'left',
       kerning: true,
       rotated: false,
       color: [225, 31, 38, 1],
-      haloColor: 'black',
+      haloColor: '#0A3049',
       haloSize: '1px',
-      xoffset: 10,
-      yoffset: -4
+      xoffset: 12,
+      yoffset: -5
     }
     return new Graphic({
       geometry: position,
