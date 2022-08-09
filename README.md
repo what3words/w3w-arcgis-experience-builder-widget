@@ -75,5 +75,5 @@ All contributions are welcome; please submit a pull request.
 
 The MIT License (MIT)
 
-A copy of the license is available in the repository's [license](LICENSE.txt) file.
+A copy of the license is available in the repository's [license](LICENSE) file.
 

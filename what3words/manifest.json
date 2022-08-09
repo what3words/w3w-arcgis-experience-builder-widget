@@ -1,7 +1,19 @@
 {
   "name": "what3words",
-  "type": "exb-web-extension-repo",
-  "description": "This is a what3words widget",
-  "copyright": "what3words limited",
-  "license": "http://www.apache.org/licenses/LICENSE-2.0"
+  "label": "what3words",
+  "type": "widget",
+  "version": "1.0.0",
+  "exbVersion": "1.0.0",
+  "author": "Manuela Sabatino",
+  "description": "what3words exp builder app with ArcGIS locator",
+  "copyright": "",
+  "license": "http://www.apache.org/licenses/LICENSE-2.0",
+  "properties": {},
+  "translatedLocales": [
+    "en"
+  ],
+  "defaultSize": {
+    "width": 800,
+    "height": 500
+  }
 }
