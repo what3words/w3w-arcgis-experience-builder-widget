@@ -17,7 +17,7 @@ A custom widget for [ArcGIS Experience Builder](https://developers.arcgis.com/ex
 
 - Create your [own Experience Application](https://developers.arcgis.com/experience-builder/guide/);
 
-- Create your own experience application with a base map. You can now add the what3words widget to the map, on the side or whichever you prefer. You can search the `what3words` widget by typing its name on the search bar at the top of the list of widgets or look for the widget on the list.
+- Create your own experience application with a base map. You can now add the what3words widget to the map, on the side or whichever you prefer. You can search the `what3words` widget by typing its name on the search bar at the top of the list of widgets or looking for the widget on the list.
 
 ![Search widget](./docs/ScreenShot-02-search-w3w.png)
 
@@ -30,7 +30,7 @@ On the Content panel of the widget on the right hand side, you have 3 sections:
         - The Lat/Long coordinates options allows you to display the WGS84 coordinates of the related what3words address;
         - The Zoom button allows you to get to 5000m closer to the point on the map;
         - The Copy button allows you to copy the what3words to your clipboard;
-        - The Popup message once is enabled you can display a popup message with the what3words address info above the map marker after tapping anywhere on the map.
+        - With Popup message enabled you can display a popup message with the what3words address info above the map marker after tapping anywhere on the map.
 
 
 ![Drag and drop widget](./docs/ScreenShot-03-drag-and-drop-w3w.png)
