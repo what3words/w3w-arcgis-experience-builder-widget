@@ -10,9 +10,8 @@ A custom widget for [ArcGIS Experience Builder](https://developers.arcgis.com/ex
 - A copy of this widget `what3words`.
 
 ## Installation and Configuration
-Clone the sample repo into your Experience Builder Client root folder and restart your watcher.
 
-- Deploy the widget by copying the `what3words` folder and its contents into your ArcGIS Experience Builder installation's `client/your-extensions/widgets/` folder;
+- Deploy the widget by copying the `what3words` folder and its contents into your ArcGIS Experience Builder installation's `client/your-extensions/widgets/` folder and restart your watcher;
 
 - Run both [ArcGIS Experience Builder server](https://developers.arcgis.com/experience-builder/guide/install-guide/#server-install) and [ArcGIS Experience Builder client](https://developers.arcgis.com/experience-builder/guide/install-guide/#client-install) in 2 separate terminals;
 
@@ -32,6 +31,7 @@ On the Content panel of the widget on the right hand side, you have 3 sections:
         - The Zoom button allows you to get to 5000m closer to the point on the map;
         - The Copy button allows you to copy the what3words to your clipboard;
         - The Popup message once is enabled you can display a popup message with the what3words address info above the map marker after tapping anywhere on the map.
+
 
 ![Drag and drop widget](./docs/ScreenShot-03-drag-and-drop-w3w.png)
 
