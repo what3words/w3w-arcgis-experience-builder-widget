@@ -19,7 +19,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
 
   constructor (props) {
     super(props)
-    let geocodeServiceURL = this.props.config.w3wLocator
+    let geocodeServiceURL = ''
 
     if (this.props.config?.addressSettings?.geocodeServiceUrl) {
       geocodeServiceURL = this.props.config.addressSettings.geocodeServiceUrl
@@ -132,12 +132,12 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
     }
   }
 
-  componentDidUpdate (prevPops) {
+  componentDidUpdate (prevProps) {
     console.log('Component did update')
     //check for the updated geocode service url in config
-    if (prevPops.config.addressSettings?.geocodeServiceUrl !== this.props.config.addressSettings?.geocodeServiceUrl) {
+    if (prevProps.config.addressSettings?.geocodeServiceUrl !== this.props.config.addressSettings?.geocodeServiceUrl) {
       this.setState({
-        locatorURL: this.props.config.addressSettings.geocodeServiceUrl
+        w3wLocator: this.props.config.addressSettings.geocodeServiceUrl
       })
     }
   }

@@ -14,7 +14,7 @@ export const getCurrentAddress = (geocodeURL: string, position: Point) => {
       return Promise.resolve(response.address)
     }, err => {
       console.error(err.message)
-      return []
+      return err.message + ' - Check your Locator URL'
     })
   })
 }

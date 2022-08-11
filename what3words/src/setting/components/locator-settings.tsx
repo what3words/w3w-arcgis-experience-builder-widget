@@ -119,6 +119,7 @@ export default class AddressSettings extends React.PureComponent<Props, State> {
     let isValid = false
     //validate the geocode service url on change of user input url
     this._validateGeocodeService().then((isValidGeocodeService) => {
+      // console.log(isValidGeocodeService)
       if (!isValidGeocodeService) {
         isValid = false
       } else {
@@ -134,15 +135,21 @@ export default class AddressSettings extends React.PureComponent<Props, State> {
     if (this.geocodeTextBox.current.value && urlRegExString.test(this.geocodeTextBox.current.value)) {
       try {
         return await fetch(this.geocodeTextBox.current.value + '?f=json')
-          .then(res => res.json())
-          .then(result => {
-            if (result.error) {
+          .then(response => response.json())
+          .then(response => {
+            // console.log(response)
+            // The ArcGIS locator URL when added returns a 403 code which means
+            // message: "You do not have permissions to access this resource or perform this operation."
+            // messageCode: "GWM_0003"
+            // This part of the code needs to be reviewed
+            if (response.error.code !== 403) {
               return false
             } else {
               return true
             }
           })
-      } catch (e) {
+      } catch (error) {
+        console.log('Error: ' + error.message)
         return false
       }
     } else {
