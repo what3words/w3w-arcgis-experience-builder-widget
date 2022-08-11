@@ -70,6 +70,7 @@ All contributions are welcome; please submit a pull request.
 
 ## Revision History
 * `v1.0.0`  - Add the locator to the ArcGIS Experience Builder
+* `v.1.0.2` - Add a temporary fix to validate any Locator URLs
 
 ## Licensing
 
