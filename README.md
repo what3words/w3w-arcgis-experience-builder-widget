@@ -53,6 +53,12 @@ Example of a what3words Locator: `https://utility.arcgis.com/usrsvcs/servers/<My
 
 ![Final ArcGIS Experience Builder - what3words widget](./docs/ScreenShot-01-show-final-widget.png)
 
+## Troubleshooting
+If after installing correctly the what3words locator across your ArcGIS platform, you cannot display your what3words locator on your Experience app, it could be that your what3words locator hasn’t been put at the top of your `Geocoding services`.
+
+To resolve this issue, please drag-and-drop the what3words locator at the top of the Geocoding service list, as it is shown on this screenshot. You can find this list under your `Organisation > Utility services > Geocoding section`. 
+![Troubleshooting what3words locator display](./docs/ScreenShot-05-troubleshooting-w3w-locator.png)
+
 
 ## Issues
 
