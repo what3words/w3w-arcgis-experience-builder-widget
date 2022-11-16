@@ -4,6 +4,10 @@
 A custom widget for [ArcGIS Experience Builder](https://developers.arcgis.com/experience-builder//) providing reverse geocoding via the [what3words ArcGIS locator](https://developer.what3words.com/tools/gis-extensions/arcgis).
 ![Final ArcGIS Experience Builder - what3words widget](./docs/ScreenShot-01-show-final-widget.png)
 
+## Demo App
+
+You can find the Custom Web AppBuilder what3words widget in this [Github page](https://what3words.github.io/w3w-arcgis-experience-builder-widget/expBuilder_Widget/).
+
 ## Prerequisites
 - An installed and configured instance of [ArcGIS Experience Builder (Developer Edition)](https://developers.arcgis.com/experience-builder/guide/install-guide/);
 - A URL of your what3words ArcGIS Locator that has been added to your ArcGIS online or your Portal for ArcGIS by following this [instruction](https://developer.what3words.com/tools/gis-extensions/arcgis) on the what3words developer site;
@@ -77,10 +81,18 @@ All contributions are welcome; please submit a pull request.
 ## Revision History
 * `v1.0.0`  - Add the locator to the ArcGIS Experience Builder
 * `v.1.0.2` - Add a temporary fix to validate any Locator URLs
+* `v.1.0.3` - Publish the app on a web server
+
+
+## Feedback
+
+We have a quick favor to ask. Would you mind heading to our app in the [what3words ArcGIS Online page](https://w3w.maps.arcgis.com/home/item.html?id=0150cfda08334003bec3a77e1006e8c6#overview) and writing a quick review?
+
+Reviews help us keep up with your needs and they also help others like you to make confident decisions about our what3words applications.
+
+Review or not, we still love you!
 
 ## Licensing
 
-The MIT License (MIT)
-
-A copy of the license is available in the repository's [license](LICENSE) file.
+This widget is licensed under the MIT license. A copy of the license is available in the repository's [license](https://github.com/what3words/w3w-arcgis-webappbuilder-widget/blob/master/LICENSE) file.
 
