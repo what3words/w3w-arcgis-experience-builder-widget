@@ -5,7 +5,7 @@
   "version": "1.0.0",
   "exbVersion": "1.0.0",
   "author": "Manuela Sabatino",
-  "description": "what3words experience builder app with ArcGIS locator",
+  "description": "what3words exp builder app with ArcGIS locator",
   "copyright": "",
   "license": "http://www.apache.org/licenses/LICENSE-2.0",
   "properties": {},

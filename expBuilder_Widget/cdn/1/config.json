@@ -16,67 +16,64 @@
     "layout_0": {
       "type": "FIXED",
       "content": {
-        "1": {
+        "0": {
           "type": "WIDGET",
           "bbox": {
-            "left": "0%",
-            "right": "0%",
+            "left": "0.0%",
+            "right": "0.0%",
             "top": "0.0%",
             "bottom": "0.0%",
-            "width": "100%",
+            "width": "100.0%",
             "height": "100.0%"
           },
-          "widgetId": "widget_2",
+          "widgetId": "widget_1",
           "setting": {
             "autoProps": {
               "right": false,
               "left": false,
-              "top": true,
-              "bottom": false,
+              "top": false,
+              "bottom": true,
               "width": "STRETCH"
             },
-            "vCenter": false,
             "hCenter": false
-          },
-          "isPending": false
+          }
         }
       },
       "order": [
-        "1"
+        "0"
       ]
     },
     "layout_1": {
       "type": "FIXED",
       "label": "Map FixedLayout",
+      "order": [
+        "0"
+      ],
       "content": {
         "0": {
           "type": "WIDGET",
+          "bbox": {
+            "left": "32.9%",
+            "right": "32.8%",
+            "top": "84.5%",
+            "bottom": "0.0%",
+            "width": "34.3%",
+            "height": "15.5%"
+          },
+          "widgetId": "widget_2",
           "setting": {
-            "style": {},
             "autoProps": {
-              "left": false,
-              "right": true,
+              "left": true,
+              "right": false,
               "top": true,
               "bottom": false
             },
             "vCenter": false,
             "hCenter": false
           },
-          "bbox": {
-            "left": "29.7%",
-            "right": "29.7%",
-            "top": "76.6%",
-            "bottom": "6.8%",
-            "width": "40.6%",
-            "height": "16.6%"
-          },
-          "widgetId": "widget_3",
           "isPending": false
         }
-      },
-      "order": [
-        "0"
-      ]
+      }
     }
   },
   "exbVersion": "1.9.0",
@@ -87,7 +84,7 @@
   },
   "template": "blankfullscreen",
   "widgets": {
-    "widget_2": {
+    "widget_1": {
       "uri": "widgets/arcgis/arcgis-map/",
       "version": "1.9.0",
       "label": "Map",
@@ -99,8 +96,8 @@
           "canNavigation": true,
           "canLocate": true,
           "canCompass": true,
-          "canBaseMap": true,
           "canLayers": true,
+          "canBaseMap": true,
           "canMeasure": true,
           "canFullScreen": true,
           "canScaleBar": true
@@ -122,23 +119,23 @@
             "spatialReference": {
               "wkid": 102100
             },
-            "xmin": -23021.731811861373,
-            "ymin": 6712834.730159422,
-            "xmax": -20508.864506920003,
-            "ymax": 6715060.958608286
+            "xmin": -24822.779290878287,
+            "ymin": 6712036.918676674,
+            "xmax": -18707.81702790309,
+            "ymax": 6715858.7700910345
           },
           "rotation": 0,
           "viewType": "2d"
         }
       },
-      "id": "widget_2",
+      "id": "widget_1",
       "layouts": {
         "MapFixedLayout": {
           "LARGE": "layout_1"
         }
       }
     },
-    "widget_3": {
+    "widget_2": {
       "uri": "widgets/what3words/",
       "version": "1.0.0",
       "config": {
@@ -151,21 +148,21 @@
           "geocodeServiceUrl": "https://utility.arcgis.com/usrsvcs/servers/6123e8aa30f345b7a1d18db626ad7156/rest/services/what3words_EN_English/GeocodeServer"
         }
       },
-      "id": "widget_3",
+      "id": "widget_2",
       "useMapWidgetIds": [
-        "widget_2"
+        "widget_1"
       ],
       "style": {
         "background": {
-          "color": "var(--light)",
+          "color": "#ffffff",
           "fillType": "center",
           "image": {
             "url": ""
           }
         },
         "border": {
-          "type": "dashed",
-          "color": "var(--light)",
+          "color": "#ffffff",
+          "type": "solid",
           "width": "10px"
         },
         "borderRadius": {
@@ -176,13 +173,6 @@
             0
           ],
           "unit": "px"
-        },
-        "boxShadow": {
-          "offsetX": "3px",
-          "offsetY": "3px",
-          "blur": "10px",
-          "spread": "0px",
-          "color": "var(--info-100)"
         }
       }
     }
@@ -214,5 +204,5 @@
       "page_0": []
     }
   ],
-  "timestamp": 1668536130798
+  "timestamp": 1668591140483
 }
