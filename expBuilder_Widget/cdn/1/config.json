@@ -31,12 +31,14 @@
             "autoProps": {
               "right": false,
               "left": false,
-              "top": false,
-              "bottom": true,
+              "top": true,
+              "bottom": false,
               "width": "STRETCH"
             },
-            "hCenter": false
-          }
+            "hCenter": false,
+            "vCenter": false
+          },
+          "isPending": false
         }
       },
       "order": [
@@ -47,7 +49,8 @@
       "type": "FIXED",
       "label": "Map FixedLayout",
       "order": [
-        "0"
+        "0",
+        "1"
       ],
       "content": {
         "0": {
@@ -72,6 +75,29 @@
             "hCenter": false
           },
           "isPending": false
+        },
+        "1": {
+          "type": "WIDGET",
+          "bbox": {
+            "left": "0.0%",
+            "right": "0.0%",
+            "top": "82.0%",
+            "bottom": "0.0%",
+            "width": "100.0%",
+            "height": "18.0%"
+          },
+          "widgetId": "widget_3",
+          "setting": {
+            "autoProps": {
+              "left": false,
+              "right": true,
+              "top": true,
+              "bottom": false,
+              "width": "STRETCH"
+            },
+            "hCenter": false,
+            "vCenter": false
+          }
         }
       }
     }
@@ -111,29 +137,31 @@
               "spatialReference": {
                 "wkid": 102100
               },
-              "x": -21765.298159390688,
-              "y": 6713947.844383854
+              "x": -21765.29815939164,
+              "y": 6713947.8443838535
             }
           },
           "extent": {
             "spatialReference": {
               "wkid": 102100
             },
-            "xmin": -24822.779290878287,
-            "ymin": 6712036.918676674,
-            "xmax": -18707.81702790309,
-            "ymax": 6715858.7700910345
+            "xmin": -24313.99532134263,
+            "ymin": 6712354.610075492,
+            "xmax": -19216.60099744065,
+            "ymax": 6715541.078692215
           },
           "rotation": 0,
           "viewType": "2d"
-        }
+        },
+        "layoutIndex": 0
       },
       "id": "widget_1",
       "layouts": {
         "MapFixedLayout": {
           "LARGE": "layout_1"
         }
-      }
+      },
+      "useDataSources": []
     },
     "widget_2": {
       "uri": "widgets/what3words/",
@@ -142,7 +170,7 @@
         "displayCoordinates": true,
         "displayCopyButton": true,
         "displayZoomButton": true,
-        "displayPopupMessage": false,
+        "displayPopupMessage": true,
         "w3wLocator": "https://utility.arcgis.com/usrsvcs/servers/6123e8aa30f345b7a1d18db626ad7156/rest/services/what3words_EN_English/GeocodeServer",
         "addressSettings": {
           "geocodeServiceUrl": "https://utility.arcgis.com/usrsvcs/servers/6123e8aa30f345b7a1d18db626ad7156/rest/services/what3words_EN_English/GeocodeServer"
@@ -174,14 +202,72 @@
           ],
           "unit": "px"
         }
-      }
+      },
+      "label": "what3words 4"
+    },
+    "widget_3": {
+      "uri": "widgets/what3words/",
+      "version": "1.0.0",
+      "label": "what3words 5",
+      "config": {
+        "displayCoordinates": true,
+        "displayCopyButton": true,
+        "displayZoomButton": true,
+        "displayPopupMessage": false,
+        "w3wLocator": "https://utility.arcgis.com/usrsvcs/servers/6123e8aa30f345b7a1d18db626ad7156/rest/services/what3words_EN_English/GeocodeServer",
+        "addressSettings": {
+          "geocodeServiceUrl": "https://utility.arcgis.com/usrsvcs/servers/f0614ab4053548c2a8c9031b49a2b1e8/rest/services/what3words_EN_English/GeocodeServer"
+        }
+      },
+      "id": "widget_3",
+      "style": {
+        "background": {
+          "color": "var(--light)",
+          "fillType": "fill",
+          "image": {
+            "url": ""
+          }
+        },
+        "border": {
+          "type": "solid",
+          "color": "var(--light)",
+          "width": "10px"
+        },
+        "borderRadius": {
+          "number": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "unit": "px"
+        }
+      },
+      "useMapWidgetIds": [
+        "widget_1"
+      ]
     }
   },
   "widgetsManifest": {},
   "views": {},
   "sections": {},
   "dialogs": {},
-  "dataSources": {},
+  "dataSources": {
+    "dataSource_1": {
+      "id": "dataSource_1",
+      "type": "WEB_MAP",
+      "sourceLabel": "BNG BASEMAP",
+      "itemId": "c30a1d7815d44ec98dd2b68e479ef571",
+      "portalUrl": "https://w3w.maps.arcgis.com"
+    },
+    "dataSource_3": {
+      "id": "dataSource_3",
+      "type": "WEB_MAP",
+      "sourceLabel": "Survey of Historic Buildings — Columbia County, New York",
+      "itemId": "3ac3b3b82a6b44d6a9968243310d36fb",
+      "portalUrl": "https://w3w.maps.arcgis.com"
+    }
+  },
   "messageConfigs": {},
   "attributes": {
     "portalUrl": "https://w3w.maps.arcgis.com",
@@ -204,5 +290,5 @@
       "page_0": []
     }
   ],
-  "timestamp": 1668591140483
+  "timestamp": 1669750671535
 }
