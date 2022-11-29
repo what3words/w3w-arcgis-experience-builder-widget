@@ -125,7 +125,7 @@
           "canLayers": true,
           "canBaseMap": true,
           "canMeasure": true,
-          "canFullScreen": true,
+          "canFullScreen": false,
           "canScaleBar": true
         },
         "isUseCustomMapState": true,
@@ -208,7 +208,6 @@
     "widget_3": {
       "uri": "widgets/what3words/",
       "version": "1.0.0",
-      "label": "what3words 5",
       "config": {
         "displayCoordinates": true,
         "displayCopyButton": true,
@@ -216,7 +215,7 @@
         "displayPopupMessage": false,
         "w3wLocator": "https://utility.arcgis.com/usrsvcs/servers/6123e8aa30f345b7a1d18db626ad7156/rest/services/what3words_EN_English/GeocodeServer",
         "addressSettings": {
-          "geocodeServiceUrl": "https://utility.arcgis.com/usrsvcs/servers/f0614ab4053548c2a8c9031b49a2b1e8/rest/services/what3words_EN_English/GeocodeServer"
+          "geocodeServiceUrl": "https://utility.arcgis.com/usrsvcs/servers/6123e8aa30f345b7a1d18db626ad7156/rest/services/what3words_EN_English/GeocodeServer"
         }
       },
       "id": "widget_3",
@@ -284,5 +283,5 @@
       "page_0": []
     }
   ],
-  "timestamp": 1669750671535
+  "timestamp": 1669753606063
 }

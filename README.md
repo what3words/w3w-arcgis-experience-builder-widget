@@ -82,6 +82,8 @@ All contributions are welcome; please submit a pull request.
 * `v1.0.0`  - Add the locator to the ArcGIS Experience Builder
 * `v.1.0.2` - Add a temporary fix to validate any Locator URLs
 * `v.1.0.3` - Publish the app on a web server
+* `v.1.0.4` - Fix bug - What3words widget can be displayed on maps with layers
+
 
 
 ## Feedback
