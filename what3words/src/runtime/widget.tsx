@@ -1,7 +1,6 @@
 /** @jsx jsx */
 import { React, AllWidgetProps, jsx, getAppStore } from 'jimu-core'
 import { JimuMapViewComponent, JimuMapView } from 'jimu-arcgis'
-import Point from 'esri/geometry/Point'
 import { getCurrentAddress, getMarkerGraphic, getMapLabelGraphic } from './locator-utils'
 import { getW3WStyle } from './lib/style'
 import defaultMessages from './translations/default'
@@ -39,7 +38,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
       JimuMapView: null,
       latitude: '',
       longitude: '',
-      what3words: '',
+      what3words: null,
       isCopyMessageOpen: false
     }
   }
@@ -86,50 +85,46 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
     }, 500)
   }
 
-  activeViewChangeHandler = (jmv: JimuMapView) => {
-    if (jmv) {
-      this.mapView = jmv.view
+  onActiveViewChange = (jmv: JimuMapView) => {
+    if (!jmv) return
+    this.mapView = jmv.view
+
+    this.setState({
+      jimuMapView: jmv
+    })
+    this.setState({
+      w3wLocator: this.state.w3wLocator
+    })
+    this.mapView.on('click', async (mapClick: any) => {
+      this.mapView.graphics.removeAll()
+      this.mapView.popup.autoOpenEnabled = false
+      const graphic = await getMarkerGraphic(mapClick.mapPoint)
       this.setState({
-        jimuMapView: jmv
+        latitude: mapClick.mapPoint.latitude.toFixed(4),
+        longitude: mapClick.mapPoint.longitude.toFixed(4)
       })
-      this.setState({
-        w3wLocator: this.state.w3wLocator
+      // eslint-disable-next-line no-lone-blocks
+      { this.props.config.displayPopupMessage &&
+      this.mapView.popup.open({
+        title: 'Reverse geocode for ' + `${this.state.latitude}, ${this.state.longitude}`,
+        location: mapClick.mapPoint
       })
-      this.mapView.on('click', async (mapClick) => {
-        this.mapView.graphics.removeAll()
-        this.mapView.popup.autoOpenEnabled = false
-        const graphic = await getMarkerGraphic(mapClick.mapPoint)
-        const point: Point = this.state.jimuMapView.view.toMap({
-          x: mapClick.x,
-          y: mapClick.y
-        })
+      }
+      getCurrentAddress(this.state.w3wLocator, mapClick.mapPoint).then(async response => {
         this.setState({
-          latitude: point.latitude.toFixed(4),
-          longitude: point.longitude.toFixed(4)
+          what3words: response
         })
-        // eslint-disable-next-line no-lone-blocks
-        { this.props.config.displayPopupMessage &&
-        this.mapView.popup.open({
-          title: 'Reverse geocode for ' + `${this.state.latitude}, ${this.state.longitude}`,
-          location: mapClick.mapPoint
-        })
-        }
-        getCurrentAddress(this.state.w3wLocator, mapClick.mapPoint).then(async response => {
-          this.setState({
-            what3words: response
-          })
-          const mapLabel = await getMapLabelGraphic(mapClick.mapPoint, this.state.what3words)
-          this.mapView.popup.content = 'what3words address: ' + `///${response}`
-          this.mapView.graphics.add(graphic)
-          this.mapView.graphics.add(mapLabel)
-          this.mapView.set({ center: mapClick.mapPoint }) // center to the point
-        }).catch((error) => {
-          console.log('error: ' + error)
-          this.mapView.popup.content = 'No address was found for this location'
-          this.mapView.graphics.removeAll()
-        })
+        const mapLabel = await getMapLabelGraphic(mapClick.mapPoint, this.state.what3words)
+        this.mapView.popup.content = 'what3words address: ' + `///${response}`
+        this.mapView.graphics.add(graphic)
+        this.mapView.graphics.add(mapLabel)
+        this.mapView.set({ center: mapClick.mapPoint }) // center to the point
+      }).catch((error) => {
+        console.log('error: ' + error)
+        this.mapView.popup.content = 'No address was found for this location'
+        this.mapView.graphics.removeAll()
       })
-    }
+    })
   }
 
   componentDidUpdate (prevProps) {
@@ -151,13 +146,13 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
   render () {
     return <div css={getW3WStyle(this.props.theme)} className="widget-starter jimu-widget">
       <h5>Reverse Geocode with your what3words locator</h5>
-      {this.props.hasOwnProperty('useMapWidgetIds') &&
+      {{}.hasOwnProperty.call(this.props, 'useMapWidgetIds') &&
         this.props.useMapWidgetIds &&
-        this.props.useMapWidgetIds[0] && (
+        this.props.useMapWidgetIds.length === 1 && (
           <JimuMapViewComponent
             useMapWidgetId={this.props.useMapWidgetIds?.[0]}
-            onActiveViewChange={this.activeViewChangeHandler}
-          />
+            onActiveViewChange={this.onActiveViewChange}
+          ></JimuMapViewComponent>
       )}
       {this.props.config.displayCopyButton &&
       <Button type='tertiary' aria-label={this.nls('copy')} aria-disabled={!this.state.what3words} title={this.nls('copy')} className='float-right actionButton' icon size={'sm'}

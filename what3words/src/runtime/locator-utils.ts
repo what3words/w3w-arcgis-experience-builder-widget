@@ -2,25 +2,43 @@ import Point from 'esri/geometry/Point'
 import { loadArcGISJSAPIModules } from 'jimu-arcgis'
 const w3wIcon = require('../assets/w3wMarker.png')
 
-export const getCurrentAddress = (geocodeURL: string, position: Point) => {
-  if (!position) return Promise.resolve(null)
+export const getCurrentAddress = (geocodeURL: string, mapClick: Point) => {
+  if (!mapClick) return Promise.resolve(null)
   return loadArcGISJSAPIModules(['esri/rest/locator']).then(modules => {
     const [locator] = modules
-    return locator.locationToAddress(geocodeURL, {
-      location: position
-    }, {
-      query: {}
-    }).then(response => {
-      return Promise.resolve(response.address)
-    }, err => {
-      console.error(err.message)
-      return err.message + ' - Check your Locator URL'
+    return createPoint(mapClick).then(point => {
+      return locator.locationToAddress(geocodeURL, {
+        location: point
+      }, {
+        query: {}
+      }).then(response => {
+        return Promise.resolve(response.address)
+      }, err => {
+        console.error(err.message)
+        return err.message + ' - Check your Locator URL'
+      })
     })
   })
 }
 
-export const getMarkerGraphic = (position: Point) => {
-  if (!position) return Promise.resolve(null)
+export const createPoint = (mapClick: any): Promise<Point> => {
+  if (!mapClick) {
+    return Promise.resolve(null)
+  }
+  return loadArcGISJSAPIModules(['esri/geometry/Point']).then(modules => {
+    const [Point] = modules
+    return new Point({
+      longitude: mapClick.longitude,
+      latitude: mapClick.latitude,
+      spatialReference: {
+        wkid: 4326
+      }
+    })
+  })
+}
+
+export const getMarkerGraphic = (point: Point) => {
+  if (!point) return Promise.resolve(null)
   return loadArcGISJSAPIModules(['esri/Graphic', 'esri/symbols/PictureMarkerSymbol']).then(modules => {
     let Graphic: __esri.GraphicConstructor = null
     let PictureMarkerSymbol: typeof __esri.PictureMarkerSymbol
@@ -31,14 +49,16 @@ export const getMarkerGraphic = (position: Point) => {
       url: w3wIcon
     })
     return new Graphic({
-      geometry: position,
+      geometry: point,
       symbol: symbol
     })
   })
 }
 
-export const getMapLabelGraphic = (position: Point, what3words: string) => {
-  if (!position) return Promise.resolve(null)
+export const getMapLabelGraphic = (point: Point, what3words: string) => {
+  if (!point) return Promise.resolve(null)
+  console.log('getMapLabelGraphic function')
+  console.log(what3words)
   return loadArcGISJSAPIModules(['esri/Graphic']).then(modules => {
     let Graphic: __esri.GraphicConstructor = null;
     [Graphic] = modules
@@ -56,7 +76,7 @@ export const getMapLabelGraphic = (position: Point, what3words: string) => {
       yoffset: -5
     }
     return new Graphic({
-      geometry: position,
+      geometry: point,
       symbol: textSym
     })
   })
