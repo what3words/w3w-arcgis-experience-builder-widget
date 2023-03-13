@@ -46,6 +46,8 @@ export const getMarkerGraphic = (point: Point) => {
     const symbol = new PictureMarkerSymbol({
       width: 25,
       height: 25,
+      xoffset: 0,
+      yoffset: 11,
       url: w3wIcon
     })
     return new Graphic({
@@ -57,8 +59,6 @@ export const getMarkerGraphic = (point: Point) => {
 
 export const getMapLabelGraphic = (point: Point, what3words: string) => {
   if (!point) return Promise.resolve(null)
-  console.log('getMapLabelGraphic function')
-  console.log(what3words)
   return loadArcGISJSAPIModules(['esri/Graphic']).then(modules => {
     let Graphic: __esri.GraphicConstructor = null;
     [Graphic] = modules
@@ -73,7 +73,7 @@ export const getMapLabelGraphic = (point: Point, what3words: string) => {
       haloColor: '#0A3049',
       haloSize: '1px',
       xoffset: 12,
-      yoffset: -5
+      yoffset: 5
     }
     return new Graphic({
       geometry: point,

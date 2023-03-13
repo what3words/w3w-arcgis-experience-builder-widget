@@ -49,41 +49,17 @@
       "type": "FIXED",
       "label": "Map FixedLayout",
       "order": [
-        "0",
         "1"
       ],
       "content": {
-        "0": {
-          "type": "WIDGET",
-          "bbox": {
-            "left": "32.9%",
-            "right": "32.8%",
-            "top": "84.5%",
-            "bottom": "0.0%",
-            "width": "34.3%",
-            "height": "15.5%"
-          },
-          "widgetId": "widget_2",
-          "setting": {
-            "autoProps": {
-              "left": true,
-              "right": false,
-              "top": true,
-              "bottom": false
-            },
-            "vCenter": false,
-            "hCenter": false
-          },
-          "isPending": false
-        },
         "1": {
           "type": "WIDGET",
           "bbox": {
-            "left": "0.0%",
-            "right": "0.0%",
-            "top": "82.0%",
-            "bottom": "0.0%",
-            "width": "100.0%",
+            "left": "25%",
+            "right": "25%",
+            "top": "81.9%",
+            "bottom": "0.1%",
+            "width": "50.0%",
             "height": "18.0%"
           },
           "widgetId": "widget_3",
@@ -96,8 +72,11 @@
               "width": "STRETCH"
             },
             "hCenter": false,
-            "vCenter": false
-          }
+            "vCenter": false,
+            "lockParent": false,
+            "lockLayout": true
+          },
+          "isPending": false
         }
       }
     }
@@ -163,48 +142,6 @@
       },
       "useDataSources": []
     },
-    "widget_2": {
-      "uri": "widgets/what3words/",
-      "version": "1.0.0",
-      "config": {
-        "displayCoordinates": true,
-        "displayCopyButton": true,
-        "displayZoomButton": true,
-        "displayPopupMessage": true,
-        "w3wLocator": "https://utility.arcgis.com/usrsvcs/servers/6123e8aa30f345b7a1d18db626ad7156/rest/services/what3words_EN_English/GeocodeServer",
-        "addressSettings": {
-          "geocodeServiceUrl": "https://utility.arcgis.com/usrsvcs/servers/6123e8aa30f345b7a1d18db626ad7156/rest/services/what3words_EN_English/GeocodeServer"
-        }
-      },
-      "id": "widget_2",
-      "useMapWidgetIds": [
-        "widget_1"
-      ],
-      "style": {
-        "background": {
-          "color": "#ffffff",
-          "fillType": "center",
-          "image": {
-            "url": ""
-          }
-        },
-        "border": {
-          "color": "#ffffff",
-          "type": "solid",
-          "width": "10px"
-        },
-        "borderRadius": {
-          "number": [
-            0,
-            0,
-            0,
-            0
-          ],
-          "unit": "px"
-        }
-      },
-      "label": "what3words 4"
-    },
     "widget_3": {
       "uri": "widgets/what3words/",
       "version": "1.0.0",
@@ -244,7 +181,8 @@
       },
       "useMapWidgetIds": [
         "widget_1"
-      ]
+      ],
+      "label": "what3words 5"
     }
   },
   "widgetsManifest": {},
@@ -283,5 +221,5 @@
       "page_0": []
     }
   ],
-  "timestamp": 1669753606063
+  "timestamp": 1678736749003
 }
