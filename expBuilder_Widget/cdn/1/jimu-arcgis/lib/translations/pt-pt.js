@@ -1,1 +1,1 @@
-define({layerIsNotSupported:"Este tipo de camada não é suportado."});
+System.register([],(function(e){return{execute:function(){e({layerIsNotSupported:"Este tipo de camada n\xe3o \xe9 suportado."})}}}));

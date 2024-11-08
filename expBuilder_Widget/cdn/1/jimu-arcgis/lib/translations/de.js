@@ -1,1 +1,1 @@
-define({layerIsNotSupported:"Dieser Layer-Typ wird nicht unterstützt."});
+System.register([],(function(e){return{execute:function(){e({layerIsNotSupported:"Dieser Layer-Typ wird nicht unterst\xfctzt."})}}}));
