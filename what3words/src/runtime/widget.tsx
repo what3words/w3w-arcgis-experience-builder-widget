@@ -114,7 +114,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
         this.setState({
           what3words: response
         })
-        const mapLabel = await getMapLabelGraphic(mapClick.mapPoint, this.state.what3words)
+        const mapLabel = await getMapLabelGraphic(mapClick.mapPoint, response)
         this.mapView.popup.content = 'what3words address: ' + `///${response}`
         this.mapView.graphics.add(graphic)
         this.mapView.graphics.add(mapLabel)
