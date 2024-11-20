@@ -13,6 +13,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
   mapView: any
   private _isMounted: boolean
   private readonly isRTL: boolean
+  private _clickHandle: __esri.Handle
   zoomScale = 5000
   what3words: string
 
@@ -82,13 +83,20 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
 
   onActiveViewChange = (jmv: JimuMapView) => {
     if (!jmv) return
+
     this.mapView = jmv.view
 
     console.log('Active view changed. MapView initialized:', !!this.mapView)
 
-    // Attach the click listener
-    this.mapView.on('click', (mapClick: any) => {
-      console.log('Map clicked at:', mapClick.mapPoint) // Add log here
+    // Remove any existing click handler before adding a new one
+    if (this._clickHandle) {
+      this._clickHandle.remove()
+      this._clickHandle = null
+    }
+
+    // Store the click handler
+    this._clickHandle = this.mapView.on('click', (mapClick: any) => {
+      console.log('Map clicked at:', mapClick.mapPoint)
       this.handleMapClick(mapClick)
     })
   }
@@ -193,24 +201,37 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
 
   deactivateWidget = () => {
     console.log('Deactivating widget')
-    // Clear graphics from the map view
     this.clearGraphics()
 
-    // Disable map click events
     if (this.mapView) {
+      if (this._clickHandle) {
+        this._clickHandle.remove()
+        this._clickHandle = null
+      }
       this.mapView.popup.autoOpenEnabled = false
       this.mapView.graphics.removeAll()
 
-      // Optionally remove any event listeners you added
-      this.mapView.on('click', null) // Remove click listener
+      if (this.mapView.closePopup) {
+        this.mapView.closePopup()
+      }
     }
+    // Reset the widget state
+    this.resetWidgetState()
   }
 
   activateWidget = () => {
     console.log('Activating widget')
     if (this.mapView) {
-      this.mapView.popup.autoOpenEnabled = false
-      this.mapView.closePopup()
+      this.mapView.popup.autoOpenEnabled = true
+
+      // Remove and reassign the click handler if needed
+      if (this._clickHandle) {
+        this._clickHandle.remove()
+      }
+      this._clickHandle = this.mapView.on('click', (mapClick: any) => {
+        console.log('Map clicked at:', mapClick.mapPoint)
+        this.handleMapClick(mapClick)
+      })
     }
   }
 
@@ -221,8 +242,13 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
   }
 
   resetWidgetState = () => {
-    this.setState({ latitude: '', longitude: '', what3words: '' })
-    this.clearGraphics()
+    console.log('Resetting widget state...')
+    this.setState({
+      latitude: '',
+      longitude: '',
+      what3words: null,
+      isCopyMessageOpen: false
+    })
   }
 
   clearGraphics = () => {
