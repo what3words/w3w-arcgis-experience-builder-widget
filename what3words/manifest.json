@@ -3,15 +3,19 @@
   "label": "what3words",
   "type": "widget",
   "version": "1.0.0",
-  "exbVersion": "1.0.0",
+  "exbVersion": "1.15.0",
   "author": "Manuela Sabatino",
   "description": "what3words exp builder app with ArcGIS locator",
   "copyright": "",
   "license": "http://www.apache.org/licenses/LICENSE-2.0",
-  "properties": {},
-  "translatedLocales": [
-    "en"
-  ],
+  "properties": {
+    "hasSettingPage": true, 
+    "hasConfig": true 
+  },
+  "dependencies": ["MapWidget"], 
+  "useDataSources": [],
+  "useMapWidgetIds": true, 
+  "translatedLocales": ["en"],
   "defaultSize": {
     "width": 800,
     "height": 500

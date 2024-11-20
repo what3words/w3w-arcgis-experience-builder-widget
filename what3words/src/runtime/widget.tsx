@@ -164,6 +164,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
 
   componentDidMount () {
     console.log('Component did mount')
+    console.log('useMapWidgetIds:', this.props.useMapWidgetIds)
     const widgetState = this.props.state || 'OPENED' // Add fallback
     console.log('Component mounted with state:', widgetState)
 
@@ -236,18 +237,24 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
     console.log('Render state:', widgetState)
 
     const { config, theme, useMapWidgetIds, id } = this.props
+    if (!useMapWidgetIds || useMapWidgetIds.length === 0) {
+      console.error('No map widget ID found. Ensure the widget is properly linked to a map.')
+      return (
+        <div>
+          <h5>Please configure this widget to use a map widget.</h5>
+        </div>
+      )
+    }
     const { what3words, latitude, longitude, isCopyMessageOpen } = this.state
 
     return (
       <div css={getW3WStyle(theme)} className="widget-starter jimu-widget">
         <h5>Reverse Geocode with your what3words locator</h5>
 
-        {useMapWidgetIds.length === 1 && (
-          <JimuMapViewComponent
+        <JimuMapViewComponent
             useMapWidgetId={useMapWidgetIds[0]}
             onActiveViewChange={this.onActiveViewChange}
-          />
-        )}
+        />
         {config.displayCopyButton && (
           <Button
             type="tertiary"
