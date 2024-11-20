@@ -1,6 +1,6 @@
 /** @jsx jsx */
-import { React, AllWidgetProps, jsx, getAppStore } from 'jimu-core'
-import { JimuMapViewComponent, JimuMapView } from 'jimu-arcgis'
+import { React, type AllWidgetProps, jsx, getAppStore } from 'jimu-core'
+import { JimuMapViewComponent, type JimuMapView } from 'jimu-arcgis'
 import { getCurrentAddress, getMarkerGraphic, getMapLabelGraphic } from './locator-utils'
 import { getW3WStyle } from './lib/style'
 import defaultMessages from './translations/default'
@@ -47,11 +47,6 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
     return this.props.intl.formatMessage({ id: id, defaultMessage: defaultMessages[id] })
   }
 
-  componentDidMount () {
-    console.log('Component did mount')
-    this._isMounted = true
-  }
-
   onZoomClick = () => {
     if (this.mapView.graphics.length > 0) {
       const selectedLocationGraphic = this.mapView.graphics.getItemAt(0)
@@ -89,104 +84,229 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
     if (!jmv) return
     this.mapView = jmv.view
 
-    this.setState({
-      jimuMapView: jmv
-    })
-    this.setState({
-      w3wLocator: this.state.w3wLocator
-    })
-    this.mapView.on('click', async (mapClick: any) => {
-      this.mapView.graphics.removeAll()
-      this.mapView.popup.autoOpenEnabled = false
-      const graphic = await getMarkerGraphic(mapClick.mapPoint)
-      this.setState({
-        latitude: mapClick.mapPoint.latitude.toFixed(4),
-        longitude: mapClick.mapPoint.longitude.toFixed(4)
-      })
-      // eslint-disable-next-line no-lone-blocks
-      { this.props.config.displayPopupMessage &&
-      this.mapView.popup.open({
-        title: 'Reverse geocode for ' + `${this.state.latitude}, ${this.state.longitude}`,
-        location: mapClick.mapPoint
-      })
-      }
-      getCurrentAddress(this.state.w3wLocator, mapClick.mapPoint).then(async response => {
-        this.setState({
-          what3words: response
-        })
-        const mapLabel = await getMapLabelGraphic(mapClick.mapPoint, response)
-        this.mapView.popup.content = 'what3words address: ' + `///${response}`
-        this.mapView.graphics.add(graphic)
-        this.mapView.graphics.add(mapLabel)
-        this.mapView.set({ center: mapClick.mapPoint }) // center to the point
-      }).catch((error) => {
-        console.log('error: ' + error)
-        this.mapView.popup.content = 'No address was found for this location'
-        this.mapView.graphics.removeAll()
-      })
+    console.log('Active view changed. MapView initialized:', !!this.mapView)
+
+    // Attach the click listener
+    this.mapView.on('click', (mapClick: any) => {
+      console.log('Map clicked at:', mapClick.mapPoint) // Add log here
+      this.handleMapClick(mapClick)
     })
   }
 
-  componentDidUpdate (prevProps) {
-    console.log('Component did update')
-    //check for the updated geocode service url in config
-    if (prevProps.config.addressSettings?.geocodeServiceUrl !== this.props.config.addressSettings?.geocodeServiceUrl) {
+  handleMapClick = async (mapClick: any) => {
+    const widgetState = this.props.state || 'OPENED' // Add fallback
+    console.log('Handling map click at:', mapClick.mapPoint)
+    console.log('Current widget state:', widgetState)
+
+    if (widgetState !== 'OPENED') {
+      console.log('Widget is not active. Ignoring click.')
+      return
+    }
+
+    if (!mapClick?.mapPoint) {
+      console.error('Invalid map point:', mapClick)
+      return
+    }
+
+    try {
+      // Close any existing popup
+      this.mapView.closePopup()
+
+      this.clearGraphics()
+
+      const { latitude, longitude } = mapClick.mapPoint
       this.setState({
-        w3wLocator: this.props.config.addressSettings.geocodeServiceUrl
+        latitude: latitude.toFixed(4),
+        longitude: longitude.toFixed(4)
       })
+
+      const address = await getCurrentAddress(this.state.w3wLocator, mapClick.mapPoint)
+      console.log('Retrieved what3words address:', address)
+
+      if (!address) {
+        throw new Error('No address returned from API')
+      }
+
+      this.setState({ what3words: address })
+
+      const marker = await getMarkerGraphic(mapClick.mapPoint)
+      const label = await getMapLabelGraphic(mapClick.mapPoint, address)
+
+      if (marker && label) {
+        this.mapView.graphics.addMany([marker, label])
+      } else {
+        console.error('Failed to create graphics for map point:', mapClick.mapPoint)
+      }
+
+      // Conditionally open the popup based on displayPopupMessage toggle
+      if (this.props.config.displayPopupMessage) {
+        this.mapView.openPopup({
+          title: `Reverse geocode for ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`,
+          content: `what3words address: ///${address}`,
+          location: mapClick.mapPoint
+        })
+      } else {
+        console.log('Popup message display is toggled off in configuration.')
+      }
+    } catch (error) {
+      console.error('Error handling map click:', error)
+
+      // Optionally handle error but avoid unnecessary popup display
+      if (this.props.config.displayPopupMessage) {
+        this.mapView.openPopup({
+          title: 'Error',
+          content: 'Failed to retrieve what3words address.',
+          location: mapClick.mapPoint
+        })
+      }
+    }
+  }
+
+  componentDidMount () {
+    console.log('Component did mount')
+    const widgetState = this.props.state || 'OPENED' // Add fallback
+    console.log('Component mounted with state:', widgetState)
+
+    if (widgetState === 'OPENED') {
+      this.activateWidget()
+    } else if (widgetState === 'CLOSED') {
+      this.deactivateWidget()
+    }
+  }
+
+  componentDidUpdate (prevProps) {
+    const prevState = prevProps.state || 'OPENED'
+    const currentState = this.props.state || 'OPENED'
+    console.log('Component did update: previous state:', prevState, 'current state:', currentState)
+
+    if (prevState !== currentState) {
+      if (currentState === 'CLOSED') {
+        console.log('[Widget] Deactivating...')
+        this.deactivateWidget()
+      } else if (currentState === 'OPENED') {
+        console.log('[Widget] Activating...')
+        this.activateWidget()
+      }
+    }
+  }
+
+  deactivateWidget = () => {
+    console.log('Deactivating widget')
+    // Clear graphics from the map view
+    this.clearGraphics()
+
+    // Disable map click events
+    if (this.mapView) {
+      this.mapView.popup.autoOpenEnabled = false
+      this.mapView.graphics.removeAll()
+
+      // Optionally remove any event listeners you added
+      this.mapView.on('click', null) // Remove click listener
+    }
+  }
+
+  activateWidget = () => {
+    console.log('Activating widget')
+    if (this.mapView) {
+      this.mapView.popup.autoOpenEnabled = false
+      this.mapView.closePopup()
     }
   }
 
   componentWillUnmount = () => {
-    console.log('Component will unmount')
+    console.log('Component did mount: initial state:', this.props.state)
     this._isMounted = false
-    this.mapView.graphics.removeAll()
+    this.deactivateWidget() // Ensure all resources are cleaned up
+  }
+
+  resetWidgetState = () => {
+    this.setState({ latitude: '', longitude: '', what3words: '' })
+    this.clearGraphics()
+  }
+
+  clearGraphics = () => {
+    if (this.mapView) {
+      this.mapView.graphics.removeAll()
+    }
   }
 
   render () {
-    return <div css={getW3WStyle(this.props.theme)} className="widget-starter jimu-widget">
-      <h5>Reverse Geocode with your what3words locator</h5>
-      {{}.hasOwnProperty.call(this.props, 'useMapWidgetIds') &&
-        this.props.useMapWidgetIds &&
-        this.props.useMapWidgetIds.length === 1 && (
+    console.log('Render props:', this.props)
+    const widgetState = this.props.state || 'OPENED' // Fallback to 'OPENED'
+    console.log('Render state:', widgetState)
+
+    const { config, theme, useMapWidgetIds, id } = this.props
+    const { what3words, latitude, longitude, isCopyMessageOpen } = this.state
+
+    return (
+      <div css={getW3WStyle(theme)} className="widget-starter jimu-widget">
+        <h5>Reverse Geocode with your what3words locator</h5>
+
+        {useMapWidgetIds.length === 1 && (
           <JimuMapViewComponent
-            useMapWidgetId={this.props.useMapWidgetIds?.[0]}
+            useMapWidgetId={useMapWidgetIds[0]}
             onActiveViewChange={this.onActiveViewChange}
-          ></JimuMapViewComponent>
-      )}
-      {this.props.config.displayCopyButton &&
-      <Button type='tertiary' aria-label={this.nls('copy')} aria-disabled={!this.state.what3words} title={this.nls('copy')} className='float-right actionButton' icon size={'sm'}
-        active={this.state.isCopyMessageOpen} disabled={!this.state.what3words} id={'refCopy' + this.props.id} onClick={this.onCopyClick.bind(this)}>
-        <Icon icon={iconCopy} size={'17'}></Icon>
-      </Button>
-      }
-      {this.props.config.displayZoomButton &&
-      <Button type='tertiary' aria-label={this.nls('zoomTo')} aria-disabled={!this.state.what3words} title={this.nls('zoomTo')} className='float-right actionButton' icon size={'sm'}
-       onClick={this.onZoomClick.bind(this)} disabled={!this.state.what3words}>
-        <Icon icon={iconZoom} size={'17'}></Icon>
-       </Button>
-      }
-      <h3 className="w3wBlock">
-          <span className='w3wRed'>///</span>{this.state.what3words}
-      </h3>
-      {this.props.config.displayCoordinates &&
-      <div className="w3wCoords">
-        <div className="w3wCoordsProp"><span className='w3wRed w3wCoordsFirstCol'>{defaultMessages.y}:</span><span>{this.state.latitude}</span></div>
-        <div className="w3wCoordsProp"><span className='w3wRed w3wCoordsFirstCol'>{defaultMessages.x}:</span><span>{this.state.longitude}</span></div>
+          />
+        )}
+        {config.displayCopyButton && (
+          <Button
+            type="tertiary"
+            aria-label={this.nls('copy')}
+            title={this.nls('copy')}
+            icon
+            size="sm"
+            aria-disabled={!what3words}
+            className='float-right actionButton'
+            active={isCopyMessageOpen}
+            disabled={!what3words}
+            id={'refCopy' + id}
+            onClick={this.onCopyClick.bind(this)}
+          >
+            <Icon icon={iconCopy} size={'17'} />
+          </Button>
+        )}
+        {config.displayZoomButton && (
+          <Button
+            type="tertiary"
+            aria-label={this.nls('zoomTo')}
+            title={this.nls('zoomTo')}
+            icon
+            size="sm"
+            aria-disabled={!what3words}
+            className='float-right actionButton'
+            onClick={this.onZoomClick.bind(this)}
+            disabled={!what3words}
+          >
+            <Icon icon={iconZoom} size={'17'} />
+          </Button>
+        )}
+        <h3 className="w3wBlock">
+          <span className="w3wRed">///</span>
+          {what3words}
+        </h3>
+
+        {config.displayCoordinates && (
+          <div className="w3wCoords">
+            <div className="w3wCoordsProp">
+              <span className="w3wRed w3wCoordsFirstCol">{defaultMessages.y}:</span> {latitude}
+            </div>
+            <div className="w3wCoordsProp">
+              <span className="w3wRed w3wCoordsFirstCol">{defaultMessages.x}:</span> {longitude}
+            </div>
+          </div>
+        )}
+        {isCopyMessageOpen && (
+          <Popper
+            open={isCopyMessageOpen}
+            version={0}
+            placement={'bottom'}
+            showArrow={true}
+            reference={'refCopy' + id}
+            offset={[0, 0]}>
+            <div className="p-2">{this.nls('copySuccessMessage')}</div>
+          </Popper>
+        )}
       </div>
-      }
-      {/* Copy message toast popper */}
-      {this.state.isCopyMessageOpen &&
-        <Popper
-          open={this.state.isCopyMessageOpen}
-          version={0}
-          placement={'bottom'}
-          showArrow={true}
-          reference={'refCopy' + this.props.id}
-          offset={[0, 0]}>
-          <div className={'p-2'}>{this.nls('copySuccessMessage')}</div>
-        </Popper>
-      }
-    </div>
+    )
   }
 }
