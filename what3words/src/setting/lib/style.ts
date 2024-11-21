@@ -1,10 +1,11 @@
-import { ThemeVariables, css, SerializedStyles, getAppStore } from 'jimu-core'
+import { css, getAppStore } from 'jimu-core'
+import type { IMThemeVariables, SerializedStyles } from 'jimu-core'
 
-export function getAddressSettingsStyle (theme: ThemeVariables): SerializedStyles {
+export function getAddressSettingsStyle (theme: IMThemeVariables): SerializedStyles {
   return css`
 
   .locator-url {
-    background-color: ${theme.colors.palette.dark[200]};
+    background-color: ${theme.ref.palette.neutral[800]};
     padding: 2px;
   }
   
@@ -15,7 +16,7 @@ export function getAddressSettingsStyle (theme: ThemeVariables): SerializedStyle
   `
 }
 
-export function getAlertPopupStyle (theme: ThemeVariables): SerializedStyles {
+export function getAlertPopupStyle (theme: IMThemeVariables): SerializedStyles {
   const isRTL = getAppStore().getState().appContext.isRTL
 
   return css`
@@ -33,7 +34,7 @@ export function getAlertPopupStyle (theme: ThemeVariables): SerializedStyles {
 
     .locatorErrorMessage {
       padding-top: 5px;
-      color: ${theme.colors.danger};
+      color: ${theme.sys.color.error.main};
       font-weight: bold;
     }
 
@@ -47,7 +48,7 @@ export function getAlertPopupStyle (theme: ThemeVariables): SerializedStyles {
   `
 }
 
-export function getWidgetDisplayOptionsStyle (theme: ThemeVariables): SerializedStyles {
+export function getWidgetDisplayOptionsStyle (theme: IMThemeVariables): SerializedStyles {
   return css`
       label {
         display: inline-flex;

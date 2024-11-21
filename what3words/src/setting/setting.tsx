@@ -1,16 +1,15 @@
 /** @jsx jsx */
-import { React, jsx, getAppStore, FormattedMessage } from 'jimu-core'
+import { React, jsx, getAppStore, FormattedMessage, type ImmutableArray, type UseUtility } from 'jimu-core'
 import { type AllWidgetSettingProps } from 'jimu-for-builder'
 import AddressSettings from './components/locator-settings'
 import {
   MapWidgetSelector,
-  SettingCollapse,
   SettingRow,
   SettingSection
 } from 'jimu-ui/advanced/setting-components'
 import defaultMessages from './translations/default'
 import { getWidgetDisplayOptionsStyle } from './lib/style'
-import { Switch } from 'jimu-ui'
+import { Switch, CollapsablePanel, TextInput, Radio } from 'jimu-ui'
 
 interface State {
   isAddressSettingsOpen: boolean
@@ -44,32 +43,33 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<a
 
   /** Toggle address settings panel */
   onToggleAddressSettings = () => {
-    this.setState((prevState) => ({
-      isAddressSettingsOpen: !prevState.isAddressSettingsOpen
-    }))
+    this.setState({
+      isAddressSettingsOpen: !this.state.isAddressSettingsOpen
+    })
+  }
+
+  /** Handle mode change */
+  handleModeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const mode = event.target.value
+    this.props.onSettingChange({
+      id: this.props.id,
+      config: this.props.config.set('mode', mode) // Update mode
+    })
+  }
+
+  /** Handle input changes for API key and Locator URL */
+  handleInputChange = (property: string, event: React.ChangeEvent<HTMLInputElement>) => {
+    this.props.onSettingChange({
+      id: this.props.id,
+      config: this.props.config.setIn(['addressSettings', property], event.target.value)
+    })
   }
 
   /** Update address settings */
-  updateAddressSettings = (property: string, value: string | number) => {
+  updateAddressSettings = (property: string, value: string | number | ImmutableArray<UseUtility> | [] | boolean) => {
     this.props.onSettingChange({
       id: this.props.id,
       config: this.props.config.setIn(['addressSettings', property], value)
-    })
-  }
-
-  /** Set what3words locator URL */
-  setW3wLocator = (w3wLocator: string) => {
-    this.props.onSettingChange({
-      id: this.props.id,
-      config: this.props.config.set('w3wLocator', w3wLocator)
-    })
-  }
-
-  /** Toggle display options */
-  switchDisplayOption = (key: string, event: React.FormEvent<HTMLInputElement>) => {
-    this.props.onSettingChange({
-      id: this.props.id,
-      config: this.props.config.set(key, event.currentTarget.checked)
     })
   }
 
@@ -87,31 +87,70 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<a
           })}
         >
           <SettingRow>
-            <MapWidgetSelector useMapWidgetIds={useMapWidgetIds} onSelect={this.onMapWidgetSelected} />
+            <MapWidgetSelector
+            useMapWidgetIds={useMapWidgetIds}
+            onSelect={this.onMapWidgetSelected}
+          />
           </SettingRow>
         </SettingSection>
 
-        {/* Address Settings Section */}
-        <SettingSection>
-          <SettingCollapse
-            defaultIsOpen
-            label={this.nls('addressSettingsLabel')}
-            isOpen={this.state.isAddressSettingsOpen}
-            onRequestOpen={this.onToggleAddressSettings}
-            onRequestClose={this.onToggleAddressSettings}
-          >
+        {/* Mode Selector Section */}
+        <SettingSection title="Mode Selection">
+          <SettingRow flow="wrap">
+            <Radio
+              value="apiKey"
+              checked={config?.mode === 'apiKey'}
+              onChange={this.handleModeChange}
+            />
+            <label>Use API Key</label>
+          </SettingRow>
+          <SettingRow>
+            <Radio
+              value="locatorUrl"
+              checked={config?.mode === 'locatorUrl'}
+              onChange={this.handleModeChange}
+            />
+            <label>Use Locator URL</label>
+          </SettingRow>
+        </SettingSection>
+
+        {/* API Key Section */}
+        {config?.mode === 'apiKey' && (
+          <SettingSection title="API Key">
             <SettingRow flow="wrap">
-              <AddressSettings
-                intl={intl}
-                theme={theme}
-                portalSelf={this.props.portalSelf}
-                config={config?.addressSettings || {}} // Fallback to empty object
-                isRTL={this.isRTL}
-                onAddressSettingsUpdated={this.updateAddressSettings}
+              <TextInput
+                className="w-100"
+                placeholder="Enter your what3words API key"
+                value={config?.addressSettings?.w3wApiKey || ''}
+                onChange={(e) => { this.handleInputChange('w3wApiKey', e) }}
               />
             </SettingRow>
-          </SettingCollapse>
-        </SettingSection>
+          </SettingSection>
+        )}
+
+        {/* Address Settings Section */}
+        {config?.mode === 'locatorUrl' && (
+          <SettingSection>
+            <CollapsablePanel
+              defaultIsOpen
+              label={this.nls('addressSettingsLabel')}
+              isOpen={this.state.isAddressSettingsOpen}
+              onRequestOpen={this.onToggleAddressSettings}
+              onRequestClose={this.onToggleAddressSettings}
+            >
+              <SettingRow flow="wrap" className="w-100">
+                <AddressSettings
+                  intl={intl}
+                  theme={theme}
+                  portalSelf={this.props.portalSelf}
+                  config={config?.addressSettings || {}} // Fallback to empty object
+                  isRTL={this.isRTL}
+                  onAddressSettingsUpdated={this.updateAddressSettings}
+                />
+              </SettingRow>
+            </CollapsablePanel>
+          </SettingSection>
+        )}
 
         {/* Widget Display Options Section */}
         <SettingSection
@@ -132,7 +171,12 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<a
                 <div className="checkbox-row">
                   <Switch
                     checked={config?.[key] || false}
-                    onChange={(event) => { this.switchDisplayOption(key, event) }}
+                    onChange={(event) => {
+                      this.props.onSettingChange({
+                        id: this.props.id,
+                        config: this.props.config.set(key, event.currentTarget.checked)
+                      })
+                    }}
                   />
                   <label>
                     <FormattedMessage id={label} defaultMessage={defaultMessages[label]} />

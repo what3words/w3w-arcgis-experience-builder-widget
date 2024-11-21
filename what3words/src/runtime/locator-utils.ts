@@ -1,4 +1,4 @@
-import Point from 'esri/geometry/Point'
+import type Point from 'esri/geometry/Point'
 import { loadArcGISJSAPIModules } from 'jimu-arcgis'
 const w3wIcon = require('../assets/w3wMarker.png')
 
@@ -26,6 +26,24 @@ export const getCurrentAddress = (geocodeURL: string, mapClick: Point): Promise<
       })
     })
   })
+}
+
+/**
+ * Fetches an address from the what3words API.
+ * @param apiKey - The what3words API key.
+ * @param latitude  - The latitude.
+ * @param longitude - The longitude.
+ * @returns A promise resolving to the retrieved address.
+ */
+export const getCurrentAddressFromApiKey = async (apiKey: string, latitude: number, longitude: number): Promise<string | null> => {
+  if (!apiKey) throw new Error('API key is not provided.')
+
+  const url = `https://api.what3words.com/v3/convert-to-3wa?key=${apiKey}&coordinates=${latitude},${longitude}`
+  const response = await fetch(url)
+  if (!response.ok) throw new Error('Failed to fetch address.')
+
+  const data = await response.json()
+  return data.words || null
 }
 
 /**

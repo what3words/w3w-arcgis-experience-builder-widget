@@ -1,7 +1,7 @@
 /** @jsx jsx */
-import { React, type AllWidgetProps, jsx, getAppStore } from 'jimu-core'
-import { JimuMapViewComponent, type JimuMapView } from 'jimu-arcgis'
-import { getCurrentAddress, getMarkerGraphic, getMapLabelGraphic } from './locator-utils'
+import { React, type AllWidgetProps, jsx, getAppStore, UtilityManager } from 'jimu-core'
+import { JimuMapViewComponent, loadArcGISJSAPIModules, type JimuMapView } from 'jimu-arcgis'
+import { getCurrentAddress, getMarkerGraphic, getMapLabelGraphic, getCurrentAddressFromApiKey } from './locator-utils'
 import { getW3WStyle } from './lib/style'
 import defaultMessages from './translations/default'
 import { Button, Icon, Popper } from 'jimu-ui'
@@ -19,7 +19,10 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
 
   constructor (props) {
     super(props)
-    let geocodeServiceURL = ''
+    // let geocodeServiceURL = this.props.config?.addressSettings?.geocodeServiceUrl || ''
+
+    //Get the default geocoding service URL
+    let geocodeServiceURL = this.getDefaultGeocodeServiceURL()
 
     if (this.props.config?.addressSettings?.geocodeServiceUrl) {
       geocodeServiceURL = this.props.config.addressSettings.geocodeServiceUrl
@@ -42,10 +45,65 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
       what3words: null,
       isCopyMessageOpen: false
     }
+    //check whether any utility selected in configuration in the new app
+    if (this.props.config.addressSettings?.useUtilitiesGeocodeService?.length > 0) {
+      this.updateGeocodeURL()
+    }
   }
 
   nls = (id: string) => {
     return this.props.intl.formatMessage({ id: id, defaultMessage: defaultMessages[id] })
+  }
+
+  updateGeocodeURL = () => {
+    this.getGeocodeServiceURL().then((geocodeServiceURL) => {
+      this.setState({
+        w3wLocator: geocodeServiceURL
+      })
+    })
+  }
+
+  getDefaultGeocodeServiceURL = () => {
+    //by default use esri world geocoding service
+    let geocodeServiceURL = 'https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer'
+    //if geocoding service url is configured then use that (This is for backward compatibility before implementing Utility selector)
+    //else if use org first geocode service
+    if (this.props.config?.addressSettings?.geocodeServiceUrl) {
+      geocodeServiceURL = this.props.config.addressSettings.geocodeServiceUrl
+    } else if (this.props.portalSelf && this.props.portalSelf.helperServices && this.props.portalSelf.helperServices.geocode &&
+      this.props.portalSelf.helperServices.geocode.length > 0 && this.props.portalSelf.helperServices.geocode[0].url) { // Use org's first geocode service if available
+      geocodeServiceURL = this.props.portalSelf.helperServices.geocode[0].url
+    }
+    return geocodeServiceURL
+  }
+
+  getGeocodeServiceURL = async (): Promise<string> => {
+    //Ge the default geocoding service url if utility service is not configured
+    let geocodeServiceURL = this.getDefaultGeocodeServiceURL()
+    const geocodeURlFromUtility = await this.getGeocodeURLFromUtility()
+    // if utility services is used fetch its url
+    if (this.props.config.addressSettings?.useUtilitiesGeocodeService?.length > 0) {
+      geocodeServiceURL = geocodeURlFromUtility
+    }
+    return geocodeServiceURL
+  }
+
+  getGeocodeURLFromUtility = async (): Promise<string> => {
+    if (this.props.config.addressSettings?.useUtilitiesGeocodeService?.length > 0) {
+      return this.getUrlOfUseUtility(this.props.config.addressSettings?.useUtilitiesGeocodeService?.[0])
+    }
+    return Promise.resolve('')
+  }
+
+  //get url from the selcted utility
+  getUrlOfUseUtility = async (useUtility: UseUtility): Promise<string> => {
+    if (!useUtility) {
+      return Promise.resolve('')
+    }
+    return UtilityManager.getInstance().getUrlOfUseUtility(useUtility)
+      .then((url) => {
+        return Promise.resolve(url)
+      })
   }
 
   onZoomClick = () => {
@@ -117,18 +175,61 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
     }
 
     try {
-      // Close any existing popup
+      // Check if mapPoint contains valid spatialReference and coordinates
+      console.log('mapPoint:', mapClick.mapPoint)
+      // Close any existing popup and clear graphics
       this.mapView.closePopup()
-
       this.clearGraphics()
 
-      const { latitude, longitude } = mapClick.mapPoint
+      let latitude: number, longitude: number
+      let mapPointWGS84 = mapClick.mapPoint
+
+      // Only project to WGS84 if using the API key
+      if (this.props.config.mode === 'apiKey') {
+        const [projection, SpatialReference] = await loadArcGISJSAPIModules([
+          'esri/geometry/projection',
+          'esri/geometry/SpatialReference'
+        ])
+
+        if (!projection.isLoaded()) {
+          await projection.load()
+        }
+
+        const wgs84 = new SpatialReference({ wkid: 4326 })
+        mapPointWGS84 = projection.project(mapClick.mapPoint, wgs84)
+
+        if (!mapPointWGS84) {
+          throw new Error('Failed to project map point to WGS84.')
+        }
+
+        console.log('Projected map point to WGS84:', mapPointWGS84)
+        latitude = mapPointWGS84.latitude
+        longitude = mapPointWGS84.longitude
+
+        if (!latitude || !longitude) {
+          throw new Error('Failed to retrieve latitude or longitude from projected point.')
+        }
+      } else {
+        // Use map point's native coordinates when using Locator URL
+        latitude = mapClick.mapPoint.latitude
+        longitude = mapClick.mapPoint.longitude
+
+        if (latitude === null || longitude === null) {
+          throw new Error('Invalid latitude or longitude from mapPoint.')
+        }
+      }
+
       this.setState({
         latitude: latitude.toFixed(4),
         longitude: longitude.toFixed(4)
       })
 
-      const address = await getCurrentAddress(this.state.w3wLocator, mapClick.mapPoint)
+      const address =
+        this.props.config.mode === 'apiKey'
+          ? await getCurrentAddressFromApiKey(this.props.config.w3wApiKey, latitude, longitude)
+          : await getCurrentAddress(this.state.w3wLocator, mapClick.mapPoint)
+
+      console.log('mode:', this.props.config.mode)
       console.log('Retrieved what3words address:', address)
 
       if (!address) {
@@ -196,6 +297,31 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
         console.log('[Widget] Activating...')
         this.activateWidget()
       }
+    }
+    // Update the locator URL if changed
+    if (prevProps.config?.addressSettings?.geocodeServiceUrl !== this.props.config?.addressSettings?.geocodeServiceUrl) {
+      this.setState({
+        w3wLocator: this.props.config?.addressSettings?.geocodeServiceUrl
+      })
+    }
+    //check for the updated geocode service url in config
+    //if utility services is used then check if it is updated OR
+    //if utility service was configured and now removed
+    //In these two cases update the geocode url
+    if ((this.props.config.addressSettings?.useUtilitiesGeocodeService?.length > 0 &&
+      prevProps.config.addressSettings?.useUtilitiesGeocodeService?.[0]?.utilityId !== this.props.config.addressSettings?.useUtilitiesGeocodeService?.[0]?.utilityId) ||
+      (this.props.config.addressSettings?.useUtilitiesGeocodeService?.length === 0 &&
+        prevProps.config.addressSettings?.useUtilitiesGeocodeService.length !== this.props.config.addressSettings?.useUtilitiesGeocodeService.length)) {
+      this.updateGeocodeURL()
+    }
+
+    //check if the display full address changed in config
+    if (prevProps.config?.addressSettings?.displayFullAddress !== this.props.config?.addressSettings.displayFullAddress) {
+      this.setState({
+        isDisplayFullAddress: this.props.config?.addressSettings.displayFullAddress
+      }, () => {
+        this.updateGeocodeURL()
+      })
     }
   }
 
