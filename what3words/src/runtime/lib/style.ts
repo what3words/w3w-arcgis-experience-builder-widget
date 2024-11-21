@@ -1,7 +1,15 @@
-import { ThemeVariables, css, SerializedStyles } from 'jimu-core'
-export function getW3WStyle (theme: ThemeVariables): SerializedStyles {
+import type { IMThemeVariables, SerializedStyles } from 'jimu-core'
+import { css } from 'jimu-core'
+export function getW3WStyle (theme: IMThemeVariables): SerializedStyles {
   return css`
-  
+      .toggle-grid-button {
+        cursor: pointer;
+      }
+
+      .toggle-grid-button.active {
+        background: #e11f26;
+        color: #ffffff;
+      }
       .w3wBlock {
         display:block;
         white-space:nowrap;
@@ -31,8 +39,6 @@ export function getW3WStyle (theme: ThemeVariables): SerializedStyles {
       }
       .actionButton {
         margin: 2px 2px 0px 2px;
-      }
-      .actionButton {
         color: #E11F26;
       }
       .actionButton:disabled{

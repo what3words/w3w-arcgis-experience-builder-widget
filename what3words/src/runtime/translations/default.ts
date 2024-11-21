@@ -4,5 +4,6 @@ export default {
   y: 'Latitude',
   copy: 'Copy',
   copySuccessMessage: 'Copy Successful',
-  zoomTo: 'Zoom To'
+  zoomTo: 'Zoom To',
+  viewGrid: 'View Grid'
 }

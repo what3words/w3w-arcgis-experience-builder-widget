@@ -1,19 +1,23 @@
 /** @jsx jsx */
-import { React, type AllWidgetProps, jsx, getAppStore, UtilityManager } from 'jimu-core'
+import { React, type AllWidgetProps, jsx, getAppStore, UtilityManager, type UseUtility } from 'jimu-core'
 import { JimuMapViewComponent, loadArcGISJSAPIModules, type JimuMapView } from 'jimu-arcgis'
 import { getCurrentAddress, getMarkerGraphic, getMapLabelGraphic, getCurrentAddressFromApiKey } from './locator-utils'
 import { getW3WStyle } from './lib/style'
 import defaultMessages from './translations/default'
 import { Button, Icon, Popper } from 'jimu-ui'
+import { drawW3WGrid, clearGridLayer, initializeGridLayer } from './w3w-grid-utils'
+import gridIcon from '../assets/grid_red.svg'
 
 const iconCopy = require('jimu-ui/lib/icons/duplicate.svg')
 const iconZoom = require('jimu-ui/lib/icons/zoom-out-fixed.svg')
 
-export default class Widget extends React.PureComponent<AllWidgetProps<any>, any> {
+export default class Widget extends React.PureComponent<AllWidgetProps<any>, State> {
   mapView: any
   private _isMounted: boolean
   private readonly isRTL: boolean
   private _clickHandle: __esri.Handle
+  private _zoomHandle: __esri.WatchHandle
+  private _extentHandle: __esri.WatchHandle
   zoomScale = 5000
   what3words: string
 
@@ -43,7 +47,9 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
       latitude: '',
       longitude: '',
       what3words: null,
-      isCopyMessageOpen: false
+      isCopyMessageOpen: false,
+      isW3WGridVisible: false, // Add a toggle state for the W3W grid
+      currentZoomLevel: 19
     }
     //check whether any utility selected in configuration in the new app
     if (this.props.config.addressSettings?.useUtilitiesGeocodeService?.length > 0) {
@@ -143,6 +149,16 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
     if (!jmv) return
 
     this.mapView = jmv.view
+    // Add zoom and extent handlers
+    this._zoomHandle = this.mapView.watch('zoom', (zoomLevel: number) => {
+      this.setState({ currentZoomLevel: zoomLevel }, this.updateGridVisibility)
+    })
+
+    this._extentHandle = this.mapView.watch('extent', () => {
+      if (this.state.isW3WGridVisible && this.isZoomLevelInRange()) {
+        drawW3WGrid(this.mapView, this.props.config.w3wApiKey)
+      }
+    })
 
     console.log('Active view changed. MapView initialized:', !!this.mapView)
 
@@ -273,6 +289,10 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
     } else if (widgetState === 'CLOSED') {
       this.deactivateWidget()
     }
+
+    if (this.mapView) {
+      initializeGridLayer(this.mapView)
+    }
   }
 
   componentDidUpdate (prevProps) {
@@ -289,6 +309,13 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
       } else if (currentState === 'OPENED') {
         console.log('[Widget] Activating...')
         this.activateWidget()
+      }
+    }
+
+    if (currentMode !== prevMode) {
+      if (currentMode === 'locatorUrl') {
+        this.setState({ isW3WGridVisible: false })
+        clearGridLayer()
       }
     }
 
@@ -328,6 +355,47 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
     }
   }
 
+  // Toggle the W3W grid visibility
+  toggleGridVisibility = async () => {
+    const { isW3WGridVisible } = this.state
+
+    if (!this.isZoomLevelInRange()) {
+      console.warn('Zoom level is out of range (17-25). Grid not displayed.')
+      this.mapView.popup.open({
+        title: 'Notice',
+        content: 'Grid can only be displayed at zoom levels between 17 and 25.',
+        location: this.mapView.center
+      })
+      return
+    }
+
+    if (!isW3WGridVisible) {
+      this.setState({ isW3WGridVisible: true })
+      drawW3WGrid(this.mapView, this.props.config.w3wApiKey)
+    } else {
+      this.setState({ isW3WGridVisible: false })
+      clearGridLayer()
+    }
+  }
+
+  updateGridVisibility = () => {
+    const { isW3WGridVisible } = this.state
+    if (isW3WGridVisible) {
+      if (this.isZoomLevelInRange()) {
+        drawW3WGrid(this.mapView, this.props.config.w3wApiKey)
+      } else {
+        console.warn('Zoom level is out of range (17-25). Clearing grid.')
+        clearGridLayer()
+      }
+    }
+  }
+
+  isZoomLevelInRange = () => {
+    const { currentZoomLevel } = this.state
+    return currentZoomLevel >= 17 && currentZoomLevel <= 25
+  }
+
+  // Deactivate the widget
   deactivateWidget = () => {
     console.log('Deactivating widget')
     this.clearGraphics()
@@ -348,6 +416,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
     this.resetWidgetState()
   }
 
+  // Activate the widget
   activateWidget = () => {
     console.log('Activating widget')
     if (this.mapView) {
@@ -367,6 +436,10 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
   componentWillUnmount = () => {
     console.log('Component did mount: initial state:', this.props.state)
     this._isMounted = false
+    if (this._zoomHandle) this._zoomHandle.remove()
+    if (this._extentHandle) this._extentHandle.remove()
+    clearGridLayer()
+    this.clearGraphics()
     this.deactivateWidget() // Ensure all resources are cleaned up
   }
 
@@ -387,11 +460,12 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
   }
 
   render () {
-    console.log('Render props:', this.props)
     const widgetState = this.props.state || 'OPENED' // Fallback to 'OPENED'
     console.log('Render state:', widgetState)
-
+    const { what3words, latitude, longitude, isCopyMessageOpen, isW3WGridVisible } = this.state
     const { config, theme, useMapWidgetIds, id } = this.props
+    const isApiKeyMode = config?.mode === 'apiKey'
+
     if (!useMapWidgetIds || useMapWidgetIds.length === 0) {
       console.error('No map widget ID found. Ensure the widget is properly linked to a map.')
       return (
@@ -400,16 +474,37 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
         </div>
       )
     }
-    const { what3words, latitude, longitude, isCopyMessageOpen } = this.state
 
     return (
       <div css={getW3WStyle(theme)} className="widget-starter jimu-widget">
-        <h5>Reverse Geocode with your what3words locator</h5>
+        <h5>what3words widget</h5>
 
         <JimuMapViewComponent
             useMapWidgetId={useMapWidgetIds[0]}
             onActiveViewChange={this.onActiveViewChange}
         />
+
+        {/* Toggle Grid Button */}
+        {isApiKeyMode && (
+          <Button
+            type="tertiary"
+            aria-label={this.nls('viewGrid')}
+            title={this.nls('viewGrid')}
+            icon
+            size="sm"
+            active={isW3WGridVisible}
+            aria-disabled={!this.isZoomLevelInRange()}
+            disabled={!this.isZoomLevelInRange()}
+            className={`toggle-grid-button float-right actionButton ${isW3WGridVisible ? 'active' : ''}`}
+            onClick={this.toggleGridVisibility}
+          >
+            <img src={gridIcon} alt="Grid Icon" width="17" />
+          </Button>
+        )}
+
+        {!isApiKeyMode && <p>Grid functionality is disabled in Locator URL mode.</p>}
+
+        {/* Copy Button */}
         {config.displayCopyButton && (
           <Button
             type="tertiary"
@@ -427,6 +522,8 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
             <Icon icon={iconCopy} size={'17'} />
           </Button>
         )}
+
+        {/* Zoom Button */}
         {config.displayZoomButton && (
           <Button
             type="tertiary"
@@ -442,11 +539,14 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
             <Icon icon={iconZoom} size={'17'} />
           </Button>
         )}
+
+        {/* what3words Block */}
         <h3 className="w3wBlock">
           <span className="w3wRed">///</span>
           {what3words}
         </h3>
 
+        {/* Coordinates Block */}
         {config.displayCoordinates && (
           <div className="w3wCoords">
             <div className="w3wCoordsProp">
@@ -457,6 +557,8 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
             </div>
           </div>
         )}
+
+        {/* Copy Message Popper */}
         {isCopyMessageOpen && (
           <Popper
             open={isCopyMessageOpen}
