@@ -177,15 +177,15 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
     try {
       // Check if mapPoint contains valid spatialReference and coordinates
       console.log('mapPoint:', mapClick.mapPoint)
-      // Close any existing popup and clear graphics
       this.mapView.closePopup()
       this.clearGraphics()
 
-      let latitude: number, longitude: number
+      let latitude, longitude
       let mapPointWGS84 = mapClick.mapPoint
 
-      // Only project to WGS84 if using the API key
-      if (this.props.config.mode === 'apiKey') {
+      // Handle projection only if not in WGS84
+      if (mapClick.mapPoint.spatialReference?.wkid !== 4326) {
+        console.log('Projecting map point to WGS84...')
         const [projection, SpatialReference] = await loadArcGISJSAPIModules([
           'esri/geometry/projection',
           'esri/geometry/SpatialReference'
@@ -201,23 +201,17 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
         if (!mapPointWGS84) {
           throw new Error('Failed to project map point to WGS84.')
         }
-
-        console.log('Projected map point to WGS84:', mapPointWGS84)
-        latitude = mapPointWGS84.latitude
-        longitude = mapPointWGS84.longitude
-
-        if (!latitude || !longitude) {
-          throw new Error('Failed to retrieve latitude or longitude from projected point.')
-        }
-      } else {
-        // Use map point's native coordinates when using Locator URL
-        latitude = mapClick.mapPoint.latitude
-        longitude = mapClick.mapPoint.longitude
-
-        if (latitude === null || longitude === null) {
-          throw new Error('Invalid latitude or longitude from mapPoint.')
-        }
       }
+
+      // Extract latitude and longitude from WGS84 point
+      latitude = mapPointWGS84.latitude || mapPointWGS84.y
+      longitude = mapPointWGS84.longitude || mapPointWGS84.x
+
+      if (latitude === null || longitude === null) {
+        throw new Error('Invalid latitude or longitude from mapPoint.')
+      }
+
+      console.log('Latitude:', latitude, 'Longitude:', longitude)
 
       this.setState({
         latitude: latitude.toFixed(4),
@@ -227,9 +221,8 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
       const address =
         this.props.config.mode === 'apiKey'
           ? await getCurrentAddressFromApiKey(this.props.config.w3wApiKey, latitude, longitude)
-          : await getCurrentAddress(this.state.w3wLocator, mapClick.mapPoint)
+          : await getCurrentAddress(this.state.w3wLocator, mapPointWGS84)
 
-      console.log('mode:', this.props.config.mode)
       console.log('Retrieved what3words address:', address)
 
       if (!address) {
@@ -238,21 +231,20 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
 
       this.setState({ what3words: address })
 
-      const marker = await getMarkerGraphic(mapClick.mapPoint)
-      const label = await getMapLabelGraphic(mapClick.mapPoint, address)
+      const marker = await getMarkerGraphic(mapPointWGS84)
+      const label = await getMapLabelGraphic(mapPointWGS84, address)
 
       if (marker && label) {
         this.mapView.graphics.addMany([marker, label])
       } else {
-        console.error('Failed to create graphics for map point:', mapClick.mapPoint)
+        console.error('Failed to create graphics for map point:', mapPointWGS84)
       }
 
-      // Conditionally open the popup based on displayPopupMessage toggle
       if (this.props.config.displayPopupMessage) {
         this.mapView.openPopup({
           title: `Reverse geocode for ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`,
           content: `what3words address: ///${address}`,
-          location: mapClick.mapPoint
+          location: mapPointWGS84
         })
       } else {
         console.log('Popup message display is toggled off in configuration.')
@@ -260,7 +252,6 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
     } catch (error) {
       console.error('Error handling map click:', error)
 
-      // Optionally handle error but avoid unnecessary popup display
       if (this.props.config.displayPopupMessage) {
         this.mapView.openPopup({
           title: 'Error',
@@ -287,6 +278,8 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
   componentDidUpdate (prevProps) {
     const prevState = prevProps.state || 'OPENED'
     const currentState = this.props.state || 'OPENED'
+    const prevMode = prevProps.config.mode
+    const currentMode = this.props.config.mode
     console.log('Component did update: previous state:', prevState, 'current state:', currentState)
 
     if (prevState !== currentState) {
@@ -298,6 +291,16 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, any
         this.activateWidget()
       }
     }
+
+    if (prevMode !== currentMode) {
+      console.log(`Mode changed from ${prevMode} to ${currentMode}`)
+      if (currentMode === 'locatorUrl') {
+        this.setState({
+          w3wLocator: this.props.config?.addressSettings?.geocodeServiceUrl
+        })
+      }
+    }
+
     // Update the locator URL if changed
     if (prevProps.config?.addressSettings?.geocodeServiceUrl !== this.props.config?.addressSettings?.geocodeServiceUrl) {
       this.setState({
