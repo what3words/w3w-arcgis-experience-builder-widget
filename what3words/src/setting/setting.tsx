@@ -59,9 +59,11 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<a
 
   /** Handle input changes for API key and Locator URL */
   handleInputChange = (property: string, event: React.ChangeEvent<HTMLInputElement>) => {
+    const newConfig = this.props.config.setIn(['addressSettings', property], event.target.value)
+    console.log('Updated config:', newConfig)
     this.props.onSettingChange({
       id: this.props.id,
-      config: this.props.config.setIn(['addressSettings', property], event.target.value)
+      config: newConfig
     })
   }
 

@@ -5,11 +5,22 @@ import { getCurrentAddress, getMarkerGraphic, getMapLabelGraphic, getCurrentAddr
 import { getW3WStyle } from './lib/style'
 import defaultMessages from './translations/default'
 import { Button, Icon, Popper } from 'jimu-ui'
-import { drawW3WGrid, clearGridLayer, initializeGridLayer } from './w3w-grid-utils'
+import { drawW3WGrid, clearGridLayer, initializeGridLayer } from './grid-utils'
 import gridIcon from '../assets/grid_red.svg'
 
 const iconCopy = require('jimu-ui/lib/icons/duplicate.svg')
 const iconZoom = require('jimu-ui/lib/icons/zoom-out-fixed.svg')
+
+interface State {
+  w3wLocator: string
+  JimuMapView: JimuMapView | null
+  latitude: string
+  longitude: string
+  what3words: string | null
+  isCopyMessageOpen: boolean
+  isW3WGridVisible: boolean
+  currentZoomLevel: number
+}
 
 export default class Widget extends React.PureComponent<AllWidgetProps<any>, State> {
   mapView: any
@@ -18,7 +29,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
   private _clickHandle: __esri.Handle
   private _zoomHandle: __esri.WatchHandle
   private _extentHandle: __esri.WatchHandle
-  zoomScale = 5000
+  zoomScale = 1000
   what3words: string
 
   constructor (props) {
@@ -49,12 +60,23 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
       what3words: null,
       isCopyMessageOpen: false,
       isW3WGridVisible: false, // Add a toggle state for the W3W grid
-      currentZoomLevel: 19
+      currentZoomLevel: null
     }
     //check whether any utility selected in configuration in the new app
     if (this.props.config.addressSettings?.useUtilitiesGeocodeService?.length > 0) {
       this.updateGeocodeURL()
     }
+  }
+
+  getApiKey = (): string | null => {
+    const apiKey = this.props.config?.addressSettings?.w3wApiKey
+
+    if (!apiKey) {
+      console.warn('API Key is missing. Please provide an API key in the settings.')
+      return null
+    }
+
+    return apiKey
   }
 
   nls = (id: string) => {
@@ -149,6 +171,15 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
     if (!jmv) return
 
     this.mapView = jmv.view
+    // Debug log to check API key presence
+    const apiKey = this.getApiKey()
+
+    if (!apiKey) {
+      console.warn('API Key not yet available. Retrying...')
+      setTimeout(() => { this.onActiveViewChange(jmv) }, 500) // Retry after a delay
+      return
+    }
+
     // Add zoom and extent handlers
     this._zoomHandle = this.mapView.watch('zoom', (zoomLevel: number) => {
       this.setState({ currentZoomLevel: zoomLevel }, this.updateGridVisibility)
@@ -156,7 +187,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
 
     this._extentHandle = this.mapView.watch('extent', () => {
       if (this.state.isW3WGridVisible && this.isZoomLevelInRange()) {
-        drawW3WGrid(this.mapView, this.props.config.w3wApiKey)
+        drawW3WGrid(this.mapView, apiKey)
       }
     })
 
@@ -177,8 +208,8 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
 
   handleMapClick = async (mapClick: any) => {
     const widgetState = this.props.state || 'OPENED' // Add fallback
-    console.log('Handling map click at:', mapClick.mapPoint)
-    console.log('Current widget state:', widgetState)
+    const apiKey = this.getApiKey()
+    if (!apiKey) return
 
     if (widgetState !== 'OPENED') {
       console.log('Widget is not active. Ignoring click.')
@@ -196,7 +227,6 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
       this.mapView.closePopup()
       this.clearGraphics()
 
-      let latitude, longitude
       let mapPointWGS84 = mapClick.mapPoint
 
       // Handle projection only if not in WGS84
@@ -220,8 +250,8 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
       }
 
       // Extract latitude and longitude from WGS84 point
-      latitude = mapPointWGS84.latitude || mapPointWGS84.y
-      longitude = mapPointWGS84.longitude || mapPointWGS84.x
+      const latitude = mapPointWGS84.latitude || mapPointWGS84.y
+      const longitude = mapPointWGS84.longitude || mapPointWGS84.x
 
       if (latitude === null || longitude === null) {
         throw new Error('Invalid latitude or longitude from mapPoint.')
@@ -236,7 +266,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
 
       const address =
         this.props.config.mode === 'apiKey'
-          ? await getCurrentAddressFromApiKey(this.props.config.w3wApiKey, latitude, longitude)
+          ? await getCurrentAddressFromApiKey(apiKey, latitude, longitude)
           : await getCurrentAddress(this.state.w3wLocator, mapPointWGS84)
 
       console.log('Retrieved what3words address:', address)
@@ -280,9 +310,9 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
 
   componentDidMount () {
     console.log('Component did mount')
-    console.log('useMapWidgetIds:', this.props.useMapWidgetIds)
     const widgetState = this.props.state || 'OPENED' // Add fallback
-    console.log('Component mounted with state:', widgetState)
+    const apiKey = this.getApiKey()
+    if (!apiKey) return
 
     if (widgetState === 'OPENED') {
       this.activateWidget()
@@ -300,7 +330,18 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
     const currentState = this.props.state || 'OPENED'
     const prevMode = prevProps.config.mode
     const currentMode = this.props.config.mode
-    console.log('Component did update: previous state:', prevState, 'current state:', currentState)
+    if (prevProps.config !== this.props.config) {
+      const apiKey = this.getApiKey()
+      if (!apiKey) {
+        console.warn('API Key is missing after config update.')
+      }
+
+      if (!this.mapView) {
+        console.log('Reinitializing map view with updated API Key...')
+        this.onActiveViewChange(prevProps.jimuMapView)
+      }
+    }
+    // console.log('Component did update: previous state:', prevState, 'current state:', currentState)
 
     if (prevState !== currentState) {
       if (currentState === 'CLOSED') {
@@ -344,20 +385,13 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
         prevProps.config.addressSettings?.useUtilitiesGeocodeService.length !== this.props.config.addressSettings?.useUtilitiesGeocodeService.length)) {
       this.updateGeocodeURL()
     }
-
-    //check if the display full address changed in config
-    if (prevProps.config?.addressSettings?.displayFullAddress !== this.props.config?.addressSettings.displayFullAddress) {
-      this.setState({
-        isDisplayFullAddress: this.props.config?.addressSettings.displayFullAddress
-      }, () => {
-        this.updateGeocodeURL()
-      })
-    }
   }
 
   // Toggle the W3W grid visibility
   toggleGridVisibility = async () => {
     const { isW3WGridVisible } = this.state
+    const apiKey = this.getApiKey()
+    if (!apiKey) return
 
     if (!this.isZoomLevelInRange()) {
       console.warn('Zoom level is out of range (17-25). Grid not displayed.')
@@ -371,18 +405,31 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
 
     if (!isW3WGridVisible) {
       this.setState({ isW3WGridVisible: true })
-      drawW3WGrid(this.mapView, this.props.config.w3wApiKey)
+      try {
+        await drawW3WGrid(this.mapView, apiKey)
+      } catch (error) {
+        console.error('Error drawing W3W Grid:', error)
+        this.setState({ isW3WGridVisible: false }) // Revert state if grid drawing fails
+      }
     } else {
       this.setState({ isW3WGridVisible: false })
       clearGridLayer()
     }
   }
 
+  // Update grid visibility based on zoom level
   updateGridVisibility = () => {
     const { isW3WGridVisible } = this.state
+    const apiKey = this.getApiKey()
+    if (!apiKey) return
+
     if (isW3WGridVisible) {
       if (this.isZoomLevelInRange()) {
-        drawW3WGrid(this.mapView, this.props.config.w3wApiKey)
+        try {
+          drawW3WGrid(this.mapView, apiKey)
+        } catch (error) {
+          console.error('Error drawing W3W Grid during update:', error)
+        }
       } else {
         console.warn('Zoom level is out of range (17-25). Clearing grid.')
         clearGridLayer()
@@ -398,6 +445,8 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
   // Deactivate the widget
   deactivateWidget = () => {
     console.log('Deactivating widget')
+    // Clear the grid layer and graphics
+    clearGridLayer()
     this.clearGraphics()
 
     if (this.mapView) {
@@ -412,6 +461,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
         this.mapView.closePopup()
       }
     }
+
     // Reset the widget state
     this.resetWidgetState()
   }
@@ -446,10 +496,12 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
   resetWidgetState = () => {
     console.log('Resetting widget state...')
     this.setState({
+      isW3WGridVisible: false,
       latitude: '',
       longitude: '',
       what3words: null,
-      isCopyMessageOpen: false
+      isCopyMessageOpen: false,
+      currentZoomLevel: null
     })
   }
 
@@ -495,7 +547,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
             active={isW3WGridVisible}
             aria-disabled={!this.isZoomLevelInRange()}
             disabled={!this.isZoomLevelInRange()}
-            className={`toggle-grid-button float-right actionButton ${isW3WGridVisible ? 'active' : ''}`}
+            className='float-right actionButton'
             onClick={this.toggleGridVisibility}
           >
             <img src={gridIcon} alt="Grid Icon" width="17" />

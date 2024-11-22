@@ -48,6 +48,11 @@ function isBoundingBoxDrawn (bbox: __esri.Extent): boolean {
  * @param apiKey - The What3Words API Key.
  */
 export async function drawW3WGrid (mapView: __esri.MapView, apiKey: string) {
+  if (!apiKey) {
+    console.error('API Key is missing. Cannot draw What3Words grid.')
+    return
+  }
+
   if (!_gridLayer) {
     await initializeGridLayer(mapView)
   }
