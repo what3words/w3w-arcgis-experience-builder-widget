@@ -547,7 +547,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
             active={isW3WGridVisible}
             aria-disabled={!this.isZoomLevelInRange()}
             disabled={!this.isZoomLevelInRange()}
-            className='float-right actionButton'
+            className={`toggle-grid-button float-right actionButton ${isW3WGridVisible ? 'active' : ''} ${!this.isZoomLevelInRange() ? 'disabled' : ''}`}
             onClick={this.toggleGridVisibility}
           >
             <img src={gridIcon} alt="Grid Icon" width="17" />

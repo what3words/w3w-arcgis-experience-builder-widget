@@ -2,13 +2,21 @@ import type { IMThemeVariables, SerializedStyles } from 'jimu-core'
 import { css } from 'jimu-core'
 export function getW3WStyle (theme: IMThemeVariables): SerializedStyles {
   return css`
-      .toggle-grid-button {
-        cursor: pointer;
+      .toggle-grid-button.disabled {
+        pointer-events: none; /* Prevent click events */
+        opacity: 0.5; /* Reduce visibility */
+      }
+
+      .toggle-grid-button img {
+        transition: opacity 0.3s ease; /* Smooth transition for better UI */
+      }
+
+      .toggle-grid-button.disabled img {
+        opacity: 0.5; /* Apply greyed-out effect */
       }
 
       .toggle-grid-button.active {
-        background: #e11f26;
-        color: #ffffff;
+        cursor: pointer;
       }
       .w3wBlock {
         display:block;
