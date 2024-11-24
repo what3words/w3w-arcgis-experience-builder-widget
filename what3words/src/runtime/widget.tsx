@@ -4,12 +4,14 @@ import { JimuMapViewComponent, loadArcGISJSAPIModules, type JimuMapView } from '
 import { getCurrentAddress, getMarkerGraphic, getMapLabelGraphic, getCurrentAddressFromApiKey } from './locator-utils'
 import { getW3WStyle } from './lib/style'
 import defaultMessages from './translations/default'
-import { Button, Icon, Popper } from 'jimu-ui'
-import { drawW3WGrid, clearGridLayer, initializeGridLayer } from './grid-utils'
+import { Button, Icon, Popper, Alert, Tooltip } from 'jimu-ui'
+import { drawW3WGrid, clearGridLayer, initializeGridLayer, exportGeoJSON } from './grid-utils'
 import gridIcon from '../assets/grid_red.svg'
+import type GraphicsLayer from '@arcgis/core/layers/GraphicsLayer'
 
 const iconCopy = require('jimu-ui/lib/icons/duplicate.svg')
 const iconZoom = require('jimu-ui/lib/icons/zoom-out-fixed.svg')
+const iconExport = require('jimu-ui/lib/icons/export.svg')
 
 interface State {
   w3wLocator: string
@@ -20,6 +22,10 @@ interface State {
   isCopyMessageOpen: boolean
   isW3WGridVisible: boolean
   currentZoomLevel: number
+  isZoomInRange: boolean
+  alertVisible: boolean
+  gridLayerInitialized: boolean
+  exportEnabled: boolean
 }
 
 export default class Widget extends React.PureComponent<AllWidgetProps<any>, State> {
@@ -31,10 +37,13 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
   private _extentHandle: __esri.WatchHandle
   zoomScale = 1000
   what3words: string
+  _gridLayer: GraphicsLayer | null = null
+
+  // Reference for grid button
+  private readonly gridButtonRef = React.createRef<HTMLButtonElement>()
 
   constructor (props) {
     super(props)
-    // let geocodeServiceURL = this.props.config?.addressSettings?.geocodeServiceUrl || ''
 
     //Get the default geocoding service URL
     let geocodeServiceURL = this.getDefaultGeocodeServiceURL()
@@ -59,8 +68,12 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
       longitude: '',
       what3words: null,
       isCopyMessageOpen: false,
+      gridLayerInitialized: false,
       isW3WGridVisible: false, // Add a toggle state for the W3W grid
-      currentZoomLevel: null
+      currentZoomLevel: null,
+      isZoomInRange: false,
+      alertVisible: false,
+      exportEnabled: false
     }
     //check whether any utility selected in configuration in the new app
     if (this.props.config.addressSettings?.useUtilitiesGeocodeService?.length > 0) {
@@ -167,18 +180,24 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
     }, 500)
   }
 
-  onActiveViewChange = (jmv: JimuMapView) => {
-    if (!jmv) return
+  onActiveViewChange = async (JimuMapView: JimuMapView) => {
+    if (!JimuMapView) return
+    this.mapView = JimuMapView.view
 
-    this.mapView = jmv.view
+    // Monitor zoom changes
+    this.mapView.watch('zoom', this.handleZoomChange)
+
     // Debug log to check API key presence
     const apiKey = this.getApiKey()
-
     if (!apiKey) {
       console.warn('API Key not yet available. Retrying...')
-      setTimeout(() => { this.onActiveViewChange(jmv) }, 500) // Retry after a delay
+      setTimeout(() => { this.onActiveViewChange(JimuMapView) }, 500) // Retry after a delay
       return
     }
+
+    // Initialize the grid layer
+    await initializeGridLayer(this.mapView)
+    this.setState({ gridLayerInitialized: true })
 
     // Add zoom and extent handlers
     this._zoomHandle = this.mapView.watch('zoom', (zoomLevel: number) => {
@@ -191,8 +210,6 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
       }
     })
 
-    console.log('Active view changed. MapView initialized:', !!this.mapView)
-
     // Remove any existing click handler before adding a new one
     if (this._clickHandle) {
       this._clickHandle.remove()
@@ -201,7 +218,6 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
 
     // Store the click handler
     this._clickHandle = this.mapView.on('click', (mapClick: any) => {
-      console.log('Map clicked at:', mapClick.mapPoint)
       this.handleMapClick(mapClick)
     })
   }
@@ -217,13 +233,13 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
     }
 
     if (!mapClick?.mapPoint) {
-      console.error('Invalid map point:', mapClick)
+      // console.error('Invalid map point:', mapClick)
       return
     }
 
     try {
       // Check if mapPoint contains valid spatialReference and coordinates
-      console.log('mapPoint:', mapClick.mapPoint)
+      // console.log('mapPoint:', mapClick.mapPoint)
       this.mapView.closePopup()
       this.clearGraphics()
 
@@ -231,7 +247,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
 
       // Handle projection only if not in WGS84
       if (mapClick.mapPoint.spatialReference?.wkid !== 4326) {
-        console.log('Projecting map point to WGS84...')
+        // console.log('Projecting map point to WGS84...')
         const [projection, SpatialReference] = await loadArcGISJSAPIModules([
           'esri/geometry/projection',
           'esri/geometry/SpatialReference'
@@ -257,7 +273,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
         throw new Error('Invalid latitude or longitude from mapPoint.')
       }
 
-      console.log('Latitude:', latitude, 'Longitude:', longitude)
+      // console.log('Latitude:', latitude, 'Longitude:', longitude)
 
       this.setState({
         latitude: latitude.toFixed(4),
@@ -269,7 +285,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
           ? await getCurrentAddressFromApiKey(apiKey, latitude, longitude)
           : await getCurrentAddress(this.state.w3wLocator, mapPointWGS84)
 
-      console.log('Retrieved what3words address:', address)
+      // console.log('Retrieved what3words address:', address)
 
       if (!address) {
         throw new Error('No address returned from API')
@@ -292,8 +308,6 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
           content: `what3words address: ///${address}`,
           location: mapPointWGS84
         })
-      } else {
-        console.log('Popup message display is toggled off in configuration.')
       }
     } catch (error) {
       console.error('Error handling map click:', error)
@@ -387,33 +401,41 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
     }
   }
 
-  // Toggle the W3W grid visibility
-  toggleGridVisibility = async () => {
-    const { isW3WGridVisible } = this.state
-    const apiKey = this.getApiKey()
-    if (!apiKey) return
-
-    if (!this.isZoomLevelInRange()) {
-      console.warn('Zoom level is out of range (17-25). Grid not displayed.')
-      this.mapView.popup.open({
-        title: 'Notice',
-        content: 'Grid can only be displayed at zoom levels between 17 and 25.',
-        location: this.mapView.center
-      })
+  // Export the grid as GeoJSON
+  exportGeoJSONHandler = async () => {
+    if (!this.state.exportEnabled || !this._gridLayer) {
+      console.log(this._gridLayer.graphics.length)
+      console.error('Grid layer is not initialized or empty. Cannot export GeoJSON.')
       return
     }
 
+    try {
+      await exportGeoJSON(this._gridLayer)
+      console.log('GeoJSON export successful.')
+    } catch (error) {
+      console.error('Error exporting GeoJSON:', error)
+    }
+  }
+
+  // Adjust grid visibility and synchronization with export button
+  toggleGridVisibility = async () => {
+    const { isW3WGridVisible } = this.state
+
+    if (!this._gridLayer) {
+      console.log('Initializing grid layer...')
+      await initializeGridLayer(this.mapView)
+      this._gridLayer = await initializeGridLayer(this.mapView) // Assign the initialized layer
+      this.setState({ gridLayerInitialized: true })
+    }
+
     if (!isW3WGridVisible) {
-      this.setState({ isW3WGridVisible: true })
-      try {
-        await drawW3WGrid(this.mapView, apiKey)
-      } catch (error) {
-        console.error('Error drawing W3W Grid:', error)
-        this.setState({ isW3WGridVisible: false }) // Revert state if grid drawing fails
-      }
+      console.log('Drawing grid...')
+      await drawW3WGrid(this.mapView, this.getApiKey())
+      this.setState({ isW3WGridVisible: true, exportEnabled: this._gridLayer.graphics.length > 0 })
+      console.log('Grid drawn successfully.')
     } else {
+      console.log('Hiding grid...')
       this.setState({ isW3WGridVisible: false })
-      clearGridLayer()
     }
   }
 
@@ -421,32 +443,46 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
   updateGridVisibility = () => {
     const { isW3WGridVisible } = this.state
     const apiKey = this.getApiKey()
-    if (!apiKey) return
 
-    if (isW3WGridVisible) {
-      if (this.isZoomLevelInRange()) {
-        try {
-          drawW3WGrid(this.mapView, apiKey)
-        } catch (error) {
-          console.error('Error drawing W3W Grid during update:', error)
-        }
-      } else {
-        console.warn('Zoom level is out of range (17-25). Clearing grid.')
-        clearGridLayer()
-      }
+    if (!apiKey || !isW3WGridVisible) return
+
+    if (!this.isZoomLevelInRange()) {
+      this.setState({ alertVisible: true })
+      return
+    }
+
+    try {
+      drawW3WGrid(this.mapView, apiKey)
+    } catch (error) {
+      console.error('Error updating W3W Grid:', error)
     }
   }
 
+  // Check if the current zoom level is within the valid range
   isZoomLevelInRange = () => {
     const { currentZoomLevel } = this.state
     return currentZoomLevel >= 17 && currentZoomLevel <= 25
   }
 
+  // Handle zoom level change
+  handleZoomChange = () => {
+    const isZoomInRange = this.isZoomLevelInRange()
+    this.setState({ isZoomInRange })
+
+    if (!isZoomInRange) {
+      this.setState({ alertVisible: true })
+    }
+  }
+
+  // Close the alert message
+  handleAlertClose = () => {
+    this.setState({ alertVisible: false })
+  }
+
   // Deactivate the widget
   deactivateWidget = () => {
     console.log('Deactivating widget')
-    // Clear the grid layer and graphics
-    clearGridLayer()
+    // Clear the graphics layer
     this.clearGraphics()
 
     if (this.mapView) {
@@ -488,7 +524,6 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
     this._isMounted = false
     if (this._zoomHandle) this._zoomHandle.remove()
     if (this._extentHandle) this._extentHandle.remove()
-    clearGridLayer()
     this.clearGraphics()
     this.deactivateWidget() // Ensure all resources are cleaned up
   }
@@ -512,9 +547,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
   }
 
   render () {
-    const widgetState = this.props.state || 'OPENED' // Fallback to 'OPENED'
-    console.log('Render state:', widgetState)
-    const { what3words, latitude, longitude, isCopyMessageOpen, isW3WGridVisible } = this.state
+    const { what3words, latitude, longitude, isCopyMessageOpen, isW3WGridVisible, isZoomInRange, alertVisible, exportEnabled } = this.state
     const { config, theme, useMapWidgetIds, id } = this.props
     const isApiKeyMode = config?.mode === 'apiKey'
 
@@ -529,8 +562,23 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
 
     return (
       <div css={getW3WStyle(theme)} className="widget-starter jimu-widget">
-        <h5>what3words widget</h5>
-
+        <h5>what3words widget
+          <span>
+          {/* Alert for Zoom Out of Range */}
+          {alertVisible && (
+            <Alert
+              type="info"
+              text="Zoom level is out of range. The grid will not be updated."
+              aria-live="polite"
+              buttonType="tertiary"
+              size="medium"
+              form="tooltip"
+              placement="right"
+              showArrow={true}
+            />
+          )}
+          </span>
+        </h5>
         <JimuMapViewComponent
             useMapWidgetId={useMapWidgetIds[0]}
             onActiveViewChange={this.onActiveViewChange}
@@ -538,23 +586,49 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
 
         {/* Toggle Grid Button */}
         {isApiKeyMode && (
-          <Button
-            type="tertiary"
-            aria-label={this.nls('viewGrid')}
-            title={this.nls('viewGrid')}
-            icon
-            size="sm"
-            active={isW3WGridVisible}
-            aria-disabled={!this.isZoomLevelInRange()}
-            disabled={!this.isZoomLevelInRange()}
-            className={`toggle-grid-button float-right actionButton ${isW3WGridVisible ? 'active' : ''} ${!this.isZoomLevelInRange() ? 'disabled' : ''}`}
-            onClick={this.toggleGridVisibility}
-          >
-            <img src={gridIcon} alt="Grid Icon" width="17" />
-          </Button>
+          <Tooltip title={isW3WGridVisible ? 'Hide Grid' : 'View Grid'} placement="bottom" followCursor>
+            <span>
+              <Button
+                ref={this.gridButtonRef}
+                id="gridButton"
+                type="tertiary"
+                aria-label='Toggle Grid'
+                title='Toggle Grid'
+                icon
+                size="sm"
+                active={isW3WGridVisible}
+                aria-disabled={!isZoomInRange}
+                disabled={!isZoomInRange}
+                className={`toggle-grid-button float-right actionButton ${isW3WGridVisible ? 'active' : ''} ${!isZoomInRange ? 'disabled' : ''}`}
+                onClick={this.toggleGridVisibility}
+              >
+                <img src={gridIcon} alt="Grid Icon" width="17" />
+              </Button>
+            </span>
+          </Tooltip>
         )}
 
-        {!isApiKeyMode && <p>Grid functionality is disabled in Locator URL mode.</p>}
+        {/* Download Grid Button */}
+        {isApiKeyMode && (
+          <Tooltip title="Download Grid" placement="bottom" followCursor>
+            <span>
+                <Button
+                type="tertiary"
+                aria-label="Download Grid"
+                title="Download Grid"
+                icon
+                size="sm"
+                onClick={() => { this.exportGeoJSONHandler() }}
+                className='float-right actionButton'
+                disabled={!exportEnabled}
+              >
+                <Icon icon={iconExport} size="17" />
+              </Button>
+            </span>
+          </Tooltip>
+        )}
+
+        {/* {!isApiKeyMode && <p>Grid functionality is disabled in Locator URL mode.</p>} */}
 
         {/* Copy Button */}
         {config.displayCopyButton && (

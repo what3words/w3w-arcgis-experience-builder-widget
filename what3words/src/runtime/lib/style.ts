@@ -49,8 +49,10 @@ export function getW3WStyle (theme: IMThemeVariables): SerializedStyles {
         margin: 2px 2px 0px 2px;
         color: #E11F26;
       }
-      .actionButton:disabled{
-        cursor: default;
+      .actionButton.disabled {
+        pointer-events: none; /* Prevent click events */
+        color: grey; /* Grey out text */
+        opacity: 0.5; /* Reduce visibility */
       }
     `
 }
