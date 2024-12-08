@@ -63,6 +63,41 @@ If after installing correctly the what3words locator across your ArcGIS platform
 To resolve this issue, please drag-and-drop the what3words locator at the top of the Geocoding service list, as it is shown on this screenshot. You can find this list under your `Organisation > Utility services > Geocoding section`. 
 ![Troubleshooting what3words locator display](./docs/ScreenShot-05-troubleshooting-w3w-locator.png)
 
+To make it work with the @what3words/api, you need to add to your experience builder app this code snippet to the `widget-webpack-override.js` which is a file in `<Path-to-file>/ArcGISExperienceBuilder-v1.15/client/webpack/widget-webpack-override.js` in your ArcGIS experience builder app:
+
+```js
+const webpack = require('webpack');
+
+module.exports = function (webpackConfig) {
+  // Add fallbacks for Node.js core modules
+  webpackConfig.resolve.fallback = {
+    ...webpackConfig.resolve.fallback, // Preserve existing fallbacks
+    os: require.resolve('os-browserify/browser'),
+    stream: require.resolve('stream-browserify'),
+    https: require.resolve('https-browserify'),
+    url: require.resolve('url'),
+    zlib: require.resolve('browserify-zlib'),
+    http: require.resolve('stream-http'),
+  };
+
+  // Add plugins to provide global variables for process and Buffer
+  webpackConfig.plugins.push(
+    new webpack.ProvidePlugin({
+      process: 'process/browser.js',
+      Buffer: ['buffer', 'Buffer'],
+    })
+  );
+
+  return webpackConfig;
+};
+```
+
+and run the following npm install command
+
+```bash
+npm install os-browserify stream-browserify https-browserify url browserify-zlib stream-http process buffer --save-dev
+```
+
 
 ## Issues
 
