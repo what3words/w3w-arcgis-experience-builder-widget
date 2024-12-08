@@ -7,7 +7,6 @@ import defaultMessages from './translations/default'
 import { Button, Icon, Popper, Alert, Tooltip } from 'jimu-ui'
 import { drawW3WGrid, clearGridLayer, initializeGridLayer, exportGeoJSON } from './grid-utils'
 import gridIcon from '../assets/grid_red.svg'
-import type GraphicsLayer from '@arcgis/core/layers/GraphicsLayer'
 import { debounce } from 'lodash'
 
 const iconCopy = require('jimu-ui/lib/icons/duplicate.svg')
@@ -21,7 +20,7 @@ interface State {
   longitude: string
   what3words: string | null
   isCopyMessageOpen: boolean
-  isW3WGridVisible: boolean
+  isW3WGridEnabled: boolean
   currentZoomLevel: number
   isZoomInRange: boolean
   alertVisible: boolean
@@ -38,7 +37,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
   private _extentHandle: __esri.WatchHandle
   zoomScale = 1000
   what3words: string
-  _gridLayer: GraphicsLayer | null = null
+  _gridLayer: __esri.FeatureLayer | null = null
 
   // Reference for grid button
   private readonly gridButtonRef = React.createRef<HTMLButtonElement>()
@@ -70,7 +69,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
       what3words: null,
       isCopyMessageOpen: false,
       gridLayerInitialized: false,
-      isW3WGridVisible: false, // Add a toggle state for the W3W grid
+      isW3WGridEnabled: false, // Add a toggle state for the W3W grid
       currentZoomLevel: null,
       isZoomInRange: false,
       alertVisible: false,
@@ -210,7 +209,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
     this._extentHandle = this.mapView.watch(
       'extent',
       debounce(() => {
-        if (this.state.isW3WGridVisible && this.isZoomLevelInRange()) {
+        if (this.state.isW3WGridEnabled && this.isZoomLevelInRange()) {
           drawW3WGrid(this.mapView)
         }
       }, 500)
@@ -370,7 +369,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
 
     if (currentMode !== prevMode) {
       if (currentMode === 'locatorUrl') {
-        this.setState({ isW3WGridVisible: false })
+        this.setState({ isW3WGridEnabled: false })
         clearGridLayer()
       }
     }
@@ -404,13 +403,23 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
 
   // Export the grid as GeoJSON
   exportGeoJSONHandler = async () => {
-    if (!this.state.exportEnabled || !this._gridLayer) {
-      console.log(this._gridLayer.graphics.length)
-      console.error('Grid layer is not initialized or empty. Cannot export GeoJSON.')
+    if (!this._gridLayer || this._gridLayer.destroyed) {
+      console.error('FeatureLayer is not initialized or has been destroyed. Cannot export GeoJSON.')
       return
     }
 
     try {
+      // Verify if the FeatureLayer has any features
+      const query = this._gridLayer.createQuery()
+      query.where = '1=1' // Select all features
+      const featureSet = await this._gridLayer.queryFeatures(query)
+
+      if (!featureSet.features || featureSet.features.length === 0) {
+        console.error('FeatureLayer has no features to export.')
+        return
+      }
+
+      // Call the updated exportGeoJSON function
       await exportGeoJSON(this._gridLayer)
       console.log('GeoJSON export successful.')
     } catch (error) {
@@ -420,38 +429,52 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
 
   // Adjust grid visibility and synchronization with export button
   toggleGridVisibility = async () => {
-    const { isW3WGridVisible } = this.state
+    const { isW3WGridEnabled } = this.state
+    const apiKey = this.getApiKey()
+    if (!apiKey) {
+      console.error('API Key is missing.')
+      return
+    }
+    // Check if the FeatureLayer is destroyed
+    if (this._gridLayer && this._gridLayer.destroyed) {
+      console.warn('FeatureLayer was destroyed. Reinitializing...')
+      this._gridLayer = null // Reset the reference
+    }
 
     if (!this._gridLayer) {
-      const apiKey = this.getApiKey()
-      if (!apiKey) {
-        console.error('API Key is missing.')
-        return
-      }
-
       console.log('Initializing grid layer...')
       this._gridLayer = await initializeGridLayer(this.mapView, apiKey)
       this.setState({ gridLayerInitialized: true })
     }
 
-    if (!isW3WGridVisible) {
+    if (!isW3WGridEnabled) {
       console.log('Drawing grid...')
       await drawW3WGrid(this.mapView)
-      this.setState({ isW3WGridVisible: true, exportEnabled: this._gridLayer.graphics.length > 0 })
+      // Check if features were successfully added
+      const query = this._gridLayer.createQuery()
+      query.where = '1=1'
+      const featureSet = await this._gridLayer.queryFeatures(query)
+
+      this.setState({
+        isW3WGridEnabled: true,
+        exportEnabled: featureSet.features.length > 0
+      })
       console.log('Grid drawn successfully.')
     } else {
       console.log('Hiding grid...')
-      this.setState({ isW3WGridVisible: false })
-      this._gridLayer.removeAll() // Clear graphics if hiding
+      this.setState({ isW3WGridEnabled: false })
+      if (this._gridLayer) {
+        await this._gridLayer.applyEdits({ deleteFeatures: this._gridLayer.source.toArray() }) // Clear the grid lines
+      }
     }
   }
 
   // Update grid visibility based on zoom level
   updateGridVisibility = () => {
-    const { isW3WGridVisible } = this.state
+    const { isW3WGridEnabled } = this.state
     const apiKey = this.getApiKey()
 
-    if (!apiKey || !isW3WGridVisible) return
+    if (!apiKey || !isW3WGridEnabled) return
 
     if (!this.isZoomLevelInRange()) {
       this.setState({ alertVisible: true })
@@ -490,7 +513,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
   deactivateWidget = () => {
     console.log('Deactivating widget')
     if (this._gridLayer) {
-      this._gridLayer.removeAll()
+      clearGridLayer()
     }
     // Clear the graphics layer
     this.clearGraphics()
@@ -523,7 +546,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
         this._clickHandle.remove()
       }
       this._clickHandle = this.mapView.on('click', (mapClick: any) => {
-        console.log('Map clicked at:', mapClick.mapPoint)
+        // console.log('Map clicked at:', mapClick.mapPoint)
         this.handleMapClick(mapClick)
       })
     }
@@ -534,6 +557,15 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
     this._isMounted = false
     if (this._zoomHandle) this._zoomHandle.remove()
     if (this._extentHandle) this._extentHandle.remove()
+    if (this._clickHandle) this._clickHandle.remove()
+    // Remove and destroy the feature layer
+    if (this._gridLayer) {
+      if (this.mapView.map.findLayerById(this._gridLayer.id)) {
+        this.mapView.map.remove(this._gridLayer)
+      }
+      this._gridLayer.destroy()
+      this._gridLayer = null
+    }
     this.clearGraphics()
     this.deactivateWidget() // Ensure all resources are cleaned up
   }
@@ -541,7 +573,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
   resetWidgetState = () => {
     console.log('Resetting widget state...')
     this.setState({
-      isW3WGridVisible: false,
+      isW3WGridEnabled: false,
       latitude: '',
       longitude: '',
       what3words: null,
@@ -557,7 +589,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
   }
 
   render () {
-    const { what3words, latitude, longitude, isCopyMessageOpen, isW3WGridVisible, isZoomInRange, alertVisible, exportEnabled } = this.state
+    const { what3words, latitude, longitude, isCopyMessageOpen, isW3WGridEnabled, isZoomInRange, alertVisible, exportEnabled } = this.state
     const { config, theme, useMapWidgetIds, id } = this.props
     const isApiKeyMode = config?.mode === 'apiKey'
 
@@ -596,7 +628,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
 
         {/* Toggle Grid Button */}
         {isApiKeyMode && (
-          <Tooltip title={isW3WGridVisible ? 'Hide Grid' : 'View Grid'} placement="bottom" followCursor>
+          <Tooltip title={isW3WGridEnabled ? 'Disabled Grid' : 'Enabled Grid'} placement="bottom" followCursor>
             <span>
               <Button
                 ref={this.gridButtonRef}
@@ -606,10 +638,10 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
                 title='Toggle Grid'
                 icon
                 size="sm"
-                active={isW3WGridVisible}
+                active={isW3WGridEnabled}
                 aria-disabled={!isZoomInRange}
                 disabled={!isZoomInRange}
-                className={`toggle-grid-button float-right actionButton ${isW3WGridVisible ? 'active' : ''} ${!isZoomInRange ? 'disabled' : ''}`}
+                className={`toggle-grid-button float-right actionButton ${isW3WGridEnabled ? 'active' : ''} ${!isZoomInRange ? 'disabled' : ''}`}
                 onClick={this.toggleGridVisibility}
               >
                 <img src={gridIcon} alt="Grid Icon" width="17" />
