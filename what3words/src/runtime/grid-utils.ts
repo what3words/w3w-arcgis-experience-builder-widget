@@ -28,9 +28,11 @@ export async function initializeGridLayer (mapView: __esri.MapView, apiKey: stri
     })
     mapView.map.add(_gridLayer)
     console.log('W3W Grid Layer initialized and added to the map.')
-  } else {
-    console.log('W3W Grid Layer already initialized.')
+  } else if (!mapView.map.findLayerById('w3wGridLayer')) {
+    mapView.map.add(_gridLayer) // Add only if it's not already part of the map
   }
+  // Store the API key with the layer to avoid redundant initialization
+  (_gridLayer as any).apiKey = apiKey
 
   return _gridLayer
 }
@@ -67,7 +69,8 @@ function isBoundingBoxDrawn (bbox: __esri.Extent): boolean {
  * Avoids redrawing areas that have already been drawn.
  * @param mapView - The MapView instance.
  */
-export async function drawW3WGrid (mapView: __esri.MapView) {
+
+export async function drawW3WGrid (mapView: __esri.MapView): Promise<void> {
   if (!_gridLayer || !w3wService) {
     console.error('Grid layer or What3Words service is not initialized.')
     return
@@ -80,23 +83,34 @@ export async function drawW3WGrid (mapView: __esri.MapView) {
     'esri/Graphic'
   ])
 
+  // Ensure the projection module is loaded
+  if (!projection.isLoaded()) {
+    await projection.load()
+  }
+
   const extent = mapView.extent
 
-  // Project the extent to WGS84
   const wgs84SpatialReference = new SpatialReference({ wkid: 4326 })
-  const projectedExtent = projection.project(
-    new Extent({
-      xmin: extent.xmin,
-      ymin: extent.ymin,
-      xmax: extent.xmax,
-      ymax: extent.ymax,
-      spatialReference: extent.spatialReference
-    }),
-    wgs84SpatialReference
-  ) as unknown as __esri.Extent
+  let projectedExtent: __esri.Extent
 
-  if (!projectedExtent) {
-    console.error('Failed to project extent to WGS84.')
+  try {
+    // Project the extent to WGS84
+    projectedExtent = projection.project(
+      new Extent({
+        xmin: extent.xmin,
+        ymin: extent.ymin,
+        xmax: extent.xmax,
+        ymax: extent.ymax,
+        spatialReference: extent.spatialReference
+      }),
+      wgs84SpatialReference
+    ) as unknown as __esri.Extent
+
+    if (!projectedExtent) {
+      throw new Error('Projection failed: projected extent is null or undefined.')
+    }
+  } catch (error) {
+    console.error('Failed to project extent to WGS84:', error)
     return
   }
 
@@ -130,7 +144,7 @@ export async function drawW3WGrid (mapView: __esri.MapView) {
 
     console.log('Fetched W3W Grid Data:', gridData)
 
-    // Extract lines from MultiLineString geometry
+    // Process the grid data and create graphics
     const graphics = gridData.features.flatMap((feature) => {
       if (
         feature.geometry.type === 'MultiLineString' &&
@@ -165,7 +179,6 @@ export async function drawW3WGrid (mapView: __esri.MapView) {
     console.error('Error fetching W3W Grid:', error)
   }
 }
-
 /**
  * Exports the W3W grid layer as a GeoJSON file with the correct FeatureCollection format.
  * @param layer - The GraphicsLayer containing the grid lines.

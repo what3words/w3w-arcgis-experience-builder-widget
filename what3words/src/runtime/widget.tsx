@@ -8,6 +8,7 @@ import { Button, Icon, Popper, Alert, Tooltip } from 'jimu-ui'
 import { drawW3WGrid, clearGridLayer, initializeGridLayer, exportGeoJSON } from './grid-utils'
 import gridIcon from '../assets/grid_red.svg'
 import type GraphicsLayer from '@arcgis/core/layers/GraphicsLayer'
+import { debounce } from 'lodash'
 
 const iconCopy = require('jimu-ui/lib/icons/duplicate.svg')
 const iconZoom = require('jimu-ui/lib/icons/zoom-out-fixed.svg')
@@ -196,30 +197,30 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
     }
 
     // Initialize the grid layer
-    await initializeGridLayer(this.mapView, apiKey)
-    this.setState({ gridLayerInitialized: true })
+    if (!this._gridLayer) {
+      console.log('Initializing grid layer...')
+      this._gridLayer = await initializeGridLayer(this.mapView, apiKey)
+      this.setState({ gridLayerInitialized: true })
+    }
 
-    // Add zoom and extent handlers
+    // Monitor zoom and extent changes
     this._zoomHandle = this.mapView.watch('zoom', (zoomLevel: number) => {
       this.setState({ currentZoomLevel: zoomLevel }, this.updateGridVisibility)
     })
+    this._extentHandle = this.mapView.watch(
+      'extent',
+      debounce(() => {
+        if (this.state.isW3WGridVisible && this.isZoomLevelInRange()) {
+          drawW3WGrid(this.mapView)
+        }
+      }, 500)
+    )
 
-    this._extentHandle = this.mapView.watch('extent', () => {
-      if (this.state.isW3WGridVisible && this.isZoomLevelInRange()) {
-        drawW3WGrid(this.mapView)
-      }
-    })
-
-    // Remove any existing click handler before adding a new one
+    // Handle map clicks
     if (this._clickHandle) {
       this._clickHandle.remove()
-      this._clickHandle = null
     }
-
-    // Store the click handler
-    this._clickHandle = this.mapView.on('click', (mapClick: any) => {
-      this.handleMapClick(mapClick)
-    })
+    this._clickHandle = this.mapView.on('click', this.handleMapClick)
   }
 
   handleMapClick = async (mapClick: any) => {
@@ -422,9 +423,14 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
     const { isW3WGridVisible } = this.state
 
     if (!this._gridLayer) {
+      const apiKey = this.getApiKey()
+      if (!apiKey) {
+        console.error('API Key is missing.')
+        return
+      }
+
       console.log('Initializing grid layer...')
-      await initializeGridLayer(this.mapView, this.getApiKey())
-      this._gridLayer = await initializeGridLayer(this.mapView, this.getApiKey()) // Assign the initialized layer
+      this._gridLayer = await initializeGridLayer(this.mapView, apiKey)
       this.setState({ gridLayerInitialized: true })
     }
 
@@ -436,6 +442,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
     } else {
       console.log('Hiding grid...')
       this.setState({ isW3WGridVisible: false })
+      this._gridLayer.removeAll() // Clear graphics if hiding
     }
   }
 
@@ -482,6 +489,9 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
   // Deactivate the widget
   deactivateWidget = () => {
     console.log('Deactivating widget')
+    if (this._gridLayer) {
+      this._gridLayer.removeAll()
+    }
     // Clear the graphics layer
     this.clearGraphics()
 
