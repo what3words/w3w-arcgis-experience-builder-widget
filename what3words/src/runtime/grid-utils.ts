@@ -19,11 +19,16 @@ export async function initializeGridLayer (mapView: __esri.MapView, apiKey: stri
     'esri/renderers/SimpleRenderer'
   ])
 
+  const w3wGridLines = await getW3wGridLineGraphics({ features: [], type: 'FeatureCollection' })
+
   w3wService = what3words(apiKey, { host: 'https://api.what3words.com' }, { transport: axiosTransport() })
   if (_gridLayer && _gridLayer.destroyed) {
     console.warn('FeatureLayer was destroyed. Recreating...')
     _gridLayer = null // Reset the layer to force re-creation
   }
+  mapView.map.remove(_gridLayer)
+  _gridLayer?.destroy()
+
   if (!_gridLayer) {
     const renderer = new Renderer({
       symbol: {
@@ -36,21 +41,18 @@ export async function initializeGridLayer (mapView: __esri.MapView, apiKey: stri
     _gridLayer = new FeatureLayer({
       id: 'w3wFeatureLayer',
       title: 'What3Words Grid',
-      source: [], // Empty initially, graphics will be added dynamically
+      source: w3wGridLines,
       fields: [
-        new Field({ name: 'ObjectID', alias: 'ObjectID', type: 'oid' }),
-        new Field({ name: 'gridInfo', alias: 'Grid Info', type: 'string' })
+        new Field({ name: 'ObjectID', alias: 'ObjectID', type: 'oid' })
       ],
       geometryType: 'polyline',
-      renderer,
-      popupTemplate: {
-        title: 'Grid Line',
-        content: 'This is a grid line from the What3Words API.'
-      }
+      renderer
     })
 
     mapView.map.add(_gridLayer)
     console.log('W3W Feature Layer initialized and added to the map.')
+  } else {
+    _gridLayer?.destroy()
   }
 
   return _gridLayer
@@ -87,6 +89,44 @@ function getUndrawnBoundingBox (extent: __esri.Extent): __esri.Extent | null {
     }
   }
   return extent // Return the undrawn part
+}
+
+export async function getW3wGridLineGraphics (
+  w3wGrid: FeatureCollectionResponse<GridSectionGeoJsonResponse>
+): Promise<__esri.Graphic[]> {
+  if (!w3wGrid || !w3wGrid.features || w3wGrid.features.length === 0) {
+    console.warn('No grid data provided.')
+    return []
+  }
+
+  const [Graphic] = await loadArcGISJSAPIModules(['esri/Graphic'])
+
+  // Iterate over the grid features and map them to Graphics
+  return w3wGrid.features.flatMap((feature, index) => {
+    if (feature.geometry.type !== 'MultiLineString') {
+      console.warn('Unsupported geometry type in grid feature:', feature.geometry.type)
+      return []
+    }
+
+    // Process each line segment in the MultiLineString
+    return feature.geometry.coordinates.map((coordinate: any) => {
+      return new Graphic({
+        attributes: {
+          ObjectID: index
+        },
+        geometry: {
+          type: 'polyline',
+          spatialReference: { wkid: 4326 },
+          paths: coordinate
+        } as __esri.Polyline,
+        symbol: {
+          type: 'simple-line',
+          color: [255, 0, 0, 0.5], // Red line with transparency
+          width: 0.5
+        }
+      })
+    })
+  })
 }
 
 /**
@@ -138,36 +178,14 @@ export async function drawW3WGrid (mapView: __esri.MapView): Promise<void> {
       return
     }
 
-    const [Graphic] = await loadArcGISJSAPIModules(['esri/Graphic'])
+    const graphics = await getW3wGridLineGraphics(gridData)
 
-    const graphics = gridData.features.flatMap((feature, index) => {
-      if (feature.geometry.type === 'MultiLineString') {
-        return feature.geometry.coordinates.map((line) => new Graphic({
-          geometry: {
-            type: 'polyline',
-            paths: line,
-            spatialReference: wgs84SpatialReference
-          },
-          attributes: {
-            ObjectID: index,
-            gridInfo: 'W3W Grid Line'
-          }
-        }))
-      }
-      return []
-    })
-
-    const edits = await _gridLayer.applyEdits({ addFeatures: graphics })
-
-    if (edits.addFeatureResults.length > 0) {
-      console.log(`Added ${edits.addFeatureResults.length} grid lines.`)
+    if (graphics.length > 0) {
+      await _gridLayer.applyEdits({ addFeatures: graphics })
+      console.log(`Added ${graphics.length} grid lines.`)
     } else {
-      console.warn('No features were added to the grid layer.')
+      console.log('No new grid lines to add.')
     }
-
-    _gridLayer.applyEdits({ addFeatures: graphics })
-    console.log(`Added ${graphics.length} new grid lines.`)
-
     // Cache the drawn bounding box
     _drawnBoundingBoxes.push(undrawnExtent)
   } catch (error) {

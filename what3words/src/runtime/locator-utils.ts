@@ -1,6 +1,23 @@
 import type Point from 'esri/geometry/Point'
 import { loadArcGISJSAPIModules } from 'jimu-arcgis'
-const w3wIcon = require('../assets/w3wMarker.png')
+import what3words, { axiosTransport } from '@what3words/api'
+import type { What3wordsService, ConvertTo3waResponse } from '@what3words/api'
+
+let w3wService: What3wordsService
+
+/**
+ * Initializes the What3Words service with the provided API key.
+ * @param apiKey - The W3W API Key.
+ */
+export function initializeW3wService (apiKey: string): void {
+  if (!apiKey) {
+    console.error('W3W API Key is required to initialize the service.')
+    return
+  }
+
+  w3wService = what3words(apiKey, { host: 'https://api.what3words.com' }, { transport: axiosTransport() })
+  console.log('What3Words service initialized.')
+}
 
 /**
  * Fetches an address from a geocode service.
@@ -29,21 +46,36 @@ export const getCurrentAddress = (geocodeURL: string, mapClick: Point): Promise<
 }
 
 /**
- * Fetches an address from the what3words API.
- * @param apiKey - The what3words API key.
- * @param latitude  - The latitude.
- * @param longitude - The longitude.
- * @returns A promise resolving to the retrieved address.
+ * Fetches the W3W address and square using the initialized W3W service.
+ * @param latitude - Latitude of the location.
+ * @param longitude - Longitude of the location.
+ * @returns A promise resolving to the W3W address and square.
  */
-export const getCurrentAddressFromApiKey = async (apiKey: string, latitude: number, longitude: number): Promise<string | null> => {
-  if (!apiKey) throw new Error('API key is not provided.')
+export async function getCurrentAddressFromW3wService (
+  latitude: number,
+  longitude: number
+): Promise<{ words: string, square: { southwest: { lat: number, lng: number }, northeast: { lat: number, lng: number } } } | null> {
+  if (!w3wService) {
+    console.error('W3W service is not initialized. Please call initializeW3wService first.')
+    return null
+  }
 
-  const url = `https://api.what3words.com/v3/convert-to-3wa?key=${apiKey}&coordinates=${latitude},${longitude}`
-  const response = await fetch(url)
-  if (!response.ok) throw new Error('Failed to fetch address.')
+  try {
+    const response = await w3wService.convertTo3wa({ coordinates: { lat: latitude, lng: longitude } }) as ConvertTo3waResponse
 
-  const data = await response.json()
-  return data.words || null
+    if (!response.words || !response.square) {
+      console.error('Invalid response from W3W API:', response)
+      return null
+    }
+
+    return {
+      words: response.words,
+      square: response.square
+    }
+  } catch (error) {
+    console.error('Error fetching W3W address:', error)
+    return null
+  }
 }
 
 /**
@@ -64,56 +96,109 @@ export const createPoint = (mapClick: any): Promise<Point> => {
 }
 
 /**
- * Creates a marker graphic for a given point.
- * @param point - The point where the marker should be displayed.
+ * Creates a polygon graphic for the given W3W square with dynamic color adjustment.
+ * The polygon is styled using W3W branding colors and scales dynamically.
+ * @param square - The W3W square to calculate the polygon's bounds.
+ * @param mapView - The MapView instance to retrieve zoom level and other details.
+ * @param proximityFactor - A factor indicating proximity to a certain point (optional).
  * @returns A promise resolving to a Graphic.
  */
-export const getMarkerGraphic = (point: Point): Promise<__esri.Graphic | null> => {
-  if (!point) return Promise.resolve(null)
+export const getMarkerGraphic = async (
+  square: { southwest: { lat: number, lng: number }, northeast: { lat: number, lng: number } },
+  mapView: __esri.MapView,
+  proximityFactor: number = 1
+): Promise<__esri.Graphic | null> => {
+  if (!square || !mapView) return null
 
-  return loadArcGISJSAPIModules(['esri/Graphic', 'esri/symbols/PictureMarkerSymbol']).then(([Graphic, PictureMarkerSymbol]) => {
-    const symbol = new PictureMarkerSymbol({
-      width: 25,
-      height: 25,
-      xoffset: 0,
-      yoffset: 11,
-      url: w3wIcon
+  try {
+    const [Graphic, SimpleFillSymbol] = await loadArcGISJSAPIModules(['esri/Graphic', 'esri/symbols/SimpleFillSymbol'])
+
+    // Create the polygon geometry
+    const polygon = {
+      type: 'polygon',
+      rings: [
+        [square.southwest.lng, square.southwest.lat], // Bottom-left
+        [square.northeast.lng, square.southwest.lat], // Bottom-right
+        [square.northeast.lng, square.northeast.lat], // Top-right
+        [square.southwest.lng, square.northeast.lat], // Top-left
+        [square.southwest.lng, square.southwest.lat] // Close the loop
+      ],
+      spatialReference: { wkid: 4326 }
+    }
+
+    // Dynamic color adjustments
+    const zoomLevel = mapView.zoom
+
+    // Adjust opacity dynamically based on zoom level
+    const fillOpacity = Math.min(0.5 + 0.03 * (28 - zoomLevel), 1) // Higher zoom = more opaque
+
+    // Adjust color brightness based on proximity factor (e.g., closer = brighter)
+    const baseColor = [225, 31, 38] // W3W red color
+    const outlineColor = [160, 15, 25] // Darker red for outline
+
+    const adjustedFillColor = baseColor.map((channel) => Math.min(channel + proximityFactor * 15, 255))
+    const adjustedOutlineColor = outlineColor.map((channel) => Math.min(channel + proximityFactor * 10, 255))
+
+    // Style the polygon
+    const symbol = new SimpleFillSymbol({
+      color: [...adjustedFillColor, fillOpacity], // Adjusted fill color with dynamic opacity
+      outline: {
+        color: [...adjustedOutlineColor, 1], // Darker outline color with full opacity
+        width: 2 // Outline width
+      }
     })
 
     return new Graphic({
-      geometry: point,
+      geometry: polygon,
       symbol: symbol
     })
-  })
+  } catch (error) {
+    console.error('Error creating polygon graphic with dynamic colors:', error)
+    return null
+  }
 }
 
 /**
  * Creates a label graphic for the what3words address.
- * @param point - The point where the label should be displayed.
+ * @param square - The W3W square for which the label should be displayed.
  * @param what3words - The what3words address to display.
  * @returns A promise resolving to a Graphic.
  */
-export const getMapLabelGraphic = (point: Point, what3words: string): Promise<__esri.Graphic | null> => {
-  if (!point) return Promise.resolve(null)
+export const getMapLabelGraphic = async (
+  square: { southwest: { lat: number, lng: number }, northeast: { lat: number, lng: number } },
+  what3words: string
+): Promise<__esri.Graphic | null> => {
+  if (!square || !what3words) return null
 
-  return loadArcGISJSAPIModules(['esri/Graphic']).then(([Graphic]) => {
+  try {
+    const [Graphic] = await loadArcGISJSAPIModules(['esri/Graphic'])
+
+    // Calculate the center of the square for the label placement
+    const centerLat = (square.southwest.lat + square.northeast.lat) / 2
+    const centerLng = (square.southwest.lng + square.northeast.lng) / 2
+
     const textSymbol = {
       type: 'text',
       text: '///' + what3words,
       font: { size: 12, weight: 'bold' },
-      horizontalAlignment: 'left',
-      kerning: true,
-      rotated: false,
+      horizontalAlignment: 'center',
       color: [225, 31, 38, 1],
       haloColor: '#0A3049',
       haloSize: '1px',
-      xoffset: 12,
-      yoffset: 5
+      yoffset: 20 // Offset the label slightly above the marker
     }
 
     return new Graphic({
-      geometry: point,
+      geometry: {
+        type: 'point',
+        latitude: centerLat,
+        longitude: centerLng,
+        spatialReference: { wkid: 4326 }
+      },
       symbol: textSymbol
     })
-  })
+  } catch (error) {
+    console.error('Error creating map label graphic:', error)
+    return null
+  }
 }

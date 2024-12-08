@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { React, type AllWidgetProps, jsx, getAppStore, UtilityManager, type UseUtility } from 'jimu-core'
 import { JimuMapViewComponent, loadArcGISJSAPIModules, type JimuMapView } from 'jimu-arcgis'
-import { getCurrentAddress, getMarkerGraphic, getMapLabelGraphic, getCurrentAddressFromApiKey } from './locator-utils'
+import { getCurrentAddress, getMarkerGraphic, getMapLabelGraphic, getCurrentAddressFromW3wService, initializeW3wService } from './locator-utils'
 import { getW3WStyle } from './lib/style'
 import defaultMessages from './translations/default'
 import { Button, Icon, Popper, Alert, Tooltip } from 'jimu-ui'
@@ -208,9 +208,9 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
     })
     this._extentHandle = this.mapView.watch(
       'extent',
-      debounce(() => {
+      debounce(async () => {
         if (this.state.isW3WGridEnabled && this.isZoomLevelInRange()) {
-          drawW3WGrid(this.mapView)
+          await drawW3WGrid(this.mapView)
         }
       }, 500)
     )
@@ -233,21 +233,19 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
     }
 
     if (!mapClick?.mapPoint) {
-      // console.error('Invalid map point:', mapClick)
+      console.error('Invalid map point:', mapClick)
       return
     }
 
     try {
-      // Check if mapPoint contains valid spatialReference and coordinates
-      // console.log('mapPoint:', mapClick.mapPoint)
+      // Close existing popups and clear any graphics
       this.mapView.closePopup()
       this.clearGraphics()
 
       let mapPointWGS84 = mapClick.mapPoint
 
-      // Handle projection only if not in WGS84
+      // Handle projection if not in WGS84
       if (mapClick.mapPoint.spatialReference?.wkid !== 4326) {
-        // console.log('Projecting map point to WGS84...')
         const [projection, SpatialReference] = await loadArcGISJSAPIModules([
           'esri/geometry/projection',
           'esri/geometry/SpatialReference'
@@ -265,7 +263,6 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
         }
       }
 
-      // Extract latitude and longitude from WGS84 point
       const latitude = mapPointWGS84.latitude || mapPointWGS84.y
       const longitude = mapPointWGS84.longitude || mapPointWGS84.x
 
@@ -273,39 +270,41 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
         throw new Error('Invalid latitude or longitude from mapPoint.')
       }
 
-      // console.log('Latitude:', latitude, 'Longitude:', longitude)
-
       this.setState({
         latitude: latitude.toFixed(4),
         longitude: longitude.toFixed(4)
       })
 
+      // Fetch the W3W address
       const address =
         this.props.config.mode === 'apiKey'
-          ? await getCurrentAddressFromApiKey(apiKey, latitude, longitude)
+          ? await getCurrentAddressFromW3wService(latitude, longitude)
           : await getCurrentAddress(this.state.w3wLocator, mapPointWGS84)
+      console.log('W3W API Response:', address)
 
-      // console.log('Retrieved what3words address:', address)
-
-      if (!address) {
-        throw new Error('No address returned from API')
+      if (typeof address !== 'object' || !address.square) {
+        throw new Error('No address or square information returned from API')
       }
 
-      this.setState({ what3words: address })
+      this.setState({ what3words: address.words })
 
-      const marker = await getMarkerGraphic(mapPointWGS84)
-      const label = await getMapLabelGraphic(mapPointWGS84, address)
+      // Add a marker and label
+      const proximityFactor = 1
+      const marker = await getMarkerGraphic(address.square, this.mapView, proximityFactor)
+      const label = await getMapLabelGraphic(address.square, address.words)
 
-      if (marker && label) {
-        this.mapView.graphics.addMany([marker, label])
-      } else {
-        console.error('Failed to create graphics for map point:', mapPointWGS84)
+      if (marker) {
+        this.mapView.graphics.add(marker)
+      }
+
+      if (label) {
+        this.mapView.graphics.add(label)
       }
 
       if (this.props.config.displayPopupMessage) {
         this.mapView.openPopup({
-          title: `Reverse geocode for ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`,
-          content: `what3words address: ///${address}`,
+          title: 'what3words Address',
+          content: `///${address.words}`,
           location: mapPointWGS84
         })
       }
@@ -327,6 +326,9 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
     const widgetState = this.props.state || 'OPENED' // Add fallback
     const apiKey = this.getApiKey()
     if (!apiKey) return
+
+    // Initialize W3W service
+    initializeW3wService(apiKey)
 
     if (widgetState === 'OPENED') {
       this.activateWidget()
