@@ -196,7 +196,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
     }
 
     // Initialize the grid layer
-    await initializeGridLayer(this.mapView)
+    await initializeGridLayer(this.mapView, apiKey)
     this.setState({ gridLayerInitialized: true })
 
     // Add zoom and extent handlers
@@ -206,7 +206,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
 
     this._extentHandle = this.mapView.watch('extent', () => {
       if (this.state.isW3WGridVisible && this.isZoomLevelInRange()) {
-        drawW3WGrid(this.mapView, apiKey)
+        drawW3WGrid(this.mapView)
       }
     })
 
@@ -335,7 +335,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
     }
 
     if (this.mapView) {
-      initializeGridLayer(this.mapView)
+      initializeGridLayer(this.mapView, apiKey)
     }
   }
 
@@ -423,14 +423,14 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
 
     if (!this._gridLayer) {
       console.log('Initializing grid layer...')
-      await initializeGridLayer(this.mapView)
-      this._gridLayer = await initializeGridLayer(this.mapView) // Assign the initialized layer
+      await initializeGridLayer(this.mapView, this.getApiKey())
+      this._gridLayer = await initializeGridLayer(this.mapView, this.getApiKey()) // Assign the initialized layer
       this.setState({ gridLayerInitialized: true })
     }
 
     if (!isW3WGridVisible) {
       console.log('Drawing grid...')
-      await drawW3WGrid(this.mapView, this.getApiKey())
+      await drawW3WGrid(this.mapView)
       this.setState({ isW3WGridVisible: true, exportEnabled: this._gridLayer.graphics.length > 0 })
       console.log('Grid drawn successfully.')
     } else {
@@ -452,7 +452,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
     }
 
     try {
-      drawW3WGrid(this.mapView, apiKey)
+      drawW3WGrid(this.mapView)
     } catch (error) {
       console.error('Error updating W3W Grid:', error)
     }

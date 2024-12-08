@@ -1,15 +1,24 @@
 import { loadArcGISJSAPIModules } from 'jimu-arcgis'
 import { saveAs } from 'file-saver' // Ensure file-saver is installed
+import what3words, { axiosTransport } from '@what3words/api'
+import type { What3wordsService, GridSectionGeoJsonResponse, FeatureCollectionResponse } from '@what3words/api'
 
 let _gridLayer: __esri.GraphicsLayer | null = null
 let _drawnBoundingBoxes: __esri.Extent[] = []
+let w3wService: What3wordsService
 
 /**
- * Initialize the W3W Grid Layer.
+ * Initialize the W3W Service and Grid Layer.
  * @param mapView - The MapView instance.
+ * @param apiKey - The What3Words API Key.
  */
-export async function initializeGridLayer(mapView: __esri.MapView): Promise<__esri.GraphicsLayer> {
+export async function initializeGridLayer (mapView: __esri.MapView, apiKey: string): Promise<__esri.GraphicsLayer> {
   const [GraphicsLayer] = await loadArcGISJSAPIModules(['esri/layers/GraphicsLayer'])
+
+  w3wService = what3words(apiKey, { host: 'https://api.what3words.com' }, { transport: axiosTransport() })
+  if (!w3wService) {
+    console.error('Failed to initialize What3Words Service with API Key:', apiKey)
+  }
 
   if (!_gridLayer) {
     _gridLayer = new GraphicsLayer({
@@ -54,19 +63,13 @@ function isBoundingBoxDrawn (bbox: __esri.Extent): boolean {
 }
 
 /**
- * Fetch and draw the W3W Grid on the map using the What3Words public API.
+ * Fetch and draw the W3W Grid on the map using the @what3words/api client.
  * Avoids redrawing areas that have already been drawn.
  * @param mapView - The MapView instance.
- * @param apiKey - The What3Words API Key.
  */
-export async function drawW3WGrid (mapView: __esri.MapView, apiKey: string) {
-  if (!apiKey) {
-    console.error('API Key is missing. Cannot draw What3Words grid.')
-    return
-  }
-
-  if (!_gridLayer) {
-    console.error('Grid layer is not initialized.')
+export async function drawW3WGrid (mapView: __esri.MapView) {
+  if (!_gridLayer || !w3wService) {
+    console.error('Grid layer or What3Words service is not initialized.')
     return
   }
 
@@ -76,11 +79,6 @@ export async function drawW3WGrid (mapView: __esri.MapView, apiKey: string) {
     'esri/geometry/Extent',
     'esri/Graphic'
   ])
-
-  // Ensure the projection module is loaded
-  if (!projection.isLoaded()) {
-    await projection.load()
-  }
 
   const extent = mapView.extent
 
@@ -119,34 +117,43 @@ export async function drawW3WGrid (mapView: __esri.MapView, apiKey: string) {
   }
 
   try {
-    const response = await fetch(
-      `https://api.what3words.com/v3/grid-section?key=${apiKey}&bounding-box=${boundingBox.southwest.lat},${boundingBox.southwest.lng},${boundingBox.northeast.lat},${boundingBox.northeast.lng}`
-    )
+    console.log('Requesting What3Words Grid Section with bounding box:', boundingBox)
+    const gridData = await w3wService.gridSection({
+      boundingBox,
+      format: 'geojson'
+    }) as unknown as FeatureCollectionResponse<GridSectionGeoJsonResponse>
 
-    if (!response.ok) {
-      throw new Error(`Failed to fetch W3W grid: ${response.statusText}`)
+    if (!gridData.features || !Array.isArray(gridData.features)) {
+      console.error('Invalid grid data received:', gridData)
+      return
     }
 
-    const gridData = await response.json()
+    console.log('Fetched W3W Grid Data:', gridData)
 
-    const graphics = gridData.lines.map((line: any) => {
-      const { start, end } = line
-
-      return new Graphic({
-        geometry: {
-          type: 'polyline',
-          paths: [
-            [start.lng, start.lat],
-            [end.lng, end.lat]
-          ],
-          spatialReference: wgs84SpatialReference
-        },
-        symbol: {
-          type: 'simple-line',
-          color: [255, 0, 0, 0.6], // Red with 60% opacity
-          width: 1
-        }
-      })
+    // Extract lines from MultiLineString geometry
+    const graphics = gridData.features.flatMap((feature) => {
+      if (
+        feature.geometry.type === 'MultiLineString' &&
+        Array.isArray(feature.geometry.coordinates)
+      ) {
+        return feature.geometry.coordinates.map((line) => {
+          return new Graphic({
+            geometry: {
+              type: 'polyline',
+              paths: line,
+              spatialReference: wgs84SpatialReference
+            },
+            symbol: {
+              type: 'simple-line',
+              color: [255, 31, 38, 0.5], // Red with 60% opacity
+              width: 0.5
+            }
+          })
+        })
+      } else {
+        console.warn('Unsupported feature geometry:', feature.geometry)
+        return []
+      }
     })
 
     _gridLayer.addMany(graphics)
