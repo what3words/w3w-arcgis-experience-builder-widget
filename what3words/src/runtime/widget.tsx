@@ -1,15 +1,18 @@
 /** @jsx jsx */
+/** @jsxFrag React.Fragment */
 import { React, type AllWidgetProps, jsx, getAppStore, UtilityManager, type UseUtility } from 'jimu-core'
 import { JimuMapViewComponent, loadArcGISJSAPIModules, type JimuMapView } from 'jimu-arcgis'
 import { getCurrentAddress, getMarkerGraphic, getMapLabelGraphic, getCurrentAddressFromW3wService, initializeW3wService } from './locator-utils'
 import { getW3WStyle } from './lib/style'
 import defaultMessages from './translations/default'
-import { Button, Icon, Popper, Alert, Tooltip } from 'jimu-ui'
+import { Button, Icon, Alert } from 'jimu-ui'
 import { drawW3WGrid, clearGridLayer, initializeGridLayer, exportGeoJSON } from './grid-utils'
 import gridIcon from '../assets/grid_red.svg'
 import { debounce } from 'lodash'
+import { CopyButton } from 'jimu-ui/basic/copy-button'
+import { ShareArrowCurveOutlined } from 'jimu-icons/outlined/editor/share-arrow-curve'
 
-const iconCopy = require('jimu-ui/lib/icons/duplicate.svg')
+// const iconCopy = require('jimu-ui/lib/icons/duplicate.svg')
 const iconZoom = require('jimu-ui/lib/icons/zoom-out-fixed.svg')
 const iconExport = require('jimu-ui/lib/icons/export.svg')
 
@@ -26,6 +29,7 @@ interface State {
   alertVisible: boolean
   gridLayerInitialized: boolean
   exportEnabled: boolean
+  nearestPlace: string | null
 }
 
 export default class Widget extends React.PureComponent<AllWidgetProps<any>, State> {
@@ -73,7 +77,8 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
       currentZoomLevel: null,
       isZoomInRange: false,
       alertVisible: false,
-      exportEnabled: false
+      exportEnabled: false,
+      nearestPlace: null
     }
     //check whether any utility selected in configuration in the new app
     if (this.props.config.addressSettings?.useUtilitiesGeocodeService?.length > 0) {
@@ -286,7 +291,17 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
         throw new Error('No address or square information returned from API')
       }
 
-      this.setState({ what3words: address.words })
+      if (address) {
+        this.setState({
+          what3words: address.words,
+          nearestPlace: address.nearestPlace
+        })
+      } else {
+        this.setState({
+          what3words: null,
+          nearestPlace: null
+        })
+      }
 
       // Add a marker and label
       const proximityFactor = 1
@@ -323,21 +338,29 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
 
   componentDidMount () {
     console.log('Component did mount')
-    const widgetState = this.props.state || 'OPENED' // Add fallback
-    const apiKey = this.getApiKey()
-    if (!apiKey) return
+    try {
+      const widgetState = this.props.state || 'OPENED' // Add fallback
+      const apiKey = this.getApiKey()
+      if (!apiKey) {
+        throw new Error('API key missing.')
+      }
 
-    // Initialize W3W service
-    initializeW3wService(apiKey)
+      // Initialize W3W service
+      initializeW3wService(apiKey).catch(console.error)
 
-    if (widgetState === 'OPENED') {
-      this.activateWidget()
-    } else if (widgetState === 'CLOSED') {
-      this.deactivateWidget()
-    }
+      if (widgetState === 'OPENED') {
+        this.activateWidget()
+      } else if (widgetState === 'CLOSED') {
+        this.deactivateWidget()
+      }
 
-    if (this.mapView) {
-      initializeGridLayer(this.mapView, apiKey)
+      if (this.mapView) {
+        initializeGridLayer(this.mapView, apiKey).catch((error) => {
+          console.error('Error during grid layer initialization:', error)
+        })
+      }
+    } catch (error) {
+      console.error('Error in componentDidMount:', error)
     }
   }
 
@@ -590,9 +613,15 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
     }
   }
 
+  openMapSitePlaceholder = () => {
+    console.log('Open Mapsite button clicked.')
+    // Add logic to open an external map site link
+    // Example: window.open('https://example.com', '_blank')
+  }
+
   render () {
-    const { what3words, latitude, longitude, isCopyMessageOpen, isW3WGridEnabled, isZoomInRange, alertVisible, exportEnabled } = this.state
-    const { config, theme, useMapWidgetIds, id } = this.props
+    const { what3words, latitude, longitude, nearestPlace, isW3WGridEnabled, isZoomInRange, alertVisible, exportEnabled } = this.state
+    const { config, theme, useMapWidgetIds } = this.props
     const isApiKeyMode = config?.mode === 'apiKey'
 
     if (!useMapWidgetIds || useMapWidgetIds.length === 0) {
@@ -606,141 +635,130 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
 
     return (
       <div css={getW3WStyle(theme)} className="widget-starter jimu-widget">
-        <h5>what3words widget
-          <span>
-          {/* Alert for Zoom Out of Range */}
-          {alertVisible && (
-            <Alert
-              type="info"
-              text="Zoom level is out of range. The grid will not be updated."
-              aria-live="polite"
-              buttonType="tertiary"
-              size="medium"
-              form="tooltip"
-              placement="right"
-              showArrow={true}
-            />
-          )}
-          </span>
-        </h5>
         <JimuMapViewComponent
             useMapWidgetId={useMapWidgetIds[0]}
             onActiveViewChange={this.onActiveViewChange}
         />
+        {/* Main Card */}
+      <div className="w3w-card">
+        {/* Title */}
+        <h5 className="card-title">what3words Address
+          <span>
+            {/* Alert for Zoom Out of Range */}
+            {alertVisible && (
+              <Alert
+                type="info"
+                text="Zoom level is out of range. The grid will not be updated."
+                aria-live="polite"
+                buttonType="tertiary"
+                size="medium"
+                form="tooltip"
+                placement="right"
+                showArrow={true}
+              />
+            )}
+          </span>
+        </h5>
 
-        {/* Toggle Grid Button */}
-        {isApiKeyMode && (
-          <Tooltip title={isW3WGridEnabled ? 'Disabled Grid' : 'Enabled Grid'} placement="bottom" followCursor>
-            <span>
+        {/* W3W Address Block */}
+        <div className="w3w-address-row">
+          <span className="w3w-address">
+            {what3words
+              ? (
+                <>
+                <span className="w3w-slash">///</span>
+                <span className="w3w-text">{what3words}</span>
+              </>
+                )
+              : (
+              <span className="w3w-placeholder">Click on the map to get what3words address.</span>
+                )}
+          </span>
+          <div className="w3w-actions">
+            {config.displayCopyButton && what3words && (
+              <CopyButton
+                text={`///${what3words}`}
+                onCopy={this.onCopyClick.bind(this)}
+              />
+            )}
+            {config.displayZoomButton && (
               <Button
-                ref={this.gridButtonRef}
-                id="gridButton"
                 type="tertiary"
-                aria-label='Toggle Grid'
-                title='Toggle Grid'
+                aria-label="Zoom"
+                title="Zoom"
                 icon
                 size="sm"
-                active={isW3WGridEnabled}
-                aria-disabled={!isZoomInRange}
-                disabled={!isZoomInRange}
-                className={`toggle-grid-button float-right actionButton ${isW3WGridEnabled ? 'active' : ''} ${!isZoomInRange ? 'disabled' : ''}`}
-                onClick={this.toggleGridVisibility}
+                disabled={!what3words}
+                onClick={this.onZoomClick.bind(this)}
               >
-                <img src={gridIcon} alt="Grid Icon" width="17" />
+                <Icon icon={iconZoom} size={'16'} />
               </Button>
-            </span>
-          </Tooltip>
-        )}
-
-        {/* Download Grid Button */}
-        {isApiKeyMode && (
-          <Tooltip title="Download Grid" placement="bottom" followCursor>
-            <span>
-                <Button
-                type="tertiary"
-                aria-label="Download Grid"
-                title="Download Grid"
-                icon
-                size="sm"
-                onClick={() => { this.exportGeoJSONHandler() }}
-                className='float-right actionButton'
-                disabled={!exportEnabled}
-              >
-                <Icon icon={iconExport} size="17" />
-              </Button>
-            </span>
-          </Tooltip>
-        )}
-
-        {/* {!isApiKeyMode && <p>Grid functionality is disabled in Locator URL mode.</p>} */}
-
-        {/* Copy Button */}
-        {config.displayCopyButton && (
-          <Button
-            type="tertiary"
-            aria-label={this.nls('copy')}
-            title={this.nls('copy')}
-            icon
-            size="sm"
-            aria-disabled={!what3words}
-            className='float-right actionButton'
-            active={isCopyMessageOpen}
-            disabled={!what3words}
-            id={'refCopy' + id}
-            onClick={this.onCopyClick.bind(this)}
-          >
-            <Icon icon={iconCopy} size={'17'} />
-          </Button>
-        )}
-
-        {/* Zoom Button */}
-        {config.displayZoomButton && (
-          <Button
-            type="tertiary"
-            aria-label={this.nls('zoomTo')}
-            title={this.nls('zoomTo')}
-            icon
-            size="sm"
-            aria-disabled={!what3words}
-            className='float-right actionButton'
-            onClick={this.onZoomClick.bind(this)}
-            disabled={!what3words}
-          >
-            <Icon icon={iconZoom} size={'17'} />
-          </Button>
-        )}
-
-        {/* what3words Block */}
-        <h3 className="w3wBlock">
-          <span className="w3wRed">///</span>
-          {what3words}
-        </h3>
-
-        {/* Coordinates Block */}
-        {config.displayCoordinates && (
-          <div className="w3wCoords">
-            <div className="w3wCoordsProp">
-              <span className="w3wRed w3wCoordsFirstCol">{defaultMessages.y}:</span> {latitude}
-            </div>
-            <div className="w3wCoordsProp">
-              <span className="w3wRed w3wCoordsFirstCol">{defaultMessages.x}:</span> {longitude}
-            </div>
+            )}
           </div>
+        </div>
+
+        {/* Subtitle: Nearest Places */}
+        {isApiKeyMode && nearestPlace && (
+        <p className="card-subtitle">
+          {what3words
+            ? (nearestPlace) // Replace this placeholder with real data if available
+            : 'No nearest places available'}
+        </p>
         )}
 
-        {/* Copy Message Popper */}
-        {isCopyMessageOpen && (
-          <Popper
-            open={isCopyMessageOpen}
-            version={0}
-            placement={'bottom'}
-            showArrow={true}
-            reference={'refCopy' + id}
-            offset={[0, 0]}>
-            <div className="p-2">{this.nls('copySuccessMessage')}</div>
-          </Popper>
+        {/* Subtitle: Lat & Long */}
+        <p className="card-subtitle">
+          Latitude: {latitude || 'N/A'}, Longitude: {longitude || 'N/A'}
+        </p>
+
+        {/* Action Buttons */}
+        <div className="w3w-actions-row">
+        {isApiKeyMode && (
+          <Button
+            ref={this.gridButtonRef}
+            id="gridButton"
+            type="tertiary"
+            aria-label="View Grid"
+            title="View Grid"
+            icon
+            size="sm"
+            active={isW3WGridEnabled}
+            disabled={!isZoomInRange}
+            className={`toggle-grid-button ${isW3WGridEnabled ? 'active' : ''} ${!isZoomInRange ? 'disabled' : ''}`}
+            onClick={this.toggleGridVisibility.bind(this)}
+          >
+            <img src={gridIcon} alt="Grid Icon" width="16" />
+            <span>View Grid</span>
+          </Button>
         )}
+        {isApiKeyMode && (
+          <Button
+            type="tertiary"
+            aria-label="Export Grid"
+            title="Export Grid"
+            icon
+            size="sm"
+            disabled={!exportEnabled}
+            onClick={this.exportGeoJSONHandler.bind(this)}
+          >
+            <Icon icon={iconExport} size={'16'} />
+            <span>Export Grid</span>
+          </Button>
+        )}
+          <Button
+            type="tertiary"
+            aria-label="Open Mapsite"
+            title="Open Mapsite"
+            icon
+            size="sm"
+            onClick={this.openMapSitePlaceholder.bind(this)}
+          >
+            <ShareArrowCurveOutlined size="16" />
+            <span>Open Mapsite</span>
+          </Button>
+        </div>
       </div>
+    </div>
     )
   }
 }

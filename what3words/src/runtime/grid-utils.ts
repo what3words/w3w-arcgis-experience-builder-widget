@@ -20,42 +20,46 @@ export async function initializeGridLayer (mapView: __esri.MapView, apiKey: stri
   ])
 
   const w3wGridLines = await getW3wGridLineGraphics({ features: [], type: 'FeatureCollection' })
-
-  w3wService = what3words(apiKey, { host: 'https://api.what3words.com' }, { transport: axiosTransport() })
-  if (_gridLayer && _gridLayer.destroyed) {
-    console.warn('FeatureLayer was destroyed. Recreating...')
-    _gridLayer = null // Reset the layer to force re-creation
-  }
-  mapView.map.remove(_gridLayer)
-  _gridLayer?.destroy()
-
-  if (!_gridLayer) {
-    const renderer = new Renderer({
-      symbol: {
-        type: 'simple-line',
-        color: [255, 31, 38, 0.5], // Red with 60% opacity
-        width: 0.5
-      }
-    })
-
-    _gridLayer = new FeatureLayer({
-      id: 'w3wFeatureLayer',
-      title: 'What3Words Grid',
-      source: w3wGridLines,
-      fields: [
-        new Field({ name: 'ObjectID', alias: 'ObjectID', type: 'oid' })
-      ],
-      geometryType: 'polyline',
-      renderer
-    })
-
-    mapView.map.add(_gridLayer)
-    console.log('W3W Feature Layer initialized and added to the map.')
-  } else {
+  try {
+    w3wService = what3words(apiKey, { host: 'https://api.what3words.com' }, { transport: axiosTransport() })
+    if (_gridLayer && _gridLayer.destroyed) {
+      console.warn('FeatureLayer was destroyed. Recreating...')
+      _gridLayer = null // Reset the layer to force re-creation
+    }
+    mapView.map.remove(_gridLayer)
     _gridLayer?.destroy()
-  }
 
-  return _gridLayer
+    if (!_gridLayer) {
+      const renderer = new Renderer({
+        symbol: {
+          type: 'simple-line',
+          color: [255, 31, 38, 0.5], // Red with 60% opacity
+          width: 0.5
+        }
+      })
+
+      _gridLayer = new FeatureLayer({
+        id: 'w3wFeatureLayer',
+        title: 'What3Words Grid',
+        source: w3wGridLines,
+        fields: [
+          new Field({ name: 'ObjectID', alias: 'ObjectID', type: 'oid' })
+        ],
+        geometryType: 'polyline',
+        renderer
+      })
+
+      mapView.map.add(_gridLayer)
+      console.log('W3W Feature Layer initialized and added to the map.')
+    } else {
+      _gridLayer?.destroy()
+    }
+
+    return _gridLayer
+  } catch (error) {
+    console.error('Error initializing grid layer:', error)
+    throw error
+  }
 }
 
 /**

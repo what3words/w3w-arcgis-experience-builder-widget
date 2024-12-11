@@ -9,14 +9,19 @@ let w3wService: What3wordsService
  * Initializes the What3Words service with the provided API key.
  * @param apiKey - The W3W API Key.
  */
-export function initializeW3wService (apiKey: string): void {
+export async function initializeW3wService (apiKey: string): Promise<void> {
   if (!apiKey) {
     console.error('W3W API Key is required to initialize the service.')
     return
   }
 
-  w3wService = what3words(apiKey, { host: 'https://api.what3words.com' }, { transport: axiosTransport() })
-  console.log('What3Words service initialized.')
+  try {
+    // Initialize the What3Words service
+    w3wService = what3words(apiKey, { host: 'https://api.what3words.com' }, { transport: axiosTransport() })
+    console.log('What3Words service initialized.')
+  } catch (error) {
+    console.error('Error initializing What3Words service:', error)
+  }
 }
 
 /**
@@ -54,7 +59,7 @@ export const getCurrentAddress = (geocodeURL: string, mapClick: Point): Promise<
 export async function getCurrentAddressFromW3wService (
   latitude: number,
   longitude: number
-): Promise<{ words: string, square: { southwest: { lat: number, lng: number }, northeast: { lat: number, lng: number } } } | null> {
+): Promise<{ words: string, square: { southwest: { lat: number, lng: number }, northeast: { lat: number, lng: number } }, nearestPlace: string } | null> {
   if (!w3wService) {
     console.error('W3W service is not initialized. Please call initializeW3wService first.')
     return null
@@ -70,7 +75,8 @@ export async function getCurrentAddressFromW3wService (
 
     return {
       words: response.words,
-      square: response.square
+      square: response.square,
+      nearestPlace: response.nearestPlace || 'No nearby place available'
     }
   } catch (error) {
     console.error('Error fetching W3W address:', error)
