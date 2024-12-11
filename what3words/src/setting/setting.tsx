@@ -165,7 +165,9 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<a
           {[
             { key: 'displayCoordinates', label: 'displayCoordinates' },
             { key: 'displayCopyButton', label: 'displayCopyButton' },
-            { key: 'displayZoomButton', label: 'displayZoomButton' },
+            { key: 'displayGridButton', label: 'displayGridButton' },
+            { key: 'displayExportButton', label: 'displayExportButton' },
+            { key: 'displayMapsiteButton', label: 'displayMapsiteButton' },
             { key: 'displayPopupMessage', label: 'displayPopupMessage' }
           ].map(({ key, label }) => (
             <SettingRow key={key}>

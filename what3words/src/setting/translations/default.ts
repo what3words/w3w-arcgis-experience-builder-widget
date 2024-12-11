@@ -10,6 +10,8 @@ export default {
   widgetDisplayOptions: 'Widget Display Options',
   displayCoordinates: 'Display Lat/Long',
   displayCopyButton: 'Display Copy Button',
-  displayZoomButton: 'Display Zoom Button',
+  displayGridButton: 'Display Grid Button',
+  displayExportButton: 'Display Export Button',
+  displayMapsiteButton: 'Display Mapsite Button',
   displayPopupMessage: 'Display Popup Message'
 }

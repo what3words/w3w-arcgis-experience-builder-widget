@@ -2,18 +2,16 @@
 /** @jsxFrag React.Fragment */
 import { React, type AllWidgetProps, jsx, getAppStore, UtilityManager, type UseUtility } from 'jimu-core'
 import { JimuMapViewComponent, loadArcGISJSAPIModules, type JimuMapView } from 'jimu-arcgis'
-import { getCurrentAddress, getMarkerGraphic, getMapLabelGraphic, getCurrentAddressFromW3wService, initializeW3wService } from './locator-utils'
+import { getCurrentAddress, getMarkerGraphic, getMapLabelGraphic, getCurrentAddressFromW3wService, initializeW3wService, getLocatorMapLabelGraphic, getLocatorMarkerGraphic } from './locator-utils'
 import { getW3WStyle } from './lib/style'
 import defaultMessages from './translations/default'
-import { Button, Icon, Alert } from 'jimu-ui'
+import { Button, Icon, Alert, ButtonGroup } from 'jimu-ui'
 import { drawW3WGrid, clearGridLayer, initializeGridLayer, exportGeoJSON } from './grid-utils'
 import gridIcon from '../assets/grid_red.svg'
 import { debounce } from 'lodash'
 import { CopyButton } from 'jimu-ui/basic/copy-button'
 import { ShareArrowCurveOutlined } from 'jimu-icons/outlined/editor/share-arrow-curve'
 
-// const iconCopy = require('jimu-ui/lib/icons/duplicate.svg')
-const iconZoom = require('jimu-ui/lib/icons/zoom-out-fixed.svg')
 const iconExport = require('jimu-ui/lib/icons/export.svg')
 
 interface State {
@@ -141,7 +139,6 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
     return Promise.resolve('')
   }
 
-  //get url from the selcted utility
   getUrlOfUseUtility = async (useUtility: UseUtility): Promise<string> => {
     if (!useUtility) {
       return Promise.resolve('')
@@ -150,16 +147,6 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
       .then((url) => {
         return Promise.resolve(url)
       })
-  }
-
-  onZoomClick = () => {
-    if (this.mapView.graphics.length > 0) {
-      const selectedLocationGraphic = this.mapView.graphics.getItemAt(0)
-      this.mapView.goTo({
-        center: selectedLocationGraphic.geometry,
-        scale: this.zoomScale
-      })
-    }
   }
 
   onCopyClick = () => {
@@ -228,111 +215,144 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
   }
 
   handleMapClick = async (mapClick: any) => {
-    const widgetState = this.props.state || 'OPENED' // Add fallback
-    const apiKey = this.getApiKey()
-    if (!apiKey) return
-
-    if (widgetState !== 'OPENED') {
-      console.log('Widget is not active. Ignoring click.')
-      return
-    }
-
-    if (!mapClick?.mapPoint) {
-      console.error('Invalid map point:', mapClick)
-      return
-    }
+    if (!this.isWidgetActive()) return
 
     try {
-      // Close existing popups and clear any graphics
-      this.mapView.closePopup()
-      this.clearGraphics()
+      this.resetMapState()
 
-      let mapPointWGS84 = mapClick.mapPoint
+      const mapPointWGS84 = await this.getMapPointInWGS84(mapClick.mapPoint)
+      if (!mapPointWGS84) return
 
-      // Handle projection if not in WGS84
-      if (mapClick.mapPoint.spatialReference?.wkid !== 4326) {
-        const [projection, SpatialReference] = await loadArcGISJSAPIModules([
-          'esri/geometry/projection',
-          'esri/geometry/SpatialReference'
-        ])
+      const { latitude, longitude } = this.extractCoordinates(mapPointWGS84)
+      this.setState({ latitude, longitude })
 
-        if (!projection.isLoaded()) {
-          await projection.load()
-        }
+      const address = await this.fetchAddress(latitude, longitude, mapPointWGS84)
+      if (!address) throw new Error('Address fetch failed.')
 
-        const wgs84 = new SpatialReference({ wkid: 4326 })
-        mapPointWGS84 = projection.project(mapClick.mapPoint, wgs84)
+      this.updateStateWithAddress(address)
+      await this.addGraphicsToMap(address, mapPointWGS84)
 
-        if (!mapPointWGS84) {
-          throw new Error('Failed to project map point to WGS84.')
-        }
+      if (this.props.config.displayPopupMessage) {
+        this.showPopup(address.words, mapPointWGS84)
       }
+    } catch (error) {
+      this.handleError(mapClick, error)
+    }
+  }
 
-      const latitude = mapPointWGS84.latitude || mapPointWGS84.y
-      const longitude = mapPointWGS84.longitude || mapPointWGS84.x
+  isWidgetActive = (): boolean => {
+    const widgetState = this.props.state || 'OPENED'
+    const apiKey = this.getApiKey()
+    if (!apiKey || widgetState !== 'OPENED') {
+      console.log('Widget is not active or API key is missing.')
+      return false
+    }
+    return true
+  }
 
-      if (latitude === null || longitude === null) {
-        throw new Error('Invalid latitude or longitude from mapPoint.')
+  resetMapState = () => {
+    this.mapView.closePopup()
+    this.clearGraphics()
+  }
+
+  getMapPointInWGS84 = async (mapPoint: any): Promise<any> => {
+    if (!mapPoint) {
+      console.error('Invalid map point.')
+      return null
+    }
+
+    if (mapPoint.spatialReference?.wkid === 4326) {
+      return mapPoint // Already in WGS84
+    }
+
+    const [projection, SpatialReference] = await loadArcGISJSAPIModules([
+      'esri/geometry/projection',
+      'esri/geometry/SpatialReference'
+    ])
+
+    if (!projection.isLoaded()) await projection.load()
+
+    const wgs84 = new SpatialReference({ wkid: 4326 })
+    const projectedPoint = projection.project(mapPoint, wgs84)
+
+    if (!projectedPoint) {
+      console.error('Failed to project map point to WGS84.')
+      return null
+    }
+
+    return projectedPoint
+  }
+
+  extractCoordinates = (mapPoint: any) => {
+    const latitude = mapPoint.latitude?.toFixed(4) || mapPoint.y?.toFixed(4)
+    const longitude = mapPoint.longitude?.toFixed(4) || mapPoint.x?.toFixed(4)
+
+    if (latitude === null || longitude === null) {
+      throw new Error('Invalid latitude or longitude.')
+    }
+
+    return { latitude, longitude }
+  }
+
+  fetchAddress = async (latitude: number, longitude: number, mapPoint: any) => {
+    if (this.props.config.mode === 'apiKey') {
+      return await getCurrentAddressFromW3wService(latitude, longitude)
+    }
+
+    const locatorResponse = await getCurrentAddress(this.state.w3wLocator, mapPoint)
+    if (locatorResponse) {
+      return {
+        words: locatorResponse,
+        square: null, // Locator URL does not provide a square
+        nearestPlace: null
       }
+    }
 
-      this.setState({
-        latitude: latitude.toFixed(4),
-        longitude: longitude.toFixed(4)
-      })
+    return null
+  }
 
-      // Fetch the W3W address
-      const address =
-        this.props.config.mode === 'apiKey'
-          ? await getCurrentAddressFromW3wService(latitude, longitude)
-          : await getCurrentAddress(this.state.w3wLocator, mapPointWGS84)
-      console.log('W3W API Response:', address)
+  updateStateWithAddress = (address: any) => {
+    this.setState({
+      what3words: address.words,
+      nearestPlace: address.nearestPlace || 'Unknown location'
+    })
+  }
 
-      if (typeof address !== 'object' || !address.square) {
-        throw new Error('No address or square information returned from API')
-      }
+  addGraphicsToMap = async (address: any, mapPoint: any) => {
+    const proximityFactor = 1
 
-      if (address) {
-        this.setState({
-          what3words: address.words,
-          nearestPlace: address.nearestPlace
-        })
-      } else {
-        this.setState({
-          what3words: null,
-          nearestPlace: null
-        })
-      }
-
-      // Add a marker and label
-      const proximityFactor = 1
+    if (address.square) {
       const marker = await getMarkerGraphic(address.square, this.mapView, proximityFactor)
       const label = await getMapLabelGraphic(address.square, address.words)
 
-      if (marker) {
-        this.mapView.graphics.add(marker)
-      }
+      if (marker) this.mapView.graphics.add(marker)
+      if (label) this.mapView.graphics.add(label)
+    } else {
+      const marker = await getLocatorMarkerGraphic(mapPoint)
+      const label = await getLocatorMapLabelGraphic(mapPoint, address.words)
 
-      if (label) {
-        this.mapView.graphics.add(label)
-      }
+      if (marker) this.mapView.graphics.add(marker)
+      if (label) this.mapView.graphics.add(label)
+    }
+  }
 
-      if (this.props.config.displayPopupMessage) {
-        this.mapView.openPopup({
-          title: 'what3words Address',
-          content: `///${address.words}`,
-          location: mapPointWGS84
-        })
-      }
-    } catch (error) {
-      console.error('Error handling map click:', error)
+  showPopup = (words: string, location: any) => {
+    this.mapView.openPopup({
+      title: 'what3words Address',
+      content: `///${words}`,
+      location
+    })
+  }
 
-      if (this.props.config.displayPopupMessage) {
-        this.mapView.openPopup({
-          title: 'Error',
-          content: 'Failed to retrieve what3words address.',
-          location: mapClick.mapPoint
-        })
-      }
+  handleError = (mapClick: any, error: Error) => {
+    console.error('Error handling map click:', error)
+
+    if (this.props.config.displayPopupMessage) {
+      this.mapView.openPopup({
+        title: 'Error',
+        content: 'Failed to retrieve what3words address.',
+        location: mapClick.mapPoint
+      })
     }
   }
 
@@ -426,7 +446,6 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
     }
   }
 
-  // Export the grid as GeoJSON
   exportGeoJSONHandler = async () => {
     if (!this._gridLayer || this._gridLayer.destroyed) {
       console.error('FeatureLayer is not initialized or has been destroyed. Cannot export GeoJSON.')
@@ -452,7 +471,6 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
     }
   }
 
-  // Adjust grid visibility and synchronization with export button
   toggleGridVisibility = async () => {
     const { isW3WGridEnabled } = this.state
     const apiKey = this.getApiKey()
@@ -494,7 +512,6 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
     }
   }
 
-  // Update grid visibility based on zoom level
   updateGridVisibility = () => {
     const { isW3WGridEnabled } = this.state
     const apiKey = this.getApiKey()
@@ -513,13 +530,11 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
     }
   }
 
-  // Check if the current zoom level is within the valid range
   isZoomLevelInRange = () => {
     const { currentZoomLevel } = this.state
     return currentZoomLevel >= 17 && currentZoomLevel <= 25
   }
 
-  // Handle zoom level change
   handleZoomChange = () => {
     const isZoomInRange = this.isZoomLevelInRange()
     this.setState({ isZoomInRange })
@@ -529,12 +544,10 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
     }
   }
 
-  // Close the alert message
   handleAlertClose = () => {
     this.setState({ alertVisible: false })
   }
 
-  // Deactivate the widget
   deactivateWidget = () => {
     console.log('Deactivating widget')
     if (this._gridLayer) {
@@ -560,7 +573,6 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
     this.resetWidgetState()
   }
 
-  // Activate the widget
   activateWidget = () => {
     console.log('Activating widget')
     if (this.mapView) {
@@ -613,10 +625,18 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
     }
   }
 
-  openMapSitePlaceholder = () => {
-    console.log('Open Mapsite button clicked.')
-    // Add logic to open an external map site link
-    // Example: window.open('https://example.com', '_blank')
+  openMapsite = () => {
+    const { what3words } = this.state
+    if (what3words) {
+      // URL-encode the what3words address to handle non-Latin characters
+      const encodedW3W = encodeURIComponent(what3words)
+      // Construct the map URL with the application query parameter
+      const mapUrl = `https://what3words.com/${encodedW3W}?application=arcgis-experience-app`
+      // Open the URL in a new tab
+      window.open(mapUrl, '_blank')
+    } else {
+      console.warn('No what3words address available to open.')
+    }
   }
 
   render () {
@@ -681,24 +701,24 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
                 onCopy={this.onCopyClick.bind(this)}
               />
             )}
-            {config.displayZoomButton && (
-              <Button
-                type="tertiary"
-                aria-label="Zoom"
-                title="Zoom"
-                icon
-                size="sm"
-                disabled={!what3words}
-                onClick={this.onZoomClick.bind(this)}
-              >
-                <Icon icon={iconZoom} size={'16'} />
-              </Button>
+            {config.displayMapsiteButton && !isApiKeyMode && what3words && (
+            <Button
+              type="tertiary"
+              aria-label="Open Mapsite"
+              title="Open Mapsite"
+              icon
+              size="sm"
+              disabled={!what3words}
+              onClick={this.openMapsite.bind(this)}
+            >
+              <ShareArrowCurveOutlined size={'16'} />
+            </Button>
             )}
           </div>
         </div>
 
         {/* Subtitle: Nearest Places */}
-        {isApiKeyMode && nearestPlace && (
+        {isApiKeyMode && nearestPlace && what3words && (
         <p className="card-subtitle">
           {what3words
             ? (nearestPlace) // Replace this placeholder with real data if available
@@ -707,55 +727,63 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
         )}
 
         {/* Subtitle: Lat & Long */}
+        { what3words && (
         <p className="card-subtitle">
           Latitude: {latitude || 'N/A'}, Longitude: {longitude || 'N/A'}
         </p>
+        )}
 
         {/* Action Buttons */}
-        <div className="w3w-actions-row">
-        {isApiKeyMode && (
-          <Button
-            ref={this.gridButtonRef}
-            id="gridButton"
-            type="tertiary"
-            aria-label="View Grid"
-            title="View Grid"
-            icon
-            size="sm"
-            active={isW3WGridEnabled}
-            disabled={!isZoomInRange}
-            className={`toggle-grid-button ${isW3WGridEnabled ? 'active' : ''} ${!isZoomInRange ? 'disabled' : ''}`}
-            onClick={this.toggleGridVisibility.bind(this)}
-          >
-            <img src={gridIcon} alt="Grid Icon" width="16" />
-            <span>View Grid</span>
-          </Button>
-        )}
-        {isApiKeyMode && (
-          <Button
-            type="tertiary"
-            aria-label="Export Grid"
-            title="Export Grid"
-            icon
-            size="sm"
-            disabled={!exportEnabled}
-            onClick={this.exportGeoJSONHandler.bind(this)}
-          >
-            <Icon icon={iconExport} size={'16'} />
-            <span>Export Grid</span>
-          </Button>
-        )}
-          <Button
-            type="tertiary"
-            aria-label="Open Mapsite"
-            title="Open Mapsite"
-            icon
-            size="sm"
-            onClick={this.openMapSitePlaceholder.bind(this)}
-          >
-            <ShareArrowCurveOutlined size="16" />
-            <span>Open Mapsite</span>
-          </Button>
+        <div className="button-group-container">
+          <ButtonGroup className="action-buttons full-width" size='lg' color='inherit'>
+            {config.displayGridButton && isApiKeyMode && (
+              <Button
+                ref={this.gridButtonRef}
+                type="tertiary"
+                aria-label={isW3WGridEnabled ? 'Hide Grid' : 'View Grid'}
+                title={isW3WGridEnabled ? 'Hide Grid' : 'View Grid'}
+                icon
+                size="sm"
+                active={isW3WGridEnabled}
+                disabled={!isZoomInRange}
+                className={`toggle-grid-button ${isW3WGridEnabled ? 'active' : ''} ${!isZoomInRange ? 'disabled' : ''}`}
+                onClick={this.toggleGridVisibility.bind(this)}
+              >
+                <img src={gridIcon} alt="Grid Icon" width="16" />
+                <span>{isW3WGridEnabled ? 'Hide Grid' : 'View Grid'}</span>
+              </Button>
+            )}
+            {config.displayExportButton && isApiKeyMode && (
+              <Button
+                type="tertiary"
+                aria-label="Export Grid"
+                title="Export Grid"
+                icon
+                size="sm"
+                className='export-button'
+                disabled={!exportEnabled}
+                onClick={this.exportGeoJSONHandler.bind(this)}
+              >
+                <Icon icon={iconExport} size={'16'} />
+                <span>Export Grid</span>
+              </Button>
+            )}
+            {config.displayMapsiteButton && isApiKeyMode && (
+              <Button
+                type="tertiary"
+                aria-label="Open Mapsite"
+                title="Open Mapsite"
+                icon
+                size="sm"
+                className='mapsite-button'
+                disabled={!what3words}
+                onClick={this.openMapsite.bind(this)}
+              >
+                <ShareArrowCurveOutlined size="16" />
+                <span>Open Mapsite</span>
+              </Button>
+            )}
+          </ButtonGroup>
         </div>
       </div>
     </div>

@@ -1,7 +1,9 @@
 {
   "displayCoordinates": true,
   "displayCopyButton": true,
-  "displayZoomButton": true,
+  "displayGridButton": true,
+  "displayExportButton": true,
+  "displayMapsiteButton": true,
   "displayPopupMessage": false,
   "w3wLocator": "https://utility.arcgis.com/usrsvcs/servers/<Enter Your Unique Path ID>/rest/services/what3words_EN_English/GeocodeServer",
   "w3wApiKey": "<Enter Your API Key>",

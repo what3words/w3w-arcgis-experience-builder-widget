@@ -6,7 +6,9 @@ export interface Config {
   w3wLocator: string
   displayCoordinates: boolean // Show lat/lon values
   displayCopyButton: boolean // Enable 'Copy' functionality
-  displayZoomButton: boolean // Enable zooming to selected location
+  displayGridButton: boolean
+  displayExportButton: boolean
+  displayMapsiteButton: boolean
   displayPopupMessage: boolean // Show popup messages on click
   addressSettings: AddressSettings // Nested configuration for geocode service
 }

@@ -2,6 +2,7 @@ import type Point from 'esri/geometry/Point'
 import { loadArcGISJSAPIModules } from 'jimu-arcgis'
 import what3words, { axiosTransport } from '@what3words/api'
 import type { What3wordsService, ConvertTo3waResponse } from '@what3words/api'
+const w3wIcon = require('../assets/w3wMarker.png')
 
 let w3wService: What3wordsService
 
@@ -40,7 +41,7 @@ export const getCurrentAddress = (geocodeURL: string, mapClick: Point): Promise<
         { location: point },
         { query: {} }
       ).then((response) => {
-        console.log('Geocode service response:', response)
+        // console.log('Geocode service response:', response)
         return Promise.resolve(response.address)
       }).catch((err) => {
         console.error('Error fetching address:', err.message)
@@ -207,4 +208,59 @@ export const getMapLabelGraphic = async (
     console.error('Error creating map label graphic:', error)
     return null
   }
+}
+
+/**
+ * Creates a marker graphic for a given point.
+ * @param point - The point where the marker should be displayed.
+ * @returns A promise resolving to a Graphic.
+ */
+export const getLocatorMarkerGraphic = (point: Point): Promise<__esri.Graphic | null> => {
+  if (!point) return Promise.resolve(null)
+
+  return loadArcGISJSAPIModules(['esri/Graphic', 'esri/symbols/PictureMarkerSymbol']).then(([Graphic, PictureMarkerSymbol]) => {
+    const symbol = new PictureMarkerSymbol({
+      width: 25,
+      height: 25,
+      xoffset: 0,
+      yoffset: 11,
+      url: w3wIcon
+    })
+
+    return new Graphic({
+      geometry: point,
+      symbol: symbol
+    })
+  })
+}
+
+/**
+ * Creates a label graphic for the what3words address.
+ * @param point - The point where the label should be displayed.
+ * @param what3words - The what3words address to display.
+ * @returns A promise resolving to a Graphic.
+ */
+export const getLocatorMapLabelGraphic = (point: Point, what3words: string): Promise<__esri.Graphic | null> => {
+  if (!point) return Promise.resolve(null)
+
+  return loadArcGISJSAPIModules(['esri/Graphic']).then(([Graphic]) => {
+    const textSymbol = {
+      type: 'text',
+      text: '///' + what3words,
+      font: { size: 12, weight: 'bold' },
+      horizontalAlignment: 'left',
+      kerning: true,
+      rotated: false,
+      color: [225, 31, 38, 1],
+      haloColor: '#0A3049',
+      haloSize: '1px',
+      xoffset: 12,
+      yoffset: 5
+    }
+
+    return new Graphic({
+      geometry: point,
+      symbol: textSymbol
+    })
+  })
 }
