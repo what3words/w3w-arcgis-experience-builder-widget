@@ -14,6 +14,7 @@ export default {
   displayNearestPlace: 'Display Nearest Place',
   displayExportButton: 'Display Export Button',
   displayMapsiteButton: 'Display Mapsite Button',
+  displayMapAnnotation: 'Display Map Annotation',
   displayPopupMessage: 'Display Popup Message',
   w3wLanguage: 'Select what3words language'
 }

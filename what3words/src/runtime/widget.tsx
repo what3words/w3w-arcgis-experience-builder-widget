@@ -339,13 +339,17 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
       const label = await getMapLabelGraphic(address.square, address.words)
 
       if (marker) this.mapView.graphics.add(marker)
-      if (label) this.mapView.graphics.add(label)
+      if (this.props.config.displayMapAnnotation && label) {
+        this.mapView.graphics.add(label)
+      }
     } else {
       const marker = await getLocatorMarkerGraphic(mapPoint)
       const label = await getLocatorMapLabelGraphic(mapPoint, address.words)
 
       if (marker) this.mapView.graphics.add(marker)
-      if (label) this.mapView.graphics.add(label)
+      if (this.props.config.displayMapAnnotation && label) {
+        this.mapView.graphics.add(label)
+      }
     }
   }
 
@@ -781,21 +785,6 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
                 <span>Export Grid</span>
               </Button>
             )}
-            {/* {config.displayMapsiteButton && isApiKeyMode && (
-              <Button
-                type="tertiary"
-                aria-label="Open Mapsite"
-                title="Open Mapsite"
-                icon
-                size="lg"
-                className='mapsite-button'
-                disabled={!what3words}
-                onClick={this.openMapsite.bind(this)}
-              >
-                <ShareArrowCurveOutlined size="16" />
-                <span>Open Mapsite</span>
-              </Button>
-            )} */}
           </div>
         </div>
       </div>

@@ -9,6 +9,7 @@ export interface Config {
   displayGridButton: boolean
   displayExportButton: boolean
   displayMapsiteButton: boolean
+  displayMapAnnotation: boolean
   w3wLanguage: string
   displayNearestPlace: boolean
   displayPopupMessage: boolean // Show popup messages on click

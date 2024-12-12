@@ -226,7 +226,8 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<a
             { key: 'displayNearestPlace', label: 'displayNearestPlace' },
             { key: 'displayExportButton', label: 'displayExportButton' },
             { key: 'displayMapsiteButton', label: 'displayMapsiteButton' },
-            { key: 'displayPopupMessage', label: 'displayPopupMessage' }
+            { key: 'displayPopupMessage', label: 'displayPopupMessage' },
+            { key: 'displayMapAnnotation', label: 'displayMapAnnotation' }
           ].map(({ key, label }) => (
             <SettingRow key={key}>
               <div className="w-100">
