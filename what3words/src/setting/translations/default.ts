@@ -11,7 +11,9 @@ export default {
   displayCoordinates: 'Display Lat/Long',
   displayCopyButton: 'Display Copy Button',
   displayGridButton: 'Display Grid Button',
+  displayNearestPlace: 'Display Nearest Place',
   displayExportButton: 'Display Export Button',
   displayMapsiteButton: 'Display Mapsite Button',
-  displayPopupMessage: 'Display Popup Message'
+  displayPopupMessage: 'Display Popup Message',
+  w3wLanguage: 'Select what3words language'
 }

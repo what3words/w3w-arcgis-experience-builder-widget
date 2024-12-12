@@ -9,6 +9,8 @@ export interface Config {
   displayGridButton: boolean
   displayExportButton: boolean
   displayMapsiteButton: boolean
+  w3wLanguage: string
+  displayNearestPlace: boolean
   displayPopupMessage: boolean // Show popup messages on click
   addressSettings: AddressSettings // Nested configuration for geocode service
 }

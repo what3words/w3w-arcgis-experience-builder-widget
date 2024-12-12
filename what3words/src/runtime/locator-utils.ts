@@ -59,7 +59,8 @@ export const getCurrentAddress = (geocodeURL: string, mapClick: Point): Promise<
  */
 export async function getCurrentAddressFromW3wService (
   latitude: number,
-  longitude: number
+  longitude: number,
+  language: string
 ): Promise<{ words: string, square: { southwest: { lat: number, lng: number }, northeast: { lat: number, lng: number } }, nearestPlace: string } | null> {
   if (!w3wService) {
     console.error('W3W service is not initialized. Please call initializeW3wService first.')
@@ -67,7 +68,9 @@ export async function getCurrentAddressFromW3wService (
   }
 
   try {
-    const response = await w3wService.convertTo3wa({ coordinates: { lat: latitude, lng: longitude } }) as ConvertTo3waResponse
+    const response = await w3wService.convertTo3wa(
+      { coordinates: { lat: latitude, lng: longitude }, language }
+    ) as ConvertTo3waResponse
 
     if (!response.words || !response.square) {
       console.error('Invalid response from W3W API:', response)

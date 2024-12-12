@@ -5,7 +5,7 @@ import { JimuMapViewComponent, loadArcGISJSAPIModules, type JimuMapView } from '
 import { getCurrentAddress, getMarkerGraphic, getMapLabelGraphic, getCurrentAddressFromW3wService, initializeW3wService, getLocatorMapLabelGraphic, getLocatorMarkerGraphic } from './locator-utils'
 import { getW3WStyle } from './lib/style'
 import defaultMessages from './translations/default'
-import { Button, Icon, Alert, ButtonGroup } from 'jimu-ui'
+import { Button, Icon, Alert } from 'jimu-ui'
 import { drawW3WGrid, clearGridLayer, initializeGridLayer, exportGeoJSON } from './grid-utils'
 import gridIcon from '../assets/grid_red.svg'
 import { debounce } from 'lodash'
@@ -37,7 +37,6 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
   private _clickHandle: __esri.Handle
   private _zoomHandle: __esri.WatchHandle
   private _extentHandle: __esri.WatchHandle
-  zoomScale = 1000
   what3words: string
   _gridLayer: __esri.FeatureLayer | null = null
 
@@ -223,6 +222,8 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
       const mapPointWGS84 = await this.getMapPointInWGS84(mapClick.mapPoint)
       if (!mapPointWGS84) return
 
+      await this.zoomToLocation(mapPointWGS84)
+
       const { latitude, longitude } = this.extractCoordinates(mapPointWGS84)
       this.setState({ latitude, longitude })
 
@@ -237,6 +238,17 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
       }
     } catch (error) {
       this.handleError(mapClick, error)
+    }
+  }
+
+  zoomToLocation = async (mapPoint: any) => {
+    try {
+      await this.mapView.goTo({
+        center: [mapPoint.longitude || mapPoint.x, mapPoint.latitude || mapPoint.y],
+        zoom: 18
+      })
+    } catch (error) {
+      console.error('Failed to zoom to location:', error)
     }
   }
 
@@ -296,7 +308,8 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
 
   fetchAddress = async (latitude: number, longitude: number, mapPoint: any) => {
     if (this.props.config.mode === 'apiKey') {
-      return await getCurrentAddressFromW3wService(latitude, longitude)
+      const language = this.props.config.w3wLanguage || 'en'
+      return await getCurrentAddressFromW3wService(latitude, longitude, language)
     }
 
     const locatorResponse = await getCurrentAddress(this.state.w3wLocator, mapPoint)
@@ -701,7 +714,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
                 onCopy={this.onCopyClick.bind(this)}
               />
             )}
-            {config.displayMapsiteButton && !isApiKeyMode && what3words && (
+            {config.displayMapsiteButton && what3words && (
             <Button
               type="tertiary"
               aria-label="Open Mapsite"
@@ -718,7 +731,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
         </div>
 
         {/* Subtitle: Nearest Places */}
-        {isApiKeyMode && nearestPlace && what3words && (
+        {config.displayNearestPlace && isApiKeyMode && nearestPlace && what3words && (
         <p className="card-subtitle">
           {what3words
             ? (nearestPlace) // Replace this placeholder with real data if available
@@ -727,7 +740,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
         )}
 
         {/* Subtitle: Lat & Long */}
-        { what3words && (
+        { config.displayCoordinates && what3words && (
         <p className="card-subtitle">
           Latitude: {latitude || 'N/A'}, Longitude: {longitude || 'N/A'}
         </p>
@@ -735,22 +748,22 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
 
         {/* Action Buttons */}
         <div className="button-group-container">
-          <ButtonGroup className="action-buttons full-width" size='lg' color='inherit'>
+          <div className="action-buttons full-width">
             {config.displayGridButton && isApiKeyMode && (
               <Button
                 ref={this.gridButtonRef}
                 type="tertiary"
-                aria-label={isW3WGridEnabled ? 'Hide Grid' : 'View Grid'}
-                title={isW3WGridEnabled ? 'Hide Grid' : 'View Grid'}
+                aria-label={isW3WGridEnabled ? 'Grid Disabled' : 'Grid Enabled'}
+                title={isW3WGridEnabled ? 'Grid Disabled' : 'Grid Enabled'}
                 icon
-                size="sm"
+                size="lg"
                 active={isW3WGridEnabled}
                 disabled={!isZoomInRange}
                 className={`toggle-grid-button ${isW3WGridEnabled ? 'active' : ''} ${!isZoomInRange ? 'disabled' : ''}`}
                 onClick={this.toggleGridVisibility.bind(this)}
               >
                 <img src={gridIcon} alt="Grid Icon" width="16" />
-                <span>{isW3WGridEnabled ? 'Hide Grid' : 'View Grid'}</span>
+                <span>{isW3WGridEnabled ? 'Grid Disabled' : 'Grid Enabled'}</span>
               </Button>
             )}
             {config.displayExportButton && isApiKeyMode && (
@@ -759,7 +772,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
                 aria-label="Export Grid"
                 title="Export Grid"
                 icon
-                size="sm"
+                size="lg"
                 className='export-button'
                 disabled={!exportEnabled}
                 onClick={this.exportGeoJSONHandler.bind(this)}
@@ -768,13 +781,13 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
                 <span>Export Grid</span>
               </Button>
             )}
-            {config.displayMapsiteButton && isApiKeyMode && (
+            {/* {config.displayMapsiteButton && isApiKeyMode && (
               <Button
                 type="tertiary"
                 aria-label="Open Mapsite"
                 title="Open Mapsite"
                 icon
-                size="sm"
+                size="lg"
                 className='mapsite-button'
                 disabled={!what3words}
                 onClick={this.openMapsite.bind(this)}
@@ -782,8 +795,8 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
                 <ShareArrowCurveOutlined size="16" />
                 <span>Open Mapsite</span>
               </Button>
-            )}
-          </ButtonGroup>
+            )} */}
+          </div>
         </div>
       </div>
     </div>

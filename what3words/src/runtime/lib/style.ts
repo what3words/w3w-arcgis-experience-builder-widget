@@ -12,7 +12,7 @@ export function getW3WStyle (theme: IMThemeVariables): SerializedStyles {
         flex-direction: column;
         gap: 12px;
         width: 100%;
-        max-width: 400px;
+        min-width: 400px;
         margin: 16px auto;
         box-sizing: border-box;
       }

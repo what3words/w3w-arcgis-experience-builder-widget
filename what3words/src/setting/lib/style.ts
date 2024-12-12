@@ -68,5 +68,24 @@ export function getWidgetDisplayOptionsStyle (theme: IMThemeVariables): Serializ
       .switch-select.checked .switch-slider {
         background-color: #01AABB !important;
       }
+
+
+      .lang-dropdown {
+        max-width: 300px; 
+        max-height: 200px; 
+        overflow-y: auto; 
+        font-size: 14px; 
+        /* width: 100%; */
+      }
+
+      .lang-item {
+        display: 'flex'; 
+        flex-direction: 'column';
+        font-size: 14px;
+      }
+
+      .jimu-btn.jimu-dropdown-button.dropdown-button.app-root-emotion-cache-ltr-g3evx9.btn.btn-link {
+        height: auto;
+      }
   `
 }

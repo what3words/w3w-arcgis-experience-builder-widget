@@ -9,10 +9,12 @@ import {
 } from 'jimu-ui/advanced/setting-components'
 import defaultMessages from './translations/default'
 import { getWidgetDisplayOptionsStyle } from './lib/style'
-import { Switch, CollapsablePanel, TextInput, Radio } from 'jimu-ui'
+import { Switch, CollapsablePanel, TextInput, Radio, Select, Option } from 'jimu-ui'
+import { getAvailableLanguages } from '../runtime/language-utils'
 
 interface State {
   isAddressSettingsOpen: boolean
+  languages: AvailableLanguage[]
 }
 
 export default class Setting extends React.PureComponent<AllWidgetSettingProps<any>, State> {
@@ -21,7 +23,8 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<a
   constructor (props) {
     super(props)
     this.state = {
-      isAddressSettingsOpen: true
+      isAddressSettingsOpen: true,
+      languages: []
     }
 
     const appState = getAppStore().getState()
@@ -31,6 +34,37 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<a
   /** Localize strings */
   nls = (id: string) => {
     return this.props.intl.formatMessage({ id, defaultMessage: defaultMessages[id] })
+  }
+
+  componentDidMount () {
+    this.fetchLanguages()
+  }
+
+  async fetchLanguages () {
+    const apiKey = this.props.config?.addressSettings?.w3wApiKey
+    if (!apiKey) return
+
+    try {
+      const languages = await getAvailableLanguages(apiKey)
+      this.setState({ languages })
+    } catch (error) {
+      console.error('Error fetching languages:', error)
+    }
+  }
+
+  setW3wApiKey = (w3wApiKey: string) => {
+    this.props.onSettingChange({
+      id: this.props.id,
+      config: this.props.config.set('w3wApiKey', w3wApiKey)
+    })
+    this.fetchLanguages() // Re-fetch languages after updating API key
+  }
+
+  setW3wLanguage = (w3wLanguage: string) => {
+    this.props.onSettingChange({
+      id: this.props.id,
+      config: this.props.config.set('w3wLanguage', w3wLanguage)
+    })
   }
 
   /** Handle map widget selection */
@@ -130,6 +164,29 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<a
           </SettingSection>
         )}
 
+        {/* Language Dropdown */}
+        {config?.mode === 'apiKey' && (
+          <SettingSection title="Select Language">
+            <SettingRow>
+              <Select
+                value={config?.w3wLanguage || 'en'}
+                onChange={(e: any) => { this.setW3wLanguage(e.target.value) }}
+                style={{ maxWidth: '300px', maxHeight: '200px', overflowY: 'auto' }}
+              >
+                {this.state.languages.map((language) => (
+                <Option key={language.code} value={language.code}>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <strong>{language.nativeName}</strong>
+                    <small>{`${language.name} (${language.code})`}</small>
+                  </div>
+                </Option>
+                ))}
+              </Select>
+            </SettingRow>
+          </SettingSection>
+
+        )}
+
         {/* Address Settings Section */}
         {config?.mode === 'locatorUrl' && (
           <SettingSection>
@@ -166,6 +223,7 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<a
             { key: 'displayCoordinates', label: 'displayCoordinates' },
             { key: 'displayCopyButton', label: 'displayCopyButton' },
             { key: 'displayGridButton', label: 'displayGridButton' },
+            { key: 'displayNearestPlace', label: 'displayNearestPlace' },
             { key: 'displayExportButton', label: 'displayExportButton' },
             { key: 'displayMapsiteButton', label: 'displayMapsiteButton' },
             { key: 'displayPopupMessage', label: 'displayPopupMessage' }
