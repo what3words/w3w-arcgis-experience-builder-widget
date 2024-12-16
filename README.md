@@ -96,6 +96,7 @@ and run the following npm install command
 
 ```bash
 npm install os-browserify stream-browserify https-browserify url browserify-zlib stream-http process buffer --save-dev
+npm install @what3words/api axios cross-fetch
 ```
 
 
