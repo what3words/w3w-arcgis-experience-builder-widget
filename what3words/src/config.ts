@@ -2,17 +2,14 @@ import { type ImmutableArray, type UseUtility, type ImmutableObject } from 'jimu
 
 export interface Config {
   mode: 'apiKey' | 'locatorUrl' // Mode for what3words API key or locator URL
-  w3wApiKey: string
-  w3wLocator: string
+  w3wApiKey: string // what3words API key
+  w3wLocator: string // what3words locator
   displayCoordinates: boolean // Show lat/lon values
   displayCopyButton: boolean // Enable 'Copy' functionality
-  displayGridButton: boolean
-  displayExportButton: boolean
-  displayMapsiteButton: boolean
-  displayMapAnnotation: boolean
-  w3wLanguage: string
-  displayNearestPlace: boolean
-  displayPopupMessage: boolean // Show popup messages on click
+  displayMapsiteButton: boolean // Enable 'Mapsite' functionality
+  displayMapAnnotation: boolean // Show map annotation
+  w3wLanguage: string //  Language for what3words
+  displayNearestPlace: boolean // Show nearest place
   addressSettings: AddressSettings // Nested configuration for geocode service
 }
 

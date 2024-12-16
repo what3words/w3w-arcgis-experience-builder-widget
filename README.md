@@ -12,6 +12,10 @@ You can find the Custom Web AppBuilder what3words widget in this [Github page](h
 - An installed and configured instance of [ArcGIS Experience Builder (Developer Edition)](https://developers.arcgis.com/experience-builder/guide/install-guide/);
 - A URL of your what3words ArcGIS Locator that has been added to your ArcGIS online or your Portal for ArcGIS by following this [instruction](https://developer.what3words.com/tools/gis-extensions/arcgis) on the what3words developer site;
 - A copy of this widget `what3words`.
+- Install `axios` via npm packages in the root directory of your project:
+  ```js
+  npm install axios
+  ```
 
 ## Installation and Configuration
 

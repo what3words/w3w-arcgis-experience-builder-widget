@@ -4,16 +4,13 @@ export function getW3WStyle (theme: IMThemeVariables): SerializedStyles {
   return css`
 
       .w3w-card {
-        background-color: ${theme.ref.palette.neutral[200]};
-        border-radius: 8px;
         padding: 16px;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
         display: flex;
         flex-direction: column;
         gap: 12px;
         width: 100%;
-        min-width: 400px;
-        margin: 16px auto;
+        max-width: 100%;
+        margin: 0 auto;
         box-sizing: border-box;
       }
 
@@ -29,6 +26,7 @@ export function getW3WStyle (theme: IMThemeVariables): SerializedStyles {
         align-items: center;
         justify-content: space-between;
         gap: 8px;
+        flex-wrap: wrap;
       }
 
       .w3w-slash {
@@ -39,6 +37,8 @@ export function getW3WStyle (theme: IMThemeVariables): SerializedStyles {
       .w3w-text {
         font-size: 20px;
         color: #0A3049;
+        flex: 1;
+        word-wrap: break-word;
       }
 
       .w3w-placeholder {
@@ -47,6 +47,12 @@ export function getW3WStyle (theme: IMThemeVariables): SerializedStyles {
         font-weight: 400; 
         color: #525252;
         text-align: center; 
+      }
+
+      .w3w-error {
+        color: #E11F26;
+        font-weight: 600;
+        font-size: 14px;
       }
 
       .w3w-address {
@@ -58,6 +64,7 @@ export function getW3WStyle (theme: IMThemeVariables): SerializedStyles {
       .w3w-actions {
         display: flex;
         gap: 4px;
+        flex-wrap: wrap;
       }
 
       .copy-button{
@@ -89,6 +96,7 @@ export function getW3WStyle (theme: IMThemeVariables): SerializedStyles {
         margin: 0; 
         padding: 0; 
         box-sizing: border-box;
+        flex-wrap: wrap;
       }
 
       .full-width .jimu-btn span {
@@ -109,6 +117,9 @@ export function getW3WStyle (theme: IMThemeVariables): SerializedStyles {
 
       .action-buttons {
         margin-top: 10px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
       }
 
       .action-buttons button {
@@ -120,6 +131,8 @@ export function getW3WStyle (theme: IMThemeVariables): SerializedStyles {
         border: .1px solid transparent;
         border-radius: 4px;
         transition: all 0.2s;
+        flex: 1;
+        justify-content: center;
       }
 
       .action-buttons button:hover {
@@ -128,37 +141,6 @@ export function getW3WStyle (theme: IMThemeVariables): SerializedStyles {
 
       .action-buttons button span {
         white-space: nowrap;
-      }
-            
-      .toggle-grid-button.jimu-btn, 
-      .export-button.jimu-btn,
-      .mapsite-button.jimu-btn {
-        flex: 1; /* Equal width for all buttons */
-        display: flex; /* Flexbox inside the button for alignment */
-        align-items: center; /* Center content vertically */
-        justify-content: center; /* Center content horizontally */
-        text-align: center; /* Center-align text */
-        box-sizing: border-box; /* Include padding and border in width calculation */
-        font-size: 13px; /* Set font size */
-        padding: 5px; /* Padding for spacing inside buttons */
-        background-color: #00456b; /* Button background */
-        color: #ffffff; /* Text color */
-        font-weight: bold; /* Bold text */
-      }
-
-      .toggle-grid-button.disabled, 
-      .export-button.disabled, 
-      .mapsite-button.disabled {
-        pointer-events: none; /* Prevent click events */
-        opacity: 0.5; /* Reduce visibility */
-      }
-
-      .toggle-grid-button img {
-        transition: opacity 0.3s ease; /* Smooth transition for better UI */
-      }
-
-      .toggle-grid-button.disabled img {
-        opacity: 0.5; /* Apply greyed-out effect */
       }
 
       .full-width .jimu-btn.active {

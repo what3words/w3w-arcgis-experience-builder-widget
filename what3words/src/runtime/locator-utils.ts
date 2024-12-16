@@ -1,10 +1,9 @@
 import type Point from 'esri/geometry/Point'
 import { loadArcGISJSAPIModules } from 'jimu-arcgis'
-import what3words, { axiosTransport } from '@what3words/api'
-import type { What3wordsService, ConvertTo3waResponse } from '@what3words/api'
+import axios from 'axios'
 const w3wIcon = require('../assets/w3wMarker.png')
 
-let w3wService: What3wordsService
+let w3wApiKey: string
 
 /**
  * Initializes the What3Words service with the provided API key.
@@ -16,39 +15,53 @@ export async function initializeW3wService (apiKey: string): Promise<void> {
     return
   }
 
-  try {
-    // Initialize the What3Words service
-    w3wService = what3words(apiKey, { host: 'https://api.what3words.com' }, { transport: axiosTransport() })
-    console.log('What3Words service initialized.')
-  } catch (error) {
-    console.error('Error initializing What3Words service:', error)
-  }
+  w3wApiKey = apiKey
+  console.log('What3Words service initialized.')
 }
 
 /**
  * Fetches an address from a geocode service.
  * @param geocodeURL - URL of the geocode service.
  * @param mapClick - The clicked point on the map.
- * @returns A promise resolving to the retrieved address.
+ * @returns A promise resolving to the retrieved address or an error message.
  */
-export const getCurrentAddress = (geocodeURL: string, mapClick: Point): Promise<string | null> => {
-  if (!mapClick) return Promise.resolve(null)
+export const getCurrentAddress = async (geocodeURL: string, mapClick: Point): Promise<string | null> => {
+  if (!mapClick) {
+    console.error('Invalid map click location.')
+    return null
+  }
 
-  return loadArcGISJSAPIModules(['esri/rest/locator']).then(([locator]) => {
-    return createPoint(mapClick).then((point) => {
-      return locator.locationToAddress(
-        geocodeURL,
-        { location: point },
-        { query: {} }
-      ).then((response) => {
-        // console.log('Geocode service response:', response)
-        return Promise.resolve(response.address)
-      }).catch((err) => {
-        console.error('Error fetching address:', err.message)
-        return err.message + ' - Check your Locator URL'
-      })
-    })
-  })
+  try {
+    const [locator] = await loadArcGISJSAPIModules(['esri/rest/locator'])
+    const point = await createPoint(mapClick)
+
+    const response = await locator.locationToAddress(
+      geocodeURL,
+      { location: point },
+      { query: {} }
+    )
+
+    if (response?.address) {
+      return response.address
+    }
+
+    // Handle unexpected structure or missing address
+    console.error('Unexpected response structure:', response)
+    throw new Error('Address not found in response.')
+  } catch (err) {
+    // Handle cases with detailed error information
+    if (err.details && err.details.messages) {
+      let errorMessage = err.details.messages[0] || 'Unknown error occurred.'
+
+      if (errorMessage.includes("Error from W3W service: error code=PaymentRequired")) {
+        errorMessage = "Quota exceeded or API plan does not have access to this feature. Please change your plan at https://accounts.what3words.com/select-plan, or contact support@what3words.com"
+      }
+      return `Error fetching address: ${errorMessage}`
+    }
+    // Fallback to a generic error message
+    const errorMessage = err.message || 'Unknown error occurred.'
+    return `Error fetching address: ${errorMessage}`
+  }
 }
 
 /**
@@ -62,25 +75,29 @@ export async function getCurrentAddressFromW3wService (
   longitude: number,
   language: string
 ): Promise<{ words: string, square: { southwest: { lat: number, lng: number }, northeast: { lat: number, lng: number } }, nearestPlace: string } | null> {
-  if (!w3wService) {
+  if (!w3wApiKey) {
     console.error('W3W service is not initialized. Please call initializeW3wService first.')
     return null
   }
 
   try {
-    const response = await w3wService.convertTo3wa(
-      { coordinates: { lat: latitude, lng: longitude }, language }
-    ) as ConvertTo3waResponse
+    const response = await axios.get('https://api.what3words.com/v3/convert-to-3wa', {
+      params: {
+        coordinates: `${latitude},${longitude}`,
+        key: w3wApiKey,
+        language
+      }
+    })
 
-    if (!response.words || !response.square) {
-      console.error('Invalid response from W3W API:', response)
+    if (!response.data.words || !response.data.square) {
+      console.error('Invalid response from W3W API:', response.data)
       return null
     }
 
     return {
-      words: response.words,
-      square: response.square,
-      nearestPlace: response.nearestPlace || 'No nearby place available'
+      words: response.data.words,
+      square: response.data.square,
+      nearestPlace: response.data.nearestPlace || 'No nearby place available'
     }
   } catch (error) {
     console.error('Error fetching W3W address:', error)
@@ -195,7 +212,7 @@ export const getMapLabelGraphic = async (
       color: [225, 31, 38, 1],
       haloColor: '#0A3049',
       haloSize: '1px',
-      yoffset: 20 // Offset the label slightly above the marker
+      yoffset: 25 // Offset the label slightly above the marker
     }
 
     return new Graphic({

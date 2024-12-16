@@ -69,23 +69,40 @@ export function getWidgetDisplayOptionsStyle (theme: IMThemeVariables): Serializ
         background-color: #01AABB !important;
       }
 
+      .api-key-input-row {
+        width: 100%;
+      }
+
+      .api-key-input-row .btn {
+        width: 100%;
+        padding: 5px;
+        margin-top: 10px;
+      }
 
       .lang-dropdown {
         max-width: 300px; 
         max-height: 200px; 
         overflow-y: auto; 
         font-size: 14px; 
-        /* width: 100%; */
+        scrollbar-width: thin;
+        scrollbar-color: #888 #f0f0f0;
       }
 
-      .lang-item {
-        display: 'flex'; 
-        flex-direction: 'column';
-        font-size: 14px;
+      .lang-dropdown::-webkit-scrollbar {
+        width: 8px;
       }
 
-      .jimu-btn.jimu-dropdown-button.dropdown-button.app-root-emotion-cache-ltr-g3evx9.btn.btn-link {
+      .lang-dropdown .lang-select button{
+        width: 100%;
         height: auto;
       }
+      .lang-item {
+        display: 'flex' !important; 
+        flex-direction: 'column' !important;
+        font-size: 14px;
+        padding: 5px; /* Optional: Add spacing for better readability */
+        border-bottom: 1px solid #ddd;
+      }
+
   `
 }

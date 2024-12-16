@@ -15,6 +15,8 @@ import { getAvailableLanguages } from '../runtime/language-utils'
 interface State {
   isAddressSettingsOpen: boolean
   languages: AvailableLanguage[]
+  tempApiKey: string
+  apiKeyError: boolean
 }
 
 export default class Setting extends React.PureComponent<AllWidgetSettingProps<any>, State> {
@@ -24,7 +26,9 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<a
     super(props)
     this.state = {
       isAddressSettingsOpen: true,
-      languages: []
+      languages: [],
+      tempApiKey: this.props.config?.addressSettings?.w3wApiKey || '',
+      apiKeyError: false
     }
 
     const appState = getAppStore().getState()
@@ -40,9 +44,9 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<a
     this.fetchLanguages()
   }
 
+  /** Fetch available languages using the saved API key */
   async fetchLanguages () {
     const apiKey = this.props.config?.addressSettings?.w3wApiKey
-    if (!apiKey) return
 
     try {
       const languages = await getAvailableLanguages(apiKey)
@@ -52,12 +56,17 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<a
     }
   }
 
-  setW3wApiKey = (w3wApiKey: string) => {
+  setW3wApiKey = async (w3wApiKey: string) => {
     this.props.onSettingChange({
       id: this.props.id,
-      config: this.props.config.set('w3wApiKey', w3wApiKey)
+      config: this.props.config.setIn(['addressSettings', 'w3wApiKey'], w3wApiKey)
     })
-    this.fetchLanguages() // Re-fetch languages after updating API key
+
+    try {
+      await this.fetchLanguages() // Fetch languages after the API key is saved
+    } catch (error) {
+      console.error('Error fetching languages with the updated API key:', error)
+    }
   }
 
   setW3wLanguage = (w3wLanguage: string) => {
@@ -91,14 +100,42 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<a
     })
   }
 
-  /** Handle input changes for API key and Locator URL */
-  handleInputChange = (property: string, event: React.ChangeEvent<HTMLInputElement>) => {
-    const newConfig = this.props.config.setIn(['addressSettings', property], event.target.value)
-    console.log('Updated config:', newConfig)
+  /** Save the API key and fetch languages */
+  handleApiKeySave = async () => {
+    const { tempApiKey } = this.state
+
+    // If API key is empty, clear languages and update the configuration
+    if (!tempApiKey.trim()) {
+      console.warn('API Key is empty. Clearing languages.')
+      this.setState({ languages: [], apiKeyError: false }) // Clear languages and reset error
+      this.props.onSettingChange({
+        id: this.props.id,
+        config: this.props.config.setIn(['addressSettings', 'w3wApiKey'], '')
+      })
+      return
+    }
+
+    // Save the API key to the configuration
     this.props.onSettingChange({
       id: this.props.id,
-      config: newConfig
+      config: this.props.config.setIn(['addressSettings', 'w3wApiKey'], tempApiKey)
     })
+
+    // Fetch languages directly using the temporary API key
+    try {
+      const languages = await getAvailableLanguages(tempApiKey)
+      this.setState({ languages, apiKeyError: false }) // Clear error if successful
+      console.log('API Key saved and languages fetched successfully.')
+    } catch (error) {
+      console.error('Error fetching languages with the saved API key:', error)
+      this.setState({ languages: [], apiKeyError: true }) // Set error and clear languages
+    }
+  }
+
+  /** Handle input changes for the temporary API key */
+  handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const tempApiKey = event.target.value
+    this.setState({ tempApiKey }) // Update the temporary API key
   }
 
   /** Update address settings */
@@ -111,6 +148,7 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<a
 
   render () {
     const { theme, config, useMapWidgetIds, intl } = this.props
+    const { tempApiKey } = this.state
 
     return (
       <div css={getWidgetDisplayOptionsStyle(theme)} className="widget-what3words-setting">
@@ -153,13 +191,19 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<a
         {/* API Key Section */}
         {config?.mode === 'apiKey' && (
           <SettingSection title="API Key">
-            <SettingRow flow="wrap">
+            <SettingRow flow="wrap" className='api-key-input-row'>
               <TextInput
                 className="w-100"
                 placeholder="Enter your what3words API key"
-                value={config?.addressSettings?.w3wApiKey || ''}
-                onChange={(e) => { this.handleInputChange('w3wApiKey', e) }}
+                value={tempApiKey}
+                onChange={this.handleInputChange}
               />
+              <button
+                className="btn btn-primary w-100"
+                onClick={this.handleApiKeySave}
+              >
+                Save
+              </button>
             </SettingRow>
           </SettingSection>
         )}
@@ -167,15 +211,17 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<a
         {/* Language Dropdown */}
         {config?.mode === 'apiKey' && (
           <SettingSection title="Select Language">
-            <SettingRow>
+            <SettingRow className='lang-dropdown'>
               <Select
+                className='lang-select'
                 value={config?.w3wLanguage || 'en'}
                 onChange={(e: any) => { this.setW3wLanguage(e.target.value) }}
-                style={{ maxWidth: '300px', maxHeight: '200px', overflowY: 'auto' }}
+                disabled={this.state.languages.length === 0}
+                placeholder='Select a language'
               >
                 {this.state.languages.map((language) => (
                 <Option key={language.code} value={language.code}>
-                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', height: 'auto' }} >
                     <strong>{language.nativeName}</strong>
                     <small>{`${language.name} (${language.code})`}</small>
                   </div>
@@ -183,6 +229,22 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<a
                 ))}
               </Select>
             </SettingRow>
+            {/* Show message when dropdown is disabled */}
+            {this.state.languages.length === 0 && (
+              <SettingRow className="no-languages-message">
+                <p style={{ color: 'inherit', fontSize: '14px' }}> {/* Error-like styling */}
+                  No languages available. Enter a valid API key.
+                </p>
+              </SettingRow>
+            )}
+            {/* Show error message if API key is invalid */}
+            {this.state.apiKeyError && (
+              <SettingRow className="api-key-error">
+                <p style={{ color: 'inherit', fontSize: '14px' }}>
+                  Invalid API key. Please enter a valid key and try again.
+                </p>
+              </SettingRow>
+            )}
           </SettingSection>
 
         )}
@@ -221,12 +283,9 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<a
         >
           {[
             { key: 'displayCoordinates', label: 'displayCoordinates' },
+            ...(config?.mode === 'apiKey' ? [{ key: 'displayNearestPlace', label: 'displayNearestPlace' }] : []),
             { key: 'displayCopyButton', label: 'displayCopyButton' },
-            { key: 'displayGridButton', label: 'displayGridButton' },
-            { key: 'displayNearestPlace', label: 'displayNearestPlace' },
-            { key: 'displayExportButton', label: 'displayExportButton' },
             { key: 'displayMapsiteButton', label: 'displayMapsiteButton' },
-            { key: 'displayPopupMessage', label: 'displayPopupMessage' },
             { key: 'displayMapAnnotation', label: 'displayMapAnnotation' }
           ].map(({ key, label }) => (
             <SettingRow key={key}>

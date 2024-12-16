@@ -8,13 +8,10 @@ export default {
   alertPopupTitle: 'Select Geocode Service',
   invalidLocatorServiceURL: 'Please enter valid geocode service url',
   widgetDisplayOptions: 'Widget Display Options',
-  displayCoordinates: 'Display Lat/Long',
+  displayCoordinates: 'Display Latitude & Longitude',
   displayCopyButton: 'Display Copy Button',
-  displayGridButton: 'Display Grid Button',
-  displayNearestPlace: 'Display Nearest Place',
-  displayExportButton: 'Display Export Button',
+  displayNearestPlace: 'Display Nearest Place Text',
   displayMapsiteButton: 'Display Mapsite Button',
   displayMapAnnotation: 'Display Map Annotation',
-  displayPopupMessage: 'Display Popup Message',
   w3wLanguage: 'Select what3words language'
 }
