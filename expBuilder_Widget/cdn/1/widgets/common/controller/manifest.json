@@ -1,0 +1,110 @@
+{
+  "name": "controller",
+  "label": "Widget Controller",
+  "type": "widget",
+  "version": "1.16.0",
+  "exbVersion": "1.16.0",
+  "author": "Esri R&D Center Beijing",
+  "description": "This is the widget used in developer guide",
+  "copyright": "",
+  "license": "http://www.apache.org/licenses/LICENSE-2.0",
+  "messageActions": [
+    {
+      "name": "openWidget",
+      "label": "Open widget",
+      "uri": "message-actions/open-widgets-action",
+      "settingUri": "message-actions/open-widgets-action-setting"
+    }
+  ],
+  "defaultSize": {
+    "height": 54,
+    "width": 200,
+    "autoWidth": true,
+    "autoHeight": true
+  },
+  "properties": {
+    "hasSettingPage": true,
+    "hasEmbeddedLayout": true,
+    "isWidgetController": true,
+    "supportAutoSize": true,
+    "useDragHandler": true,
+    "canCrossLayoutBoundary": true,
+    "hasBuilderSupportModule": true
+  },
+  "layouts": [
+    {
+      "name": "controller",
+      "label": "Controller layout",
+      "type": "FIXED"
+    }
+  ],
+  "extensions": [
+    {
+      "name": "previous",
+      "point": "CONTEXT_TOOL",
+      "uri": "tools/previous"
+    },
+    {
+      "name": "next",
+      "point": "CONTEXT_TOOL",
+      "uri": "tools/next"
+    },
+    {
+      "name": "manage-widgets",
+      "point": "CONTEXT_TOOL",
+      "uri": "tools/manage-widgets"
+    },
+    {
+      "name": "add-widget",
+      "point": "CONTEXT_TOOL",
+      "uri": "tools/add-widget"
+    },
+    {
+      "name": "appConfigOperations",
+      "point": "APP_CONFIG_OPERATIONS",
+      "uri": "tools/app-config-operations"
+    }
+  ],
+  "translatedLocales": [
+    "en",
+    "ar",
+    "bg",
+    "bs",
+    "ca",
+    "cs",
+    "da",
+    "de",
+    "el",
+    "es",
+    "et",
+    "fi",
+    "fr",
+    "he",
+    "hr",
+    "hu",
+    "id",
+    "it",
+    "ja",
+    "ko",
+    "lt",
+    "lv",
+    "nb",
+    "nl",
+    "pl",
+    "pt-br",
+    "pt-pt",
+    "ro",
+    "ru",
+    "sk",
+    "sl",
+    "sr",
+    "sv",
+    "th",
+    "tr",
+    "zh-cn",
+    "uk",
+    "vi",
+    "zh-hk",
+    "zh-tw"
+  ]
+}

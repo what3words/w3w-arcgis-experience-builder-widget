@@ -1,0 +1,22 @@
+export default {
+  _widgetLabel: 'Widget Controller',
+  behavior: 'Behavior',
+  openWidget: 'How many widgets can be opened',
+  displayType: 'Display type',
+  iconStyle: 'Icon',
+  showIconLabel: 'Label',
+  iconSizeOverride: 'Size',
+  iconInterval: 'Spacing',
+  advancedIconStyle: 'Icon style',
+  advancedIconColor: 'Icon color',
+  openStart: 'Open widgets on loading',
+  widgetsSelected: '{widgetNumber} widgets selected',
+  appearanceTip: 'Select the widgets inside the Widget Controller, and customize their icons, labels, or styles to change their appearances.',
+  appearanceTipExpress: 'Customize widget icon styles within the Widget Controller to change their appearances.',
+  widgetPanelArrangment: 'Widget panel arrangement',
+  panelFloating: 'Floating',
+  indicator: 'Indicator',
+  messageAction_openWidget: 'Open widget',
+  overflownStyle: 'Overflown style',
+  popupWindow: 'Popup window'
+}

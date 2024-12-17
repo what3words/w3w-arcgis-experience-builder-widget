@@ -30,18 +30,26 @@ You can find the Custom Web AppBuilder what3words widget in this [Github page](h
 ![Search widget](./docs/ScreenShot-02-search-w3w.png)
 
 - Once you have found it you can drag and drop the widget onto your application whichever you prefer, next to map, on top of it or at the bottom of it. 
-On the widget you can display the what3words address, the coordinates in WGS84, the zoom and copy buttons. 
+On the widget you can display the what3words address, the coordinates in WGS84, the copy and mapsite buttons, and the map annotation of the address. 
 On the Content panel of the widget on the right hand side, you have 3 sections:
     1. Select a map that you want your widget to work on;
-    2. Set the what3words locator. Click on `Set Locator` and you will be able to select your what3words locator from the ArcGIS Online or your Portal for ArcGIS. 
+    2. Select your `Mode Selection` by using the:
+      - what3words API key
+      - or what3words Locator URL  
+    If you choose the API key, you need to `enter your what3words API key`. Click `Save` and then choose your `what3words language`.
+    If you choose the locator URL, you can `Select Utility`. Search among your locators on your ArcGIS Online account and pick the one you want to use.
     3. Display some widget options:
-        - The Lat/Long coordinates options allows you to display the WGS84 coordinates of the related what3words address;
-        - The Zoom button allows you to get to 5000m closer to the point on the map;
+        - The Latitude & Longitude coordinates options allows you to display the WGS84 coordinates of the related what3words address;
         - The Copy button allows you to copy the what3words to your clipboard;
-        - With Popup message enabled you can display a popup message with the what3words address info above the map marker after tapping anywhere on the map.
+        - The Mapsite button allows you to open the what3words address to the mapsite www.what3words.com;
+        - The Map Annotation allows you to display the label of the what3words address next to the marker;
+        - The Nearest Place Text is only available if you choose the API mode and displays the nearest places for that what3words address.
 
+### API mode
+![Drag and drop widget with API mode](./docs/ScreenShot-03-drag-and-drop-w3w-api.png)
 
-![Drag and drop widget](./docs/ScreenShot-03-drag-and-drop-w3w.png)
+### Locator URL mode
+![Drag and drop widget with Locator URL mode](./docs/ScreenShot-03-drag-and-drop-w3w.png)
 
 
 - Configure the widget with your `what3words Locator URL`. By using the what3words locator, you would be able to retrieve the correct what3words address in any coordinate systems used on your web map.
@@ -67,41 +75,6 @@ If after installing correctly the what3words locator across your ArcGIS platform
 To resolve this issue, please drag-and-drop the what3words locator at the top of the Geocoding service list, as it is shown on this screenshot. You can find this list under your `Organisation > Utility services > Geocoding section`. 
 ![Troubleshooting what3words locator display](./docs/ScreenShot-05-troubleshooting-w3w-locator.png)
 
-To make it work with the @what3words/api, you need to add to your experience builder app this code snippet to the `widget-webpack-override.js` which is a file in `<Path-to-file>/ArcGISExperienceBuilder-v1.15/client/webpack/widget-webpack-override.js` in your ArcGIS experience builder app:
-
-```js
-const webpack = require('webpack');
-
-module.exports = function (webpackConfig) {
-  // Add fallbacks for Node.js core modules
-  webpackConfig.resolve.fallback = {
-    ...webpackConfig.resolve.fallback, // Preserve existing fallbacks
-    os: require.resolve('os-browserify/browser'),
-    stream: require.resolve('stream-browserify'),
-    https: require.resolve('https-browserify'),
-    url: require.resolve('url'),
-    zlib: require.resolve('browserify-zlib'),
-    http: require.resolve('stream-http'),
-  };
-
-  // Add plugins to provide global variables for process and Buffer
-  webpackConfig.plugins.push(
-    new webpack.ProvidePlugin({
-      process: 'process/browser.js',
-      Buffer: ['buffer', 'Buffer'],
-    })
-  );
-
-  return webpackConfig;
-};
-```
-
-and run the following npm install command
-
-```bash
-npm install os-browserify stream-browserify https-browserify url browserify-zlib stream-http process buffer --save-dev
-```
-
 
 ## Issues
 
@@ -119,9 +92,12 @@ All contributions are welcome; please submit a pull request.
 
 ## Revision History
 * `v1.0.0`  - Add the locator to the ArcGIS Experience Builder
-* `v.1.0.2` - Add a temporary fix to validate any Locator URLs
-* `v.1.0.3` - Publish the app on a web server
-* `v.1.0.4` - Fix bug - What3words widget can be displayed on maps with layers
+* `v1.0.2` - Add a temporary fix to validate any Locator URLs
+* `v1.0.3` - Publish the app on a web server
+* `v1.0.4` - Fix bug - What3words widget can be displayed on maps with layers
+* `v1.0.5` - update offset marker and label on the map to the actual location of the point
+* `v1.0.6` - Fix the issue of retrieving null what3wrods at first tap on the map.Compatible to exp builder v1.15
+* `v1.1.0` - New UI, add API key mode and new features
 
 
 
