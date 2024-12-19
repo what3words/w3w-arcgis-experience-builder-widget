@@ -1,0 +1,95 @@
+System.register(["jimu-core","jimu-ui","jimu-ui/advanced/setting-components","jimu-ui/advanced/data-source-selector","jimu-arcgis","jimu-core/react"],(function(e,t){var s={},i={},a={},o={},n={},r={};return{setters:[function(e){s.AllDataSourceTypes=e.AllDataSourceTypes,s.FormattedMessage=e.FormattedMessage,s.Immutable=e.Immutable,s.React=e.React,s.SessionManager=e.SessionManager,s.css=e.css,s.defaultMessages=e.defaultMessages,s.esri=e.esri,s.getAppStore=e.getAppStore,s.hooks=e.hooks,s.jsx=e.jsx,s.polished=e.polished},function(e){i.Alert=e.Alert,i.Checkbox=e.Checkbox,i.ImageWithParam=e.ImageWithParam,i.Label=e.Label,i.Radio=e.Radio,i.Switch=e.Switch,i.defaultMessages=e.defaultMessages},function(e){a.JimuLayerViewSelector=e.JimuLayerViewSelector,a.MapWidgetSelector=e.MapWidgetSelector,a.MultipleJimuMapConfig=e.MultipleJimuMapConfig,a.SettingRow=e.SettingRow,a.SettingSection=e.SettingSection},function(e){o.DataSourceSelector=e.DataSourceSelector},function(e){n.JimuMapViewComponent=e.JimuMapViewComponent,n.MapViewManager=e.MapViewManager},function(e){r.createRef=e.createRef}],execute:function(){e((()=>{var e={62686:e=>{"use strict";e.exports=n},79244:e=>{"use strict";e.exports=s},68972:e=>{"use strict";e.exports=r},14321:e=>{"use strict";e.exports=i},13089:e=>{"use strict";e.exports=o},79298:e=>{"use strict";e.exports=a}},t={};function l(s){var i=t[s];if(void 0!==i)return i.exports;var a=t[s]={exports:{}};return e[s](a,a.exports,l),a.exports}l.d=(e,t)=>{for(var s in t)l.o(t,s)&&!l.o(e,s)&&Object.defineProperty(e,s,{enumerable:!0,get:t[s]})},l.o=(e,t)=>Object.prototype.hasOwnProperty.call(e,t),l.r=e=>{"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(e,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(e,"__esModule",{value:!0})},l.p="";var c={};return l.p=window.jimuConfig.baseUrl,(()=>{"use strict";l.r(c),l.d(c,{__set_webpack_public_path__:()=>S,default:()=>m});var e=l(79244),t=l(14321),s=l(79298),i=l(13089);const a={sourceLabel:"Source",sourceDescript:"A web map or web scene, or any combination of the two.",goto:"Zoom to",layerTransparency:"Adjust layer transparency",information:"View layer details",setVisibility:"Toggle layer visibility",showOrHideLabels:"Show or hide labels",showLayerForMap:"Show layers for map data only",enableCustomizeLayers:"Enable customize layers",customizeLayerDesc:"Select the layers to display for users.",customizeLayerWarnings:"The selected Map widget does not contain a web map or web scene.",enableLegend:"Show legend",showAllLegend:"Show legend for all visible layers by default",useTickBoxes:"Use tick boxes to control layer visibility",reorderLayers:"Reorder layers",searchLayers:"Search layers"};class o extends e.React.PureComponent{constructor(t){super(t),this.unmount=!1,this.setMapThumbUrl=t=>{if(t||this.setState({mapThumbUrl:null}),this.props.portUrl&&this.props.portUrl!==(0,e.getAppStore)().getState().portalUrl)e.esri.restPortal.searchItems({q:`id:${t}`,portal:this.props.portUrl+"/sharing/rest"}).then((e=>{if(!this.unmount)if(e.results[0]){const t=`${this.props.portUrl}/sharing/rest/content/items/${e.results[0].id}/info/${e.results[0].thumbnail}`;this.setState({mapThumbUrl:t})}else this.setState({mapThumbUrl:null})}));else{const s=(0,e.getAppStore)().getState().portalUrl,i=e.SessionManager.getInstance().getSessionByUrl(s);e.esri.restPortal.searchItems({q:`id:${t}`,authentication:e.SessionManager.getInstance().getSessionByUrl(s),portal:s+"/sharing/rest"}).then((e=>{if(!this.unmount)if(e.results[0]){const t=`${s}/sharing/rest/content/items/${e.results[0].id}/info/${e.results[0].thumbnail}?token=${null==i?void 0:i.token}`;this.setState({mapThumbUrl:t})}else this.setState({mapThumbUrl:null})}))}},this.state={mapThumbUrl:null}}componentDidMount(){this.unmount=!1,this.setMapThumbUrl(this.props.mapItemId)}componentDidUpdate(e,t){e.mapItemId!==this.props.mapItemId&&this.setMapThumbUrl(this.props.mapItemId)}componentWillUnmount(){this.unmount=!0}render(){return this.state.mapThumbUrl?e.React.createElement(t.ImageWithParam,{imageParam:{url:this.state.mapThumbUrl}}):e.React.createElement(t.ImageWithParam,{imageParam:{}})}}var n=l(62686),r=function(e,t,s,i){return new(s||(s=Promise))((function(a,o){function n(e){try{l(i.next(e))}catch(e){o(e)}}function r(e){try{l(i.throw(e))}catch(e){o(e)}}function l(e){var t;e.done?a(e.value):(t=e.value,t instanceof s?t:new s((function(e){e(t)}))).then(n,r)}l((i=i.apply(e,t||[])).next())}))};function d(i){var o;const{mapViewId:l,isCustomizeEnabled:c,settingProps:d}=i,p=e.hooks.useTranslation(a,e.defaultMessages),h=n.MapViewManager.getInstance().getJimuMapViewById(l),u=e.React.useCallback((()=>{if(!l)return[];const e=[];for(const t of Object.keys(h.jimuLayerViews))e.push(t);return e}),[h.jimuLayerViews,l]),g=e.React.useCallback((()=>{var e,t,s;if(!l)return[];const i=u(),a=new Set(null===(s=null===(t=null===(e=d.config)||void 0===e?void 0:e.customizeLayerOptions)||void 0===t?void 0:t[l])||void 0===s?void 0:s.hiddenJimuLayerViewIds);return i.filter((e=>!a.has(e)))}),[u,l,null===(o=d.config)||void 0===o?void 0:o.customizeLayerOptions]),m=g(),[S,w]=e.React.useState(m),y=(e,t)=>r(this,void 0,void 0,(function*(){const s=u(),i=new Set(s);if(t){const e=Array.from(i);w(e)}else{const e=new Set(S),t=s.filter((t=>!e.has(t)));for(const e of t){(yield h.whenJimuLayerViewLoaded(e)).layer.listMode="show"}w([])}d.onSettingChange({id:d.id,config:d.config.setIn(["customizeLayerOptions",e],{isEnabled:t,hiddenJimuLayerViewIds:[]})})}));return(0,e.jsx)(e.React.Fragment,null,(0,e.jsx)("div",{className:"w-100 h-100",css:(f=d.theme,e.css`
+    .layer-item-panel {
+      .setting-header {
+        padding: ${e.polished.rem(10)} ${e.polished.rem(16)} ${e.polished.rem(0)} ${e.polished.rem(16)}
+      }
+      .setting-title {
+        font-size: ${e.polished.rem(16)};
+        .layer-item-label{
+          color: ${f.ref.palette.neutral[1e3]};
+        }
+      }
+      .setting-container {
+        height: calc(100% - ${e.polished.rem(50)});
+        overflow: auto;
+
+        .title-desc {
+          color: ${f.ref.palette.neutral[800]};
+        }
+
+        .ep-divider-bottom {
+          border-bottom: 1px solid var(--ref-palette-neutral-700)
+        }
+
+        .ep-divider-hide {
+          border-bottom: none !important
+        }
+
+        .ep-section-title {
+          max-width: 80%;
+          color: var(--ref-palette-neutral-1100);
+        }
+      }
+    }
+  `)},(0,e.jsx)("div",{className:"w-100 h-100 layer-item-panel"},(0,e.jsx)(s.SettingSection,null,(0,e.jsx)(s.SettingRow,{label:p("enableCustomizeLayers")},(0,e.jsx)(t.Switch,{className:"can-x-switch",checked:c,"data-key":"enableCustomizeLayers",onChange:e=>{y(l,e.target.checked)},"aria-label":p("enableCustomizeLayers")})),c&&(0,e.jsx)(s.SettingRow,null,(0,e.jsx)(s.JimuLayerViewSelector,{key:l,jimuMapViewId:l,onChange:e=>{const t=u(),s=new Set(e),i=[];for(const e of t)s.has(e)||i.push(e);w(e),(e=>{const t=d.config.setIn(["customizeLayerOptions",l,"hiddenJimuLayerViewIds"],e);d.onSettingChange({id:d.id,config:t})})(i)},isMultiSelection:!0,defaultSelectedValues:m}))))));var f}var p=l(68972),h=function(e,t,s,i){return new(s||(s=Promise))((function(a,o){function n(e){try{l(i.next(e))}catch(e){o(e)}}function r(e){try{l(i.throw(e))}catch(e){o(e)}}function l(e){var t;e.done?a(e.value):(t=e.value,t instanceof s?t:new s((function(e){e(t)}))).then(n,r)}l((i=i.apply(e,t||[])).next())}))};const u=Object.assign({},a,t.defaultMessages);class g extends e.React.PureComponent{constructor(i){super(i),this.supportedDsTypes=(0,e.Immutable)([e.AllDataSourceTypes.WebMap,e.AllDataSourceTypes.WebScene]),this.customizeLayersTrigger=(0,p.createRef)(),this.getPortUrl=()=>(0,e.getAppStore)().getState().portalUrl,this.shouldShowCustomizeLayerOptions=()=>{var e;return(null===(e=this.props.useMapWidgetIds)||void 0===e?void 0:e.length)>0},this.shouldShowLayerList=()=>!this.isDataSourceEmpty(),this.isCustomizeOptionEmpty=()=>this.isDataSourceEmpty()&&!this.shouldShowCustomizeWarning(),this.onRadioChange=e=>{this.props.onSettingChange({id:this.props.id,config:this.props.config.set("useMapWidget",e)}),this.setState({useMapWidget:e})},this.onToolsChanged=(e,t)=>{this.props.onSettingChange({id:this.props.id,config:this.props.config.set(t,e)})},this.onOptionsChanged=(e,t)=>{this.props.onSettingChange({id:this.props.id,config:this.props.config.set(t,e)})},this.onToggleUseDataEnabled=e=>{this.props.onSettingChange({id:this.props.id,useDataSourcesEnabled:e})},this.onDataSourceChange=e=>{e&&this.props.onSettingChange({id:this.props.id,useDataSources:e})},this.onMapWidgetSelected=e=>h(this,void 0,void 0,(function*(){var t,s,i,a,o,r,l;const c=(null===(t=n.MapViewManager.getInstance().getJimuMapViewGroup(e[0]))||void 0===t?void 0:t.jimuMapViews)||{};this.setState({mapViews:c}),this.props.onSettingChange({id:this.props.id,useMapWidgetIds:e});const d=(null===(i=n.MapViewManager.getInstance().getJimuMapViewGroup(null===(s=this.props.useMapWidgetIds)||void 0===s?void 0:s[0]))||void 0===i?void 0:i.jimuMapViews)||{};if((null===(a=this.props.useMapWidgetIds)||void 0===a?void 0:a.length)>0&&d){const e=null===(o=Object.values(d))||void 0===o?void 0:o[0],t=null===(l=null===(r=this.props.config)||void 0===r?void 0:r.customizeLayerOptions)||void 0===l?void 0:l[null==e?void 0:e.id];if(null==t?void 0:t.isEnabled){const s=new Set(null==t?void 0:t.hiddenJimuLayerViewIds);for(const t of Object.keys(null==e?void 0:e.jimuLayerViews)){const i=yield e.whenJimuLayerViewLoaded(t),a=null==i?void 0:i.layer;s.has(t)&&(a.listMode="show")}}}})),this.onViewsCreate=e=>{const t=Object.keys(e);this.setState({mapViews:e,viewIdsFromMapWidget:t})},this.onListItemBodyClick=e=>{var t;const s=`${null===(t=this.props.useMapWidgetIds)||void 0===t?void 0:t[0]}-${e}`;this.setState({activeCustomizeJmvId:s})},this.getActiveCustomizeStatus=()=>{var e,t,s;return(null===(s=null===(t=null===(e=this.props.config)||void 0===e?void 0:e.customizeLayerOptions)||void 0===t?void 0:t[this.state.activeCustomizeJmvId])||void 0===s?void 0:s.isEnabled)||!1},this.getCustomizeLayerList=()=>{var t;return(0,e.jsx)("div",{ref:this.customizeLayersTrigger,className:"w-100"},(0,e.jsx)(s.MultipleJimuMapConfig,{mapWidgetId:null===(t=this.props.useMapWidgetIds)||void 0===t?void 0:t[0],forwardRef:e=>{this.customizeLayersRef=e},onClick:this.onListItemBodyClick,sidePopperContent:(0,e.jsx)(d,{mapViewId:this.state.activeCustomizeJmvId,isCustomizeEnabled:this.getActiveCustomizeStatus(),settingProps:this.props})}))},this.getCustomizeSettingContent=()=>this.shouldShowCustomizeLayerOptions()&&(0,e.jsx)(e.React.Fragment,null,(0,e.jsx)(s.SettingRow,{label:this.getTranslatedString("customizeLayers")}),(0,e.jsx)(s.SettingRow,{"aria-label":this.getTranslatedString("customizeLayers"),className:this.isCustomizeOptionEmpty()?"empty-customize-layer-list":"customize-layer-list"},this.shouldShowCustomizeWarning()&&(0,e.jsx)(t.Alert,{tabIndex:0,className:"warningMsg",open:!0,text:this.getTranslatedString("customizeLayerWarnings"),type:"warning"}),this.shouldShowLayerList()&&this.getCustomizeLayerList())),this.shouldShowCustomizeWarning=()=>!this.state.useMapWidget||this.isDataSourceEmpty(),this.isDataSourceEmpty=()=>{var e,t,s;const i=(null===(e=n.MapViewManager.getInstance().getJimuMapViewGroup(this.props.useMapWidgetIds[0]))||void 0===e?void 0:e.jimuMapViews)||{};return 1===Object.keys(i).length&&!(null===(s=null===(t=Object.values(i))||void 0===t?void 0:t[0])||void 0===s?void 0:s.dataSourceId)},this.state={mapViews:null,useMapWidget:this.props.config.useMapWidget||!1,viewIdsFromMapWidget:null,activeCustomizeJmvId:""}}getTranslatedString(e){return this.props.intl.formatMessage({id:e,defaultMessage:u[e]})}getFormattedMessage(t){return(0,e.jsx)(e.FormattedMessage,{id:t,defaultMessage:u[t]})}render(){var a,r;const l=this.getPortUrl();let c=null,d=null,p=null,h=null,u=null;return d=(0,e.jsx)("div",{className:"data-selector-section"},(0,e.jsx)(s.SettingRow,null,(0,e.jsx)(i.DataSourceSelector,{types:this.supportedDsTypes,useDataSources:this.props.useDataSources,useDataSourcesEnabled:!0,mustUseDataSource:!0,onChange:this.onDataSourceChange,widgetId:this.props.id})),l&&this.props.dsJsons&&this.props.useDataSources&&1===this.props.useDataSources.length&&(0,e.jsx)(s.SettingRow,null,(0,e.jsx)("div",{className:"w-100"},(0,e.jsx)("div",{className:"webmap-thumbnail",title:null===(a=this.props.dsJsons[this.props.useDataSources[0].dataSourceId])||void 0===a?void 0:a.label},(0,e.jsx)(o,{mapItemId:this.props.dsJsons[this.props.useDataSources[0].dataSourceId]?this.props.dsJsons[this.props.useDataSources[0].dataSourceId].itemId:null,portUrl:this.props.dsJsons[this.props.useDataSources[0].dataSourceId]?this.props.dsJsons[this.props.useDataSources[0].dataSourceId].portalUrl:null}))))),p=(0,e.jsx)("div",{className:"map-selector-section"},(0,e.jsx)(s.SettingRow,null,(0,e.jsx)(s.MapWidgetSelector,{onSelect:this.onMapWidgetSelected,useMapWidgetIds:this.props.useMapWidgetIds})),(0,e.jsx)(n.JimuMapViewComponent,{useMapWidgetId:null===(r=this.props.useMapWidgetIds)||void 0===r?void 0:r[0],onViewsCreate:this.onViewsCreate}),this.getCustomizeSettingContent()),this.state.useMapWidget?(c=p,h=(0,e.jsx)(e.React.Fragment,null,(0,e.jsx)(s.SettingRow,{label:this.getFormattedMessage("goto")},(0,e.jsx)(t.Switch,{className:"can-x-switch",checked:this.props.config&&this.props.config.goto||!1,"data-key":"goto",onChange:e=>{this.onToolsChanged(e.target.checked,"goto")},"aria-label":this.getTranslatedString("goto")})),(0,e.jsx)(s.SettingRow,{label:this.getFormattedMessage("showOrHideLabels")},(0,e.jsx)(t.Switch,{className:"can-x-switch",checked:this.props.config&&this.props.config.label||!1,"data-key":"goto",onChange:e=>{this.onToolsChanged(e.target.checked,"label")},"aria-label":this.getTranslatedString("showOrHideLabels")})),(0,e.jsx)(s.SettingRow,{label:this.getFormattedMessage("transparency")},(0,e.jsx)(t.Switch,{className:"can-x-switch",checked:this.props.config&&this.props.config.opacity||!1,"data-key":"opacity",onChange:e=>{this.onToolsChanged(e.target.checked,"opacity")},"aria-label":this.getTranslatedString("transparency")}))),u=(0,e.jsx)(e.React.Fragment,null,(0,e.jsx)(s.SettingRow,{label:this.getFormattedMessage("useTickBoxes")},(0,e.jsx)(t.Switch,{className:"can-x-switch",checked:this.props.config&&this.props.config.useTickBoxes,"data-key":"useTickBoxes",onChange:e=>{this.onOptionsChanged(e.target.checked,"useTickBoxes")}})),(0,e.jsx)(s.SettingRow,{label:this.getFormattedMessage("enableLegend")},(0,e.jsx)(t.Switch,{className:"can-x-switch",checked:this.props.config&&this.props.config.enableLegend||!1,"data-key":"enableLegend",onChange:e=>{this.onOptionsChanged(e.target.checked,"enableLegend")},"aria-label":this.getTranslatedString("enableLegend")})),this.props.config&&this.props.config.enableLegend&&(0,e.jsx)(s.SettingRow,null,(0,e.jsx)(t.Label,{"aria-label":this.getTranslatedString("showAllLegend"),className:"cursor-pointer"},(0,e.jsx)(t.Checkbox,{className:"mr-2",checked:this.props.config&&this.props.config.showAllLegend,onChange:e=>{this.onOptionsChanged(e.target.checked,"showAllLegend")}}),(0,e.jsx)("span",{className:"check-box-label"},` ${this.getTranslatedString("showAllLegend")}`))),(0,e.jsx)(s.SettingRow,{label:this.getFormattedMessage("reorderLayers")},(0,e.jsx)(t.Switch,{className:"can-x-switch",checked:this.props.config&&this.props.config.reorderLayers||!1,"data-key":"reorderLayers",onChange:e=>{this.onOptionsChanged(e.target.checked,"reorderLayers")},"aria-label":this.getTranslatedString("reorderLayers")})),(0,e.jsx)(s.SettingRow,{label:this.getFormattedMessage("searchLayers")},(0,e.jsx)(t.Switch,{className:"can-x-switch",checked:this.props.config&&this.props.config.searchLayers||!1,"data-key":"searchLayers",onChange:e=>{this.onOptionsChanged(e.target.checked,"searchLayers")},"aria-label":this.getTranslatedString("searchLayers")})))):c=d,(0,e.jsx)("div",{css:(g=this.props.theme,e.css`
+    .widget-setting-layerlist{
+      .source-descript {
+        color: ${g.ref.palette.neutral[1e3]};
+      }
+
+      .webmap-thumbnail{
+        cursor: auto;
+        width: 100%;
+        height: 120px;
+        overflow: hidden;
+        padding: 1px;
+        border: ${e.polished.rem(2)} solid initial;
+        img, div{
+          width: 100%;
+          height: 100%;
+        }
+      }
+
+      .warning-tooltip{
+        .jimu-icon-component {
+          color: ${g.sys.color.warning.main}
+        }
+      }
+
+      .customize-layer-list{
+        margin-top: ${e.polished.rem(12)};
+      }
+
+      .empty-customize-layer-list{
+        margin-top: 0;
+      }
+
+      .layerlist-tools{
+        .layerlist-tools-item{
+          display: flex;
+          /* justify-content: space-between; */
+          margin-bottom: 8px;
+          align-items: center;
+        }
+      }
+
+      .map-selector-section .component-map-selector .form-control{
+        width: 100%;
+      }
+
+      .data-selector-section, .map-selector-section{
+        padding-top: 10px;
+      }
+
+      .check-box-label {
+        color: ${g.ref.palette.neutral[1e3]};
+        font-weight: 400;
+        line-height: ${e.polished.rem(18)};
+      }
+
+      .cursor-pointer {
+        cursor: pointer;
+      }
+
+    }
+  `)},(0,e.jsx)("div",{className:"widget-setting-layerlist"},(0,e.jsx)(s.SettingSection,{title:this.getTranslatedString("sourceLabel"),role:"group","aria-label":this.getTranslatedString("sourceLabel")},(0,e.jsx)(s.SettingRow,null,(0,e.jsx)("div",{className:"layerlist-tools w-100"},(0,e.jsx)("div",{className:"w-100"},(0,e.jsx)("div",{className:"layerlist-tools-item radio"},(0,e.jsx)(t.Radio,{id:"map-data",style:{cursor:"pointer"},name:"source-option",onChange:e=>{this.onRadioChange(!1)},checked:!this.state.useMapWidget}),(0,e.jsx)(t.Label,{style:{cursor:"pointer"},for:"map-data",className:"ml-1"},this.getTranslatedString("showLayerForMap")))),(0,e.jsx)("div",{className:"w-100"},(0,e.jsx)("div",{className:"layerlist-tools-item radio"},(0,e.jsx)(t.Radio,{id:"map-view",style:{cursor:"pointer"},name:"source-option",onChange:e=>{this.onRadioChange(!0)},checked:this.state.useMapWidget}),(0,e.jsx)(t.Label,{style:{cursor:"pointer"},for:"map-view",className:"ml-1"},this.getTranslatedString("interactWithMap")))))),c),(0,e.jsx)(s.SettingSection,{title:this.getTranslatedString("options"),role:"group","aria-label":this.getTranslatedString("options")},h,(0,e.jsx)(s.SettingRow,{label:this.getFormattedMessage("information")},(0,e.jsx)(t.Switch,{className:"can-x-switch",checked:this.props.config&&this.props.config.information||!1,"data-key":"information",onChange:e=>{this.onToolsChanged(e.target.checked,"information")},"aria-label":this.getTranslatedString("information")})),u)));var g}}g.mapExtraStateProps=e=>({dsJsons:e.appStateInBuilder.appConfig.dataSources});const m=g;function S(e){l.p=e}})(),c})())}}}));

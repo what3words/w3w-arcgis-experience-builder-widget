@@ -1,0 +1,89 @@
+{
+  "name": "search",
+  "label": "Search",
+  "type": "widget",
+  "version": "1.15.0",
+  "exbVersion": "1.15.0",
+  "author": "Esri R&D Center Beijing",
+  "description": "This is the widget used in developer guide",
+  "copyright": "",
+  "publishMessages": [
+    {
+      "messageType": "DATA_RECORDS_SELECTION_CHANGE",
+      "messageCarryData": "BOTH_DATA_SOURCE"
+    },
+    {
+      "messageType": "DATA_RECORD_SET_CHANGE",
+      "messageCarryData": "OUTPUT_DATA_SOURCE"
+    },
+    {
+      "messageType": "DATA_SOURCE_FILTER_CHANGE",
+      "messageCarryData": "BOTH_DATA_SOURCE"
+    }
+  ],
+  "license": "http://www.apache.org/licenses/LICENSE-2.0",
+  "defaultSize": {
+    "width": 400,
+    "height": 34,
+    "autoHeight": true
+  },
+  "properties": {
+    "hasSettingPage": true,
+    "canGenerateMultipleOutputDataSources": true
+  },
+  "urlParameters": [
+    {
+      "name": "search_status",
+      "label": "Search status"
+    }
+  ],
+  "extensions": [
+    {
+      "name": "appConfigOperations",
+      "point": "APP_CONFIG_OPERATIONS",
+      "uri": "tools/app-config-operations"
+    }
+  ],
+  "translatedLocales": [
+    "en",
+    "ar",
+    "bg",
+    "bs",
+    "ca",
+    "cs",
+    "da",
+    "de",
+    "el",
+    "es",
+    "et",
+    "fi",
+    "fr",
+    "he",
+    "hr",
+    "hu",
+    "id",
+    "it",
+    "ja",
+    "ko",
+    "lt",
+    "lv",
+    "nb",
+    "nl",
+    "pl",
+    "pt-br",
+    "pt-pt",
+    "ro",
+    "ru",
+    "sk",
+    "sl",
+    "sr",
+    "sv",
+    "th",
+    "tr",
+    "zh-cn",
+    "uk",
+    "vi",
+    "zh-hk",
+    "zh-tw"
+  ]
+}
