@@ -103,7 +103,6 @@
             "width": "200.00px",
             "height": "4.3%"
           },
-          "widgetId": "widget_27",
           "setting": {
             "autoProps": {
               "right": false,
@@ -112,8 +111,17 @@
               "bottom": true,
               "width": "CUSTOM",
               "height": "AUTO"
+            },
+            "effect": {
+              "SCROLL_IN": {
+                "type": "FLOAT_IN",
+                "option": {
+                  "direction": null
+                }
+              }
             }
-          }
+          },
+          "widgetId": "widget_29"
         }
       },
       "label": "Map FixedLayout"
@@ -246,7 +254,6 @@
             "width": "200.00px",
             "height": "4.3%"
           },
-          "widgetId": "widget_27",
           "setting": {
             "autoProps": {
               "right": false,
@@ -384,7 +391,6 @@
             "width": "200.00px",
             "height": "4.3%"
           },
-          "widgetId": "widget_27",
           "setting": {
             "autoProps": {
               "right": false,
@@ -450,7 +456,7 @@
         "toolConfig": {
           "canZoom": true,
           "canHome": true,
-          "canSearch": false,
+          "canSearch": true,
           "canNavigation": true,
           "canLocate": true,
           "canCompass": true,
@@ -462,34 +468,9 @@
           "canExtentNavigate": true,
           "canOverviewMap": true
         },
-        "isUseCustomMapState": true,
-        "initialMapState": {
-          "viewPoint": {
-            "rotation": 0,
-            "scale": 18055.95482200384,
-            "targetGeometry": {
-              "spatialReference": {
-                "latestWkid": 3857,
-                "wkid": 102100
-              },
-              "x": -21765.298159390688,
-              "y": 6713947.844383854
-            }
-          },
-          "extent": {
-            "spatialReference": {
-              "latestWkid": 3857,
-              "wkid": 102100
-            },
-            "xmin": -24433.42817804098,
-            "ymin": 6712280.561704339,
-            "xmax": -19097.168140740396,
-            "ymax": 6715615.127063369
-          },
-          "rotation": 0,
-          "viewType": "2d"
-        },
-        "initialMapDataSourceID": "dataSource_1",
+        "isUseCustomMapState": false,
+        "initialMapState": null,
+        "initialMapDataSourceID": "dataSource_3",
         "clientQueryDataSourceIds": [],
         "layoutIndex": 1
       },
@@ -504,10 +485,19 @@
       "label": "Map",
       "useDataSources": [
         {
-          "dataSourceId": "dataSource_1",
-          "mainDataSourceId": "dataSource_1"
+          "dataSourceId": "dataSource_4",
+          "mainDataSourceId": "dataSource_4"
+        },
+        {
+          "dataSourceId": "dataSource_3",
+          "mainDataSourceId": "dataSource_3"
         }
-      ]
+      ],
+      "dataActions": {
+        "viewInTable": {
+          "enabled": true
+        }
+      }
     },
     "widget_24": {
       "id": "widget_24",
@@ -565,13 +555,26 @@
       "id": "widget_8",
       "uri": "widgets/arcgis/map-layers/",
       "config": {
-        "useMapWidget": true
+        "useMapWidget": true,
+        "goto": true,
+        "information": true,
+        "opacity": true,
+        "label": true,
+        "useTickBoxes": true,
+        "enableLegend": true,
+        "reorderLayers": true,
+        "searchLayers": true
       },
       "useMapWidgetIds": [
         "widget_23"
       ],
       "version": "1.15.0",
-      "label": "Map Layers"
+      "label": "Map Layers",
+      "dataActions": {
+        "addToTable": {
+          "enabled": true
+        }
+      }
     },
     "widget_9": {
       "id": "widget_9",
@@ -587,7 +590,158 @@
       "uri": "widgets/common/table/",
       "version": "1.15.0",
       "config": {
-        "layersConfig": [],
+        "layersConfig": [
+          {
+            "id": "widget_29_output_config_0-output-1",
+            "name": "what3words output view",
+            "useDataSource": {
+              "dataSourceId": "widget_29_output_config_0-output",
+              "mainDataSourceId": "widget_29_output_config_0",
+              "dataViewId": "output",
+              "fields": [
+                "Default Address",
+                "objectid",
+                "what3words",
+                "Shape",
+                "Status",
+                "Score",
+                "Match_addr",
+                "Addr_type"
+              ]
+            },
+            "allFields": [
+              {
+                "jimuName": "Default Address",
+                "alias": "Default Address",
+                "type": "STRING",
+                "name": "Default Address"
+              },
+              {
+                "jimuName": "objectid",
+                "alias": "OBJECTID",
+                "type": "NUMBER",
+                "name": "objectid"
+              },
+              {
+                "jimuName": "what3words",
+                "alias": "what3words",
+                "type": "STRING",
+                "name": "what3words"
+              },
+              {
+                "jimuName": "Shape",
+                "alias": "Shape",
+                "type": "STRING",
+                "name": "Shape"
+              },
+              {
+                "jimuName": "Status",
+                "alias": "Status",
+                "type": "STRING",
+                "name": "Status"
+              },
+              {
+                "jimuName": "Score",
+                "alias": "Score",
+                "type": "STRING",
+                "name": "Score"
+              },
+              {
+                "jimuName": "Match_addr",
+                "alias": "Match_addr",
+                "type": "STRING",
+                "name": "Match_addr"
+              },
+              {
+                "jimuName": "Addr_type",
+                "alias": "Addr_type",
+                "type": "STRING",
+                "name": "Addr_type"
+              }
+            ],
+            "tableFields": [
+              {
+                "jimuName": "Default Address",
+                "alias": "Default Address",
+                "type": "STRING",
+                "name": "Default Address",
+                "visible": true
+              },
+              {
+                "jimuName": "objectid",
+                "alias": "OBJECTID",
+                "type": "NUMBER",
+                "name": "objectid",
+                "visible": true
+              },
+              {
+                "jimuName": "what3words",
+                "alias": "what3words",
+                "type": "STRING",
+                "name": "what3words",
+                "visible": true
+              },
+              {
+                "jimuName": "Shape",
+                "alias": "Shape",
+                "type": "STRING",
+                "name": "Shape",
+                "visible": true
+              },
+              {
+                "jimuName": "Status",
+                "alias": "Status",
+                "type": "STRING",
+                "name": "Status",
+                "visible": true
+              },
+              {
+                "jimuName": "Score",
+                "alias": "Score",
+                "type": "STRING",
+                "name": "Score",
+                "visible": true
+              },
+              {
+                "jimuName": "Match_addr",
+                "alias": "Match_addr",
+                "type": "STRING",
+                "name": "Match_addr",
+                "visible": true
+              },
+              {
+                "jimuName": "Addr_type",
+                "alias": "Addr_type",
+                "type": "STRING",
+                "name": "Addr_type",
+                "visible": true
+              }
+            ],
+            "enableAttachements": false,
+            "enableEdit": false,
+            "allowCsv": false,
+            "enableSearch": true,
+            "searchFields": [
+              "Default Address"
+            ],
+            "enableRefresh": true,
+            "enableSelect": true,
+            "enableDelete": false,
+            "selectMode": "SINGLE",
+            "headerFontSetting": {
+              "backgroundColor": "",
+              "fontSize": 14,
+              "bold": false,
+              "color": ""
+            },
+            "columnSetting": {
+              "responsiveType": "FIT",
+              "columnWidth": 200
+            },
+            "layerHonorMode": "WEBMAP",
+            "showCount": true
+          }
+        ],
         "arrangeType": "TABS"
       },
       "id": "widget_26",
@@ -654,20 +808,69 @@
                 "style": "esriSFSSolid"
               }
             }
-          }
+          },
+          "enabled": true
         }
       },
-      "label": "Table"
+      "label": "Table",
+      "useDataSources": [
+        {
+          "dataSourceId": "widget_29_output_config_0-output",
+          "mainDataSourceId": "widget_29_output_config_0",
+          "dataViewId": "output",
+          "fields": [
+            "Default Address",
+            "objectid",
+            "what3words",
+            "Shape",
+            "Status",
+            "Score",
+            "Match_addr",
+            "Addr_type"
+          ]
+        }
+      ]
     },
-    "widget_27": {
+    "widget_28": {
+      "uri": "widgets/what3words/",
+      "version": "1.1.0",
+      "config": {
+        "displayCoordinates": true,
+        "displayCopyButton": true,
+        "displayMapsiteButton": true,
+        "displayNearestPlace": true,
+        "displayMapAnnotation": true,
+        "w3wLanguage": "en",
+        "w3wLocator": "https://utility.arcgis.com/usrsvcs/servers/<Enter Your Unique Path ID>/rest/services/what3words_EN_English/GeocodeServer",
+        "w3wApiKey": "<Enter Your API Key>",
+        "addressSettings": {
+          "useUtilitiesGeocodeService": [
+            {
+              "utilityId": "utility_1"
+            }
+          ],
+          "w3wApiKey": "F4KKWPJ7",
+          "geocodeServiceUrl": "https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer"
+        },
+        "mode": "apiKey"
+      },
+      "id": "widget_28",
+      "useMapWidgetIds": [
+        "widget_23"
+      ]
+    },
+    "widget_29": {
       "uri": "widgets/common/search/",
       "version": "1.15.0",
+      "label": "Search",
       "config": {
         "searchResultView": "Result_Panel",
         "arrangementStyle": "Style1",
+        "searchResultStyle": "Classic",
         "maxSuggestions": 3,
         "recentSearchesMaxNumber": 3,
-        "resultMaxNumber": 3,
+        "resultMaxNumber": 6,
+        "enableFiltering": true,
         "datasourceConfig": [
           {
             "configId": "config_0",
@@ -675,6 +878,7 @@
               "svg": "${appResourceUrl}/images/icon_picker_in_setting/1734606157387.png",
               "properties": {
                 "filename": "1734606157387.png",
+                "color": "var(--dark-800)",
                 "originalName": "w3w_Symbol_RGB_Red.png",
                 "path": "${appResourceUrl}/images/icon_picker_in_setting/1734606157387.png",
                 "isUploaded": true,
@@ -682,7 +886,7 @@
               }
             },
             "label": "what3words",
-            "hint": "Enter here your what3words address",
+            "hint": "Find what3words Address",
             "useUtility": {
               "utilityId": "utility_1"
             },
@@ -693,7 +897,7 @@
               "wkid": 4326,
               "latestWkid": 4326
             },
-            "outputDataSourceId": "widget_27_output_config_0",
+            "outputDataSourceId": "widget_29_output_config_0",
             "addressFields": [
               {
                 "jimuName": "Default Address",
@@ -746,10 +950,10 @@
             ],
             "displayFields": [
               {
-                "jimuName": "what3words",
-                "alias": "what3words",
+                "jimuName": "Default Address",
+                "alias": "Default Address",
                 "type": "STRING",
-                "name": "what3words"
+                "name": "Default Address"
               }
             ],
             "defaultAddressFieldName": "Default Address"
@@ -781,7 +985,7 @@
               "wkid": 4326,
               "latestWkid": 4326
             },
-            "outputDataSourceId": "widget_27_output_config_1",
+            "outputDataSourceId": "widget_29_output_config_1",
             "addressFields": [
               {
                 "jimuName": "Default Address",
@@ -1227,17 +1431,12 @@
             "defaultAddressFieldName": "Default Address"
           }
         ],
-        "hint": "",
-        "isUseCurrentLoation": true,
-        "isShowRecentSearches": true,
-        "isAutoSelectFirstResult": true,
-        "searchResultStyle": "Classic"
+        "isShowRecentSearches": true
       },
-      "id": "widget_27",
-      "label": "Search",
+      "id": "widget_29",
       "outputDataSources": [
-        "widget_27_output_config_0",
-        "widget_27_output_config_1"
+        "widget_29_output_config_0",
+        "widget_29_output_config_1"
       ],
       "useUtilities": [
         {
@@ -1247,35 +1446,22 @@
           "utilityId": "utility_3"
         }
       ],
-      "useDataSources": []
-    },
-    "widget_28": {
-      "uri": "widgets/what3words/",
-      "version": "1.1.0",
-      "config": {
-        "displayCoordinates": true,
-        "displayCopyButton": true,
-        "displayMapsiteButton": true,
-        "displayNearestPlace": true,
-        "displayMapAnnotation": true,
-        "w3wLanguage": "en",
-        "w3wLocator": "https://utility.arcgis.com/usrsvcs/servers/<Enter Your Unique Path ID>/rest/services/what3words_EN_English/GeocodeServer",
-        "w3wApiKey": "<Enter Your API Key>",
-        "addressSettings": {
-          "useUtilitiesGeocodeService": [
-            {
-              "utilityId": "utility_1"
-            }
-          ],
-          "w3wApiKey": "F4KKWPJ7",
-          "geocodeServiceUrl": "https://utility.arcgis.com/usrsvcs/servers/6123e8aa30f345b7a1d18db626ad7156/rest/services/what3words_EN_English/GeocodeServer"
+      "useDataSources": [],
+      "style": {
+        "boxShadow": {
+          "presetStyle": "shadow-lg"
         },
-        "mode": "locatorUrl"
-      },
-      "id": "widget_28",
-      "useMapWidgetIds": [
-        "widget_23"
-      ]
+        "borderRadius": null,
+        "border": {
+          "color": null,
+          "type": "solid",
+          "width": "2px"
+        },
+        "background": {
+          "color": null,
+          "fillType": "fill"
+        }
+      }
     }
   },
   "exbVersion": "1.15.0",
@@ -1290,8 +1476,16 @@
   "sections": {},
   "dialogs": {},
   "dataSources": {
-    "widget_27_output_config_0": {
-      "id": "widget_27_output_config_0",
+    "dataSource_1": {
+      "id": "dataSource_1",
+      "type": "WEB_MAP",
+      "sourceLabel": "PublicTestWebMapViewer",
+      "itemId": "046eda0ccfe64a81bad70f7439fa78dd",
+      "portalUrl": "https://w3w.maps.arcgis.com",
+      "label": "Map"
+    },
+    "widget_29_output_config_0": {
+      "id": "widget_29_output_config_0",
       "type": "FEATURE_LAYER",
       "label": "what3words",
       "originDataSources": [],
@@ -1353,16 +1547,8 @@
       },
       "geometryType": "esriGeometryPoint"
     },
-    "dataSource_1": {
-      "id": "dataSource_1",
-      "type": "WEB_MAP",
-      "sourceLabel": "PublicTestWebMapViewer",
-      "itemId": "046eda0ccfe64a81bad70f7439fa78dd",
-      "portalUrl": "https://w3w.maps.arcgis.com",
-      "label": "Map"
-    },
-    "widget_27_output_config_1": {
-      "id": "widget_27_output_config_1",
+    "widget_29_output_config_1": {
+      "id": "widget_29_output_config_1",
       "type": "FEATURE_LAYER",
       "label": "ArcGIS World Geocoding Service",
       "originDataSources": [],
@@ -1795,15 +1981,386 @@
         }
       },
       "geometryType": "esriGeometryPoint"
+    },
+    "dataSource_2": {
+      "id": "dataSource_2",
+      "type": "WEB_MAP",
+      "sourceLabel": "BNG BASEMAP",
+      "itemId": "c30a1d7815d44ec98dd2b68e479ef571",
+      "portalUrl": "https://w3w.maps.arcgis.com"
+    },
+    "dataSource_3": {
+      "id": "dataSource_3",
+      "type": "WEB_MAP",
+      "sourceLabel": "Vector",
+      "itemId": "132a726a33974e1495c62802b2225c8f",
+      "portalUrl": "https://w3w.maps.arcgis.com"
+    },
+    "dataSource_4": {
+      "id": "dataSource_4",
+      "type": "WEB_MAP",
+      "sourceLabel": "Satellite",
+      "itemId": "e78ce7b107784ed5bc0851c65c6baa53",
+      "portalUrl": "https://w3w.maps.arcgis.com"
     }
   },
-  "messageConfigs": {},
+  "messageConfigs": {
+    "messageConfig_1": {
+      "id": "messageConfig_1",
+      "widgetId": "widget_23",
+      "messageType": "EXTENT_CHANGE",
+      "actions": [
+        {
+          "actionId": "filter-data-record-action-1734612834907",
+          "messageWidgetId": "widget_23",
+          "actionName": "filter data record action",
+          "description": null,
+          "config": [
+            {
+              "messageUseDataSource": null,
+              "actionUseDataSource": null,
+              "sqlExprObj": null,
+              "enableQueryWithCurrentExtent": true
+            }
+          ],
+          "version": "1.15.0",
+          "useDataSources": []
+        }
+      ]
+    },
+    "messageConfig_2": {
+      "id": "messageConfig_2",
+      "widgetId": "widget_23",
+      "messageType": "DATA_RECORDS_SELECTION_CHANGE",
+      "actions": [
+        {
+          "actionId": "widget_24-openWidget-1734612742070",
+          "widgetId": "widget_24",
+          "messageWidgetId": "widget_23",
+          "actionName": "openWidget",
+          "description": null,
+          "config": {
+            "widgetIds": [
+              "widget_28"
+            ],
+            "controllerId": "widget_24"
+          },
+          "version": "1.15.0",
+          "useDataSources": []
+        }
+      ]
+    },
+    "messageConfig_3": {
+      "id": "messageConfig_3",
+      "widgetId": "widget_29",
+      "messageType": "DATA_RECORD_SET_CHANGE",
+      "actions": [
+        {
+          "actionId": "widget_23-showOnMap-1734620176805",
+          "widgetId": "widget_23",
+          "messageWidgetId": "widget_29",
+          "actionName": "showOnMap",
+          "description": null,
+          "config": {
+            "isUseCustomSymbol": true,
+            "symbolOption": {
+              "pointSymbol": {
+                "type": "esriPMS",
+                "angle": 0,
+                "xoffset": 0,
+                "yoffset": 12,
+                "contentType": "image/png",
+                "imageData": "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",
+                "url": "https://static.arcgis.com/images/Symbols/Basic/RedStickpin.png",
+                "height": 24,
+                "width": 24
+              },
+              "polylineSymbol": {
+                "type": "esriSLS",
+                "color": [
+                  192,
+                  80,
+                  77,
+                  255
+                ],
+                "width": 1,
+                "style": "esriSLSSolid"
+              },
+              "polygonSymbol": {
+                "type": "esriSFS",
+                "color": [
+                  192,
+                  80,
+                  77,
+                  128
+                ],
+                "outline": {
+                  "type": "esriSLS",
+                  "color": [
+                    160,
+                    63,
+                    60,
+                    255
+                  ],
+                  "width": 1.5,
+                  "style": "esriSLSSolid"
+                },
+                "style": "esriSFSSolid"
+              }
+            }
+          },
+          "version": "1.15.0",
+          "useDataSources": []
+        },
+        {
+          "actionId": "widget_23-zoomToFeature-1734620199120",
+          "widgetId": "widget_23",
+          "messageWidgetId": "widget_29",
+          "actionName": "zoomToFeature",
+          "description": null,
+          "config": {
+            "useDataSource": {
+              "dataSourceId": "widget_29_output_config_0",
+              "mainDataSourceId": "widget_29_output_config_0",
+              "rootDataSourceId": null
+            },
+            "useDataSources": [
+              {
+                "dataSourceId": "widget_29_output_config_0",
+                "mainDataSourceId": "widget_29_output_config_0",
+                "rootDataSourceId": null
+              },
+              {
+                "dataSourceId": "widget_29_output_config_1",
+                "mainDataSourceId": "widget_29_output_config_1",
+                "rootDataSourceId": null
+              }
+            ]
+          },
+          "version": "1.15.0",
+          "useDataSources": []
+        },
+        {
+          "actionId": "widget_23-panTo-1734620203154",
+          "widgetId": "widget_23",
+          "messageWidgetId": "widget_29",
+          "actionName": "panTo",
+          "description": null,
+          "version": "1.15.0"
+        }
+      ]
+    },
+    "messageConfig_4": {
+      "id": "messageConfig_4",
+      "widgetId": "widget_29",
+      "messageType": "DATA_RECORDS_SELECTION_CHANGE",
+      "actions": [
+        {
+          "actionId": "select-data-record-action-1734620546185",
+          "messageWidgetId": "widget_29",
+          "actionName": "select data record action",
+          "description": null,
+          "config": {
+            "messageUseDataSource": {
+              "dataSourceId": "widget_29_output_config_0-output",
+              "mainDataSourceId": "widget_29_output_config_0",
+              "dataViewId": "output"
+            },
+            "actionUseDataSource": null,
+            "sqlExprObj": null,
+            "enabledDataRelationShip": true
+          },
+          "version": "1.15.0",
+          "useDataSources": [
+            {
+              "dataSourceId": "widget_29_output_config_0-output",
+              "mainDataSourceId": "widget_29_output_config_0",
+              "dataViewId": "output"
+            }
+          ]
+        },
+        {
+          "actionId": "widget_24-openWidget-1734620558952",
+          "widgetId": "widget_24",
+          "messageWidgetId": "widget_29",
+          "actionName": "openWidget",
+          "description": null,
+          "config": {
+            "widgetIds": [
+              "widget_28"
+            ],
+            "controllerId": "widget_24"
+          },
+          "version": "1.15.0",
+          "useDataSources": []
+        }
+      ]
+    },
+    "messageConfig_5": {
+      "id": "messageConfig_5",
+      "widgetId": "widget_26",
+      "messageType": "DATA_RECORDS_SELECTION_CHANGE",
+      "actions": [
+        {
+          "actionId": "select-data-record-action-1734993120947",
+          "messageWidgetId": "widget_26",
+          "actionName": "select data record action",
+          "description": null,
+          "config": {
+            "messageUseDataSource": {
+              "dataSourceId": "widget_29_output_config_0-output",
+              "mainDataSourceId": "widget_29_output_config_0",
+              "dataViewId": "output",
+              "fields": []
+            },
+            "actionUseDataSource": {
+              "dataSourceId": "widget_29_output_config_0-output",
+              "mainDataSourceId": "widget_29_output_config_0",
+              "dataViewId": "output",
+              "fields": []
+            },
+            "sqlExprObj": null,
+            "enabledDataRelationShip": true,
+            "connectionType": "SET_CUSTOM_FIELDS"
+          },
+          "version": "1.15.0",
+          "useDataSources": [
+            {
+              "dataSourceId": "widget_29_output_config_0-output",
+              "mainDataSourceId": "widget_29_output_config_0",
+              "dataViewId": "output",
+              "fields": []
+            },
+            {
+              "dataSourceId": "widget_29_output_config_0-output",
+              "mainDataSourceId": "widget_29_output_config_0",
+              "dataViewId": "output",
+              "fields": []
+            }
+          ]
+        },
+        {
+          "actionId": "widget_23-flash-1734993152773",
+          "widgetId": "widget_23",
+          "messageWidgetId": "widget_26",
+          "actionName": "flash",
+          "description": null,
+          "config": {
+            "messageUseDataSource": {
+              "dataSourceId": "widget_29_output_config_0-output",
+              "mainDataSourceId": "widget_29_output_config_0",
+              "dataViewId": "output"
+            },
+            "actionUseDataSource": null,
+            "sqlExprObj": null,
+            "enabledDataRelationShip": true
+          },
+          "version": "1.15.0",
+          "useDataSources": [
+            {
+              "dataSourceId": "widget_29_output_config_0-output",
+              "mainDataSourceId": "widget_29_output_config_0",
+              "dataViewId": "output"
+            }
+          ]
+        },
+        {
+          "actionId": "widget_23-zoomToFeature-1734993163342",
+          "widgetId": "widget_23",
+          "messageWidgetId": "widget_26",
+          "actionName": "zoomToFeature",
+          "description": null,
+          "config": {
+            "useDataSource": {
+              "dataSourceId": "widget_29_output_config_0-output",
+              "mainDataSourceId": "widget_29_output_config_0",
+              "dataViewId": "output"
+            },
+            "useDataSources": [
+              {
+                "dataSourceId": "widget_29_output_config_0-output",
+                "mainDataSourceId": "widget_29_output_config_0",
+                "dataViewId": "output"
+              }
+            ]
+          },
+          "version": "1.15.0",
+          "useDataSources": []
+        },
+        {
+          "actionId": "widget_23-filter-1734993178153",
+          "widgetId": "widget_23",
+          "messageWidgetId": "widget_26",
+          "actionName": "filter",
+          "description": null,
+          "config": {
+            "messageUseDataSource": {
+              "dataSourceId": "widget_29_output_config_0-output",
+              "mainDataSourceId": "widget_29_output_config_0",
+              "dataViewId": "output"
+            },
+            "actionUseDataSource": null,
+            "sqlExprObj": null,
+            "enabledDataRelationShip": true
+          },
+          "version": "1.15.0",
+          "useDataSources": [
+            {
+              "dataSourceId": "widget_29_output_config_0-output",
+              "mainDataSourceId": "widget_29_output_config_0",
+              "dataViewId": "output"
+            }
+          ]
+        },
+        {
+          "actionId": "widget_23-filter-1734993189485",
+          "widgetId": "widget_23",
+          "messageWidgetId": "widget_26",
+          "actionName": "filter",
+          "description": null,
+          "config": {
+            "messageUseDataSource": {
+              "dataSourceId": "widget_29_output_config_0-output",
+              "mainDataSourceId": "widget_29_output_config_0",
+              "dataViewId": "output"
+            },
+            "actionUseDataSource": null,
+            "sqlExprObj": null,
+            "enabledDataRelationShip": true
+          },
+          "version": "1.15.0",
+          "useDataSources": [
+            {
+              "dataSourceId": "widget_29_output_config_0-output",
+              "mainDataSourceId": "widget_29_output_config_0",
+              "dataViewId": "output"
+            }
+          ]
+        },
+        {
+          "actionId": "widget_24-openWidget-1734993196567",
+          "widgetId": "widget_24",
+          "messageWidgetId": "widget_26",
+          "actionName": "openWidget",
+          "description": null,
+          "config": {
+            "widgetIds": [
+              "widget_28"
+            ],
+            "controllerId": "widget_24"
+          },
+          "version": "1.15.0",
+          "useDataSources": []
+        }
+      ]
+    }
+  },
   "pageStructure": [
     {
       "home": []
     }
   ],
-  "timestamp": 1734607066338,
+  "timestamp": 1734993217211,
   "header": {
     "layout": {
       "LARGE": "layout_58"

@@ -1,7 +1,7 @@
 import type Point from 'esri/geometry/Point'
 import { loadArcGISJSAPIModules } from 'jimu-arcgis'
 import axios from 'axios'
-const w3wIcon = require('../assets/w3wMarker.png')
+// const w3wIcon = require('../assets/w3w_dark.svg')
 
 let w3wApiKey: string
 
@@ -130,7 +130,7 @@ export const createPoint = (mapClick: any): Promise<Point> => {
  * @param proximityFactor - A factor indicating proximity to a certain point (optional).
  * @returns A promise resolving to a Graphic.
  */
-export const getMarkerGraphic = async (
+export const getSquareMarkerGraphic = async (
   square: { southwest: { lat: number, lng: number }, northeast: { lat: number, lng: number } },
   mapView: __esri.MapView,
   proximityFactor: number = 1
@@ -191,7 +191,7 @@ export const getMarkerGraphic = async (
  * @param what3words - The what3words address to display.
  * @returns A promise resolving to a Graphic.
  */
-export const getMapLabelGraphic = async (
+export const getSquareMapLabelGraphic = async (
   square: { southwest: { lat: number, lng: number }, northeast: { lat: number, lng: number } },
   what3words: string
 ): Promise<__esri.Graphic | null> => {
@@ -210,8 +210,8 @@ export const getMapLabelGraphic = async (
       font: { size: 12, weight: 'bold' },
       horizontalAlignment: 'center',
       color: [225, 31, 38, 1],
-      haloColor: '#0A3049',
-      haloSize: '1px',
+      haloColor: '#ffffff',
+      haloSize: '.7px',
       yoffset: 25 // Offset the label slightly above the marker
     }
 
@@ -233,26 +233,41 @@ export const getMapLabelGraphic = async (
 /**
  * Creates a marker graphic for a given point.
  * @param point - The point where the marker should be displayed.
+ * @param mapView - The MapView instance.
  * @returns A promise resolving to a Graphic.
  */
-export const getLocatorMarkerGraphic = (point: Point): Promise<__esri.Graphic | null> => {
-  if (!point) return Promise.resolve(null)
 
-  return loadArcGISJSAPIModules(['esri/Graphic', 'esri/symbols/PictureMarkerSymbol']).then(([Graphic, PictureMarkerSymbol]) => {
+export const getMarkerGraphic = async (
+  point: Point,
+  mapView: __esri.MapView
+): Promise<__esri.Graphic | null> => {
+  if (!point) return null;
+
+  try {
+    const [Graphic, PictureMarkerSymbol] = await loadArcGISJSAPIModules([
+      'esri/Graphic',
+      'esri/symbols/PictureMarkerSymbol',
+    ]);
+
+    const iconUrl = getMarkerIcon(mapView)
+
     const symbol = new PictureMarkerSymbol({
+      url: iconUrl,
       width: 25,
       height: 25,
       xoffset: 0,
-      yoffset: 11,
-      url: w3wIcon
-    })
+      yoffset: 11
+    });
 
     return new Graphic({
       geometry: point,
-      symbol: symbol
-    })
-  })
-}
+      symbol,
+    });
+  } catch (error) {
+    console.error('Error creating locator marker graphic:', error);
+    return null;
+  }
+};
 
 /**
  * Creates a label graphic for the what3words address.
@@ -260,7 +275,7 @@ export const getLocatorMarkerGraphic = (point: Point): Promise<__esri.Graphic | 
  * @param what3words - The what3words address to display.
  * @returns A promise resolving to a Graphic.
  */
-export const getLocatorMapLabelGraphic = (point: Point, what3words: string): Promise<__esri.Graphic | null> => {
+export const getMapLabelGraphic = (point: Point, what3words: string): Promise<__esri.Graphic | null> => {
   if (!point) return Promise.resolve(null)
 
   return loadArcGISJSAPIModules(['esri/Graphic']).then(([Graphic]) => {
@@ -272,8 +287,8 @@ export const getLocatorMapLabelGraphic = (point: Point, what3words: string): Pro
       kerning: true,
       rotated: false,
       color: [225, 31, 38, 1],
-      haloColor: '#0A3049',
-      haloSize: '1px',
+      haloColor: '#ffffff',
+      haloSize: '.7px',
       xoffset: 12,
       yoffset: 5
     }
@@ -284,3 +299,42 @@ export const getLocatorMapLabelGraphic = (point: Point, what3words: string): Pro
     })
   })
 }
+
+/**
+ * Determines the appropriate marker icon based on the current map theme.
+ * @param mapView - The MapView instance to determine the theme.
+ * @returns The URL of the appropriate marker icon.
+ */
+export const getMarkerIcon = (mapView: __esri.MapView): string => {
+  // List of dark mode basemaps
+  const darkBasemaps = [
+    'Dark Gray Canvas',
+    'Dark Gray Canvas Vector',
+    'Imagery (Dark)',
+    'Modern Antique',
+    'Midnight Basemap',
+    'Human Geography Dark Map',
+    'Oceans (Dark)',
+    'Streets (Night)',
+    'Esri Dark Gray (Canvas)',
+    'Enhanced Contrast Dark Map',
+    'Navigation (Dark)',
+    'Navigation (Dark - Places)',
+    'Nova Map',
+    'GB Dark Grey',
+    'Firefly Imagery Hybrid',
+    'Imagery Hybrid',
+    'Imagery'
+  ];
+
+  // Get the current basemap title
+  const currentBasemapTitle = mapView.map.basemap?.title || '';
+
+  // Check if the current basemap is a dark mode basemap
+  const isDarkMode = darkBasemaps.some((title) => currentBasemapTitle.includes(title));
+
+  // Return the appropriate icon
+  return isDarkMode
+    ? require('../assets/w3w_white.svg') // Marker for dark mode
+    : require('../assets/w3w_dark.svg'); // Marker for light mode
+};

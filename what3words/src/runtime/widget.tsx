@@ -2,13 +2,14 @@
 /** @jsxFrag React.Fragment */
 import { React, type AllWidgetProps, jsx, getAppStore, UtilityManager, type UseUtility } from 'jimu-core'
 import { JimuMapViewComponent, loadArcGISJSAPIModules, type JimuMapView } from 'jimu-arcgis'
-import { getCurrentAddress, getMarkerGraphic, getMapLabelGraphic, getCurrentAddressFromW3wService, getPointFromW3wService, getLocatorMapLabelGraphic, getLocatorMarkerGraphic, initializeW3wService } from './locator-utils'
+import { getCurrentAddress, getMarkerGraphic, getMapLabelGraphic, getCurrentAddressFromW3wService, getSquareMapLabelGraphic, getSquareMarkerGraphic, initializeW3wService } from './locator-utils'
 import { getW3WStyle } from './lib/style'
 import defaultMessages from './translations/default'
 import { Button } from 'jimu-ui'
 import { CopyButton } from 'jimu-ui/basic/copy-button'
 import { ShareArrowCurveOutlined } from 'jimu-icons/outlined/editor/share-arrow-curve'
 import type { Extent } from 'esri/geometry'
+import { add } from 'esri/views/3d/externalRenderers'
 
 interface State {
   w3wLocator: string
@@ -23,6 +24,7 @@ interface State {
   extent: Extent
   currentAddress: any
   currentMapPoint: any
+  center: __esri.Point
 }
 
 export default class Widget extends React.PureComponent<AllWidgetProps<any>, State> {
@@ -31,7 +33,10 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
   private readonly isRTL: boolean
   private _clickHandle: __esri.Handle
   private _zoomHandle: __esri.WatchHandle
-  private readonly _extentHandle: __esri.WatchHandle
+  private _extentHandle: __esri.WatchHandle
+  private _stationaryHandle: __esri.WatchHandle
+  private _centerHandle: __esri.WatchHandle
+  private _basemapHandle: __esri.WatchHandle
   what3words: string
 
   constructor (props) {
@@ -65,7 +70,8 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
       nearestPlace: null,
       extent: null,
       currentAddress: null,
-      currentMapPoint: null
+      currentMapPoint: null,
+      center: null
     }
     //check whether any utility selected in configuration in the new app
     if (this.props.config.addressSettings?.useUtilitiesGeocodeService?.length > 0) {
@@ -139,20 +145,6 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
       })
   }
 
-  isZoomLevelInRange = () => {
-    const { currentZoomLevel } = this.state
-    return currentZoomLevel >= 17 && currentZoomLevel <= 25
-  }
-
-  handleZoomChange = async (zoomLevel: number) => {
-    const isZoomInRange = this.isZoomLevelInRange()
-    this.setState({ isZoomInRange })
-    const { currentAddress, currentMapPoint } = this.state
-    if (currentAddress && currentMapPoint) {
-      await this.addGraphicsToMap(currentAddress, currentMapPoint, zoomLevel)
-    }
-  }
-
   /* What3words Action buttons */
   onCopyClick = () => {
     //clear prev selection
@@ -196,9 +188,6 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
     if (!JimuMapView) return
     this.mapView = JimuMapView.view
 
-    // Monitor zoom changes
-    this.mapView.watch('zoom', this.handleZoomChange)
-
     // Debug log to check API key presence
     const apiKey = this.getApiKey()
     if (!apiKey) {
@@ -216,12 +205,70 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
     // Monitor zoom changes
     if (!this._zoomHandle) {
       this._zoomHandle = this.mapView.watch('zoom', (zoomLevel: number) => {
-        // console.log('Zoom level changed:', zoomLevel)
         this.setState({ currentZoomLevel: zoomLevel },
           () => this.handleZoomChange(zoomLevel)
         )
       })
     }
+    if(!this._basemapHandle) {
+      this._basemapHandle = this.mapView.watch('basemap', () => {
+        // console.log('Basemap changed. Re-evaluating marker icon...')
+        this.handleBasemapChange()
+      })
+    }
+    
+    // Watch the `stationary` property to detect when the map stops moving
+    if (!this._stationaryHandle) {
+      this._stationaryHandle = this.mapView.watch('stationary', () => {
+        // console.log('Map is stationary. Updating current map point and address...')
+        this.handleBasemapChange() 
+      })
+    }
+
+    // Watch the `center` property to update the current map point
+    if (!this._centerHandle) {
+      this._centerHandle = this.mapView.watch('center', (center) => {
+        this.setState({
+          center
+        })
+      })
+    }
+  }
+
+  isZoomLevelInRange = () => {
+    const { currentZoomLevel } = this.state
+    return currentZoomLevel >= 17 && currentZoomLevel <= 25
+  }
+
+  handleZoomChange = async (zoomLevel: number) => {
+    const isZoomInRange = this.isZoomLevelInRange()
+    this.setState({ isZoomInRange })
+    
+    const { currentAddress, currentMapPoint } = this.state
+    
+    // Do not add graphics if the widget is deactivated
+    if (!this.isWidgetActive()) {
+      return
+    }
+    if (currentAddress && currentMapPoint) {
+      await this.addGraphicsToMap(currentAddress, currentMapPoint, zoomLevel)
+    }
+  }
+
+  handleBasemapChange = async () => {
+    const { currentMapPoint } = this.state
+  
+    if (!currentMapPoint) {
+      console.log('No current map point available to update markers.')
+      return
+    }
+  
+    // Clear existing markers
+    this.clearGraphics()
+  
+    // Add the updated marker
+    this.addGraphicsToMap(this.state.currentAddress, currentMapPoint, this.state.currentZoomLevel)
+    // console.log('Markers updated for the new basemap.')
   }
 
   /* Handle Map Click */
@@ -229,6 +276,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
     if (!this.isWidgetActive()) return
 
     try {
+      this.clearGraphics()
       this.resetMapState()
 
       const mapPointWGS84 = await this.getMapPointInWGS84(mapClick.mapPoint)
@@ -273,7 +321,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
     const isApiKeyMode = this.props.config?.mode === 'apiKey'
 
     if ((isApiKeyMode && !apiKey) || widgetState !== 'OPENED') {
-      console.log('Widget is not active or API key is missing.')
+      // console.log('Widget is not active or API key is missing.')
       return false
     }
     return true
@@ -359,6 +407,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
         nearestPlace: address.nearestPlace || 'Unknown location'
       })
     }
+    // console.log('Updated state with address:', address)
   }
 
   addGraphicsToMap = async (address: any, mapPoint: any, zoomLevel: number) => {
@@ -373,8 +422,8 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
         // Handle API Key mode: add picture marker or square based on zoom level
         if (zoomLevel < 18) {
           // Add a picture marker for zoom levels below 17
-          const marker = await getLocatorMarkerGraphic(mapPoint)
-          const label = await getLocatorMapLabelGraphic(mapPoint, address.words)
+          const marker = await getMarkerGraphic(mapPoint, this.mapView)
+          const label = await getMapLabelGraphic(mapPoint, address.words)
 
           if (marker) this.mapView.graphics.add(marker)
           if (config.displayMapAnnotation && label && !address.words.startsWith('Error')) {
@@ -382,8 +431,8 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
           }
         } else if (address.square) {
           // Add a square for zoom levels 17 and above
-          const squareGraphic = await getMarkerGraphic(address.square, this.mapView, proximityFactor)
-          const label = await getMapLabelGraphic(address.square, address.words)
+          const squareGraphic = await getSquareMarkerGraphic(address.square, this.mapView, proximityFactor)
+          const label = await getSquareMapLabelGraphic(address.square, address.words)
 
           if (squareGraphic) this.mapView.graphics.add(squareGraphic)
           if (config.displayMapAnnotation && label && !address.words.startsWith('Error')) {
@@ -394,8 +443,8 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
         }
       } else {
         // Handle Locator URL mode
-        const marker = await getLocatorMarkerGraphic(mapPoint)
-        const label = await getLocatorMapLabelGraphic(mapPoint, address.words)
+        const marker = await getMarkerGraphic(mapPoint, this.mapView)
+        const label = await getMapLabelGraphic(mapPoint, address.words)
 
         if (marker) this.mapView.graphics.add(marker)
         if (config.displayMapAnnotation && label && !address.words.startsWith('Error')) {
@@ -496,6 +545,9 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
     if (this._zoomHandle) this._zoomHandle.remove()
     if (this._extentHandle) this._extentHandle.remove()
     if (this._clickHandle) this._clickHandle.remove()
+    if (this._stationaryHandle) this._stationaryHandle.remove()
+    if (this._centerHandle) this._centerHandle.remove()
+    if (this._basemapHandle) this._basemapHandle.remove()
 
     this.clearGraphics()
     this.deactivateWidget() // Ensure all resources are cleaned up
@@ -544,13 +596,17 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
       longitude: '',
       what3words: null,
       isCopyMessageOpen: false,
-      currentZoomLevel: null
+      currentZoomLevel: null,
+      currentAddress: null,
+      currentMapPoint: null
     })
   }
 
   clearGraphics = () => {
-    if (this.mapView) {
+    if (this.mapView && this.mapView.graphics) {
+      // Remove all graphics
       this.mapView.graphics.removeAll()
+      // console.log('Cleared all graphics from the map view.')
     }
   }
 
