@@ -58,7 +58,6 @@
           "type": "WIDGET",
           "bbox": {
             "left": "50%",
-            "top": "706px",
             "width": "90.00%",
             "height": "60px",
             "bottom": "25px"
@@ -132,18 +131,21 @@
         "0",
         "1",
         "2",
-        "3"
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8"
       ],
       "content": {
         "0": {
           "type": "WIDGET",
-          "bbox": {},
-          "widgetId": "widget_8"
+          "bbox": {}
         },
         "1": {
           "type": "WIDGET",
-          "bbox": {},
-          "widgetId": "widget_9"
+          "bbox": {}
         },
         "2": {
           "type": "WIDGET",
@@ -154,12 +156,33 @@
             "bottom": "NaNpx",
             "width": "600px",
             "height": "400px"
-          },
-          "widgetId": "widget_26"
+          }
         },
         "3": {
           "type": "WIDGET",
           "widgetId": "widget_28",
+          "bbox": {}
+        },
+        "4": {
+          "type": "WIDGET",
+          "widgetId": "widget_30",
+          "bbox": {}
+        },
+        "5": {
+          "type": "WIDGET",
+          "widgetId": "widget_31",
+          "bbox": {}
+        },
+        "6": {
+          "type": "WIDGET",
+          "bbox": {}
+        },
+        "7": {
+          "type": "WIDGET",
+          "bbox": {}
+        },
+        "8": {
+          "type": "WIDGET",
           "bbox": {}
         }
       },
@@ -278,13 +301,11 @@
       "content": {
         "0": {
           "type": "WIDGET",
-          "bbox": {},
-          "widgetId": "widget_8"
+          "bbox": {}
         },
         "1": {
           "type": "WIDGET",
-          "bbox": {},
-          "widgetId": "widget_9"
+          "bbox": {}
         },
         "2": {
           "type": "WIDGET",
@@ -295,8 +316,7 @@
             "bottom": "NaNpx",
             "width": "600px",
             "height": "400px"
-          },
-          "widgetId": "widget_26"
+          }
         }
       },
       "order": [
@@ -415,13 +435,11 @@
       "content": {
         "0": {
           "type": "WIDGET",
-          "bbox": {},
-          "widgetId": "widget_8"
+          "bbox": {}
         },
         "1": {
           "type": "WIDGET",
-          "bbox": {},
-          "widgetId": "widget_9"
+          "bbox": {}
         },
         "2": {
           "type": "WIDGET",
@@ -432,8 +450,7 @@
             "bottom": "NaNpx",
             "width": "600px",
             "height": "400px"
-          },
-          "widgetId": "widget_26"
+          }
         }
       },
       "order": [
@@ -456,7 +473,7 @@
         "toolConfig": {
           "canZoom": true,
           "canHome": true,
-          "canSearch": true,
+          "canSearch": false,
           "canNavigation": true,
           "canLocate": true,
           "canCompass": true,
@@ -468,7 +485,7 @@
           "canExtentNavigate": true,
           "canOverviewMap": true
         },
-        "isUseCustomMapState": false,
+        "isUseCustomMapState": true,
         "initialMapState": null,
         "initialMapDataSourceID": "dataSource_3",
         "clientQueryDataSourceIds": [],
@@ -485,17 +502,13 @@
       "label": "Map",
       "useDataSources": [
         {
-          "dataSourceId": "dataSource_4",
-          "mainDataSourceId": "dataSource_4"
-        },
-        {
           "dataSourceId": "dataSource_3",
           "mainDataSourceId": "dataSource_3"
         }
       ],
       "dataActions": {
-        "viewInTable": {
-          "enabled": true
+        "relatedData": {
+          "enabled": false
         }
       }
     },
@@ -504,7 +517,7 @@
       "uri": "widgets/common/controller/",
       "config": {
         "behavior": {
-          "onlyOpenOne": true,
+          "onlyOpenOne": false,
           "displayType": "STACK",
           "vertical": false,
           "size": {
@@ -516,19 +529,48 @@
               "width": 372,
               "height": 214
             }
-          }
+          },
+          "openStarts": [
+            "widget_28"
+          ],
+          "arrangement": "floating"
         },
         "appearance": {
           "space": 0,
-          "advanced": false,
+          "advanced": true,
           "card": {
             "showLabel": false,
-            "labelGrowth": 10,
+            "labelGrowth": 5,
             "avatar": {
               "type": "primary",
-              "size": "default",
+              "size": "lg",
               "shape": "circle"
-            }
+            },
+            "variant": {
+              "default": {
+                "color": "#080808",
+                "bg": "#076fe5",
+                "border": {
+                  "color": "#076fe5",
+                  "width": "1px"
+                }
+              },
+              "hover": {
+                "bg": "#004ca3"
+              },
+              "active": {
+                "bg": "#004ca3",
+                "color": "#080808"
+              },
+              "disabled": {
+                "color": "#868686",
+                "bg": "#e3e3e3",
+                "border": {
+                  "color": "#e3e3e3"
+                }
+              }
+            },
+            "showIndicator": true
           }
         }
       },
@@ -550,286 +592,6 @@
       ],
       "version": "1.15.0",
       "label": "Widget Controller"
-    },
-    "widget_8": {
-      "id": "widget_8",
-      "uri": "widgets/arcgis/map-layers/",
-      "config": {
-        "useMapWidget": true,
-        "goto": true,
-        "information": true,
-        "opacity": true,
-        "label": true,
-        "useTickBoxes": true,
-        "enableLegend": true,
-        "reorderLayers": true,
-        "searchLayers": true
-      },
-      "useMapWidgetIds": [
-        "widget_23"
-      ],
-      "version": "1.15.0",
-      "label": "Map Layers",
-      "dataActions": {
-        "addToTable": {
-          "enabled": true
-        }
-      }
-    },
-    "widget_9": {
-      "id": "widget_9",
-      "uri": "widgets/arcgis/legend/",
-      "config": {},
-      "useMapWidgetIds": [
-        "widget_23"
-      ],
-      "version": "1.15.0",
-      "label": "Legend"
-    },
-    "widget_26": {
-      "uri": "widgets/common/table/",
-      "version": "1.15.0",
-      "config": {
-        "layersConfig": [
-          {
-            "id": "widget_29_output_config_0-output-1",
-            "name": "what3words output view",
-            "useDataSource": {
-              "dataSourceId": "widget_29_output_config_0-output",
-              "mainDataSourceId": "widget_29_output_config_0",
-              "dataViewId": "output",
-              "fields": [
-                "Default Address",
-                "objectid",
-                "what3words",
-                "Shape",
-                "Status",
-                "Score",
-                "Match_addr",
-                "Addr_type"
-              ]
-            },
-            "allFields": [
-              {
-                "jimuName": "Default Address",
-                "alias": "Default Address",
-                "type": "STRING",
-                "name": "Default Address"
-              },
-              {
-                "jimuName": "objectid",
-                "alias": "OBJECTID",
-                "type": "NUMBER",
-                "name": "objectid"
-              },
-              {
-                "jimuName": "what3words",
-                "alias": "what3words",
-                "type": "STRING",
-                "name": "what3words"
-              },
-              {
-                "jimuName": "Shape",
-                "alias": "Shape",
-                "type": "STRING",
-                "name": "Shape"
-              },
-              {
-                "jimuName": "Status",
-                "alias": "Status",
-                "type": "STRING",
-                "name": "Status"
-              },
-              {
-                "jimuName": "Score",
-                "alias": "Score",
-                "type": "STRING",
-                "name": "Score"
-              },
-              {
-                "jimuName": "Match_addr",
-                "alias": "Match_addr",
-                "type": "STRING",
-                "name": "Match_addr"
-              },
-              {
-                "jimuName": "Addr_type",
-                "alias": "Addr_type",
-                "type": "STRING",
-                "name": "Addr_type"
-              }
-            ],
-            "tableFields": [
-              {
-                "jimuName": "Default Address",
-                "alias": "Default Address",
-                "type": "STRING",
-                "name": "Default Address",
-                "visible": true
-              },
-              {
-                "jimuName": "objectid",
-                "alias": "OBJECTID",
-                "type": "NUMBER",
-                "name": "objectid",
-                "visible": true
-              },
-              {
-                "jimuName": "what3words",
-                "alias": "what3words",
-                "type": "STRING",
-                "name": "what3words",
-                "visible": true
-              },
-              {
-                "jimuName": "Shape",
-                "alias": "Shape",
-                "type": "STRING",
-                "name": "Shape",
-                "visible": true
-              },
-              {
-                "jimuName": "Status",
-                "alias": "Status",
-                "type": "STRING",
-                "name": "Status",
-                "visible": true
-              },
-              {
-                "jimuName": "Score",
-                "alias": "Score",
-                "type": "STRING",
-                "name": "Score",
-                "visible": true
-              },
-              {
-                "jimuName": "Match_addr",
-                "alias": "Match_addr",
-                "type": "STRING",
-                "name": "Match_addr",
-                "visible": true
-              },
-              {
-                "jimuName": "Addr_type",
-                "alias": "Addr_type",
-                "type": "STRING",
-                "name": "Addr_type",
-                "visible": true
-              }
-            ],
-            "enableAttachements": false,
-            "enableEdit": false,
-            "allowCsv": false,
-            "enableSearch": true,
-            "searchFields": [
-              "Default Address"
-            ],
-            "enableRefresh": true,
-            "enableSelect": true,
-            "enableDelete": false,
-            "selectMode": "SINGLE",
-            "headerFontSetting": {
-              "backgroundColor": "",
-              "fontSize": 14,
-              "bold": false,
-              "color": ""
-            },
-            "columnSetting": {
-              "responsiveType": "FIT",
-              "columnWidth": 200
-            },
-            "layerHonorMode": "WEBMAP",
-            "showCount": true
-          }
-        ],
-        "arrangeType": "TABS"
-      },
-      "id": "widget_26",
-      "dataActions": {
-        "showOnMap": {
-          "config": {
-            "isUseCustomSymbol": true,
-            "symbolOption": {
-              "pointSymbol": {
-                "type": "esriSMS",
-                "color": [
-                  255,
-                  255,
-                  0,
-                  150
-                ],
-                "angle": 0,
-                "xoffset": 0,
-                "yoffset": 0,
-                "size": 12,
-                "style": "esriSMSCircle",
-                "outline": {
-                  "type": "esriSLS",
-                  "color": [
-                    255,
-                    255,
-                    0,
-                    150
-                  ],
-                  "width": 1,
-                  "style": "esriSLSSolid"
-                }
-              },
-              "polylineSymbol": {
-                "type": "esriSLS",
-                "color": [
-                  255,
-                  255,
-                  0,
-                  150
-                ],
-                "width": 0.75,
-                "style": "esriSLSSolid"
-              },
-              "polygonSymbol": {
-                "type": "esriSFS",
-                "color": [
-                  255,
-                  255,
-                  0,
-                  150
-                ],
-                "outline": {
-                  "type": "esriSLS",
-                  "color": [
-                    255,
-                    255,
-                    0,
-                    150
-                  ],
-                  "width": 1,
-                  "style": "esriSLSSolid"
-                },
-                "style": "esriSFSSolid"
-              }
-            }
-          },
-          "enabled": true
-        }
-      },
-      "label": "Table",
-      "useDataSources": [
-        {
-          "dataSourceId": "widget_29_output_config_0-output",
-          "mainDataSourceId": "widget_29_output_config_0",
-          "dataViewId": "output",
-          "fields": [
-            "Default Address",
-            "objectid",
-            "what3words",
-            "Shape",
-            "Status",
-            "Score",
-            "Match_addr",
-            "Addr_type"
-          ]
-        }
-      ]
     },
     "widget_28": {
       "uri": "widgets/what3words/",
@@ -868,8 +630,8 @@
         "arrangementStyle": "Style1",
         "searchResultStyle": "Classic",
         "maxSuggestions": 3,
-        "recentSearchesMaxNumber": 3,
-        "resultMaxNumber": 6,
+        "recentSearchesMaxNumber": 6,
+        "resultMaxNumber": 3,
         "enableFiltering": true,
         "datasourceConfig": [
           {
@@ -886,7 +648,7 @@
               }
             },
             "label": "what3words",
-            "hint": "Find what3words Address",
+            "hint": "",
             "useUtility": {
               "utilityId": "utility_1"
             },
@@ -1431,7 +1193,7 @@
             "defaultAddressFieldName": "Default Address"
           }
         ],
-        "isShowRecentSearches": true
+        "isAutoSelectFirstResult": false
       },
       "id": "widget_29",
       "outputDataSources": [
@@ -1446,22 +1208,307 @@
           "utilityId": "utility_3"
         }
       ],
-      "useDataSources": [],
-      "style": {
-        "boxShadow": {
-          "presetStyle": "shadow-lg"
-        },
-        "borderRadius": null,
-        "border": {
-          "color": null,
-          "type": "solid",
-          "width": "2px"
-        },
-        "background": {
-          "color": null,
-          "fillType": "fill"
+      "useDataSources": []
+    },
+    "widget_30": {
+      "uri": "widgets/common/table/",
+      "version": "1.15.0",
+      "label": "Table",
+      "config": {
+        "layersConfig": [
+          {
+            "id": "widget_29_output_config_0-output-1",
+            "name": "what3words output view",
+            "useDataSource": {
+              "dataSourceId": "widget_29_output_config_0-output",
+              "mainDataSourceId": "widget_29_output_config_0",
+              "dataViewId": "output",
+              "fields": [
+                "Default Address",
+                "objectid",
+                "what3words",
+                "Shape",
+                "Status",
+                "Score",
+                "Match_addr",
+                "Addr_type"
+              ]
+            },
+            "allFields": [
+              {
+                "jimuName": "Default Address",
+                "alias": "Default Address",
+                "type": "STRING",
+                "name": "Default Address"
+              },
+              {
+                "jimuName": "objectid",
+                "alias": "OBJECTID",
+                "type": "NUMBER",
+                "name": "objectid"
+              },
+              {
+                "jimuName": "what3words",
+                "alias": "what3words",
+                "type": "STRING",
+                "name": "what3words"
+              },
+              {
+                "jimuName": "Shape",
+                "alias": "Shape",
+                "type": "STRING",
+                "name": "Shape"
+              },
+              {
+                "jimuName": "Status",
+                "alias": "Status",
+                "type": "STRING",
+                "name": "Status"
+              },
+              {
+                "jimuName": "Score",
+                "alias": "Score",
+                "type": "STRING",
+                "name": "Score"
+              },
+              {
+                "jimuName": "Match_addr",
+                "alias": "Match_addr",
+                "type": "STRING",
+                "name": "Match_addr"
+              },
+              {
+                "jimuName": "Addr_type",
+                "alias": "Addr_type",
+                "type": "STRING",
+                "name": "Addr_type"
+              }
+            ],
+            "tableFields": [
+              {
+                "jimuName": "Default Address",
+                "alias": "Default Address",
+                "type": "STRING",
+                "name": "Default Address",
+                "editAuthority": true,
+                "editable": true,
+                "visible": true
+              },
+              {
+                "jimuName": "objectid",
+                "alias": "OBJECTID",
+                "type": "NUMBER",
+                "name": "objectid",
+                "editAuthority": true,
+                "editable": true,
+                "visible": true
+              },
+              {
+                "jimuName": "what3words",
+                "alias": "what3words",
+                "type": "STRING",
+                "name": "what3words",
+                "editAuthority": true,
+                "editable": true,
+                "visible": true
+              },
+              {
+                "jimuName": "Shape",
+                "alias": "Shape",
+                "type": "STRING",
+                "name": "Shape",
+                "editAuthority": true,
+                "editable": true,
+                "visible": true
+              },
+              {
+                "jimuName": "Status",
+                "alias": "Status",
+                "type": "STRING",
+                "name": "Status",
+                "editAuthority": true,
+                "editable": true,
+                "visible": true
+              },
+              {
+                "jimuName": "Score",
+                "alias": "Score",
+                "type": "STRING",
+                "name": "Score",
+                "editAuthority": true,
+                "editable": true,
+                "visible": true
+              },
+              {
+                "jimuName": "Match_addr",
+                "alias": "Match_addr",
+                "type": "STRING",
+                "name": "Match_addr",
+                "editAuthority": true,
+                "editable": true,
+                "visible": true
+              },
+              {
+                "jimuName": "Addr_type",
+                "alias": "Addr_type",
+                "type": "STRING",
+                "name": "Addr_type",
+                "editAuthority": true,
+                "editable": true,
+                "visible": true
+              }
+            ],
+            "enableAttachements": false,
+            "enableEdit": false,
+            "allowCsv": false,
+            "enableSearch": true,
+            "searchFields": [
+              "Default Address"
+            ],
+            "enableRefresh": true,
+            "enableSelect": true,
+            "enableDelete": false,
+            "selectMode": "MULTIPLE",
+            "headerFontSetting": {
+              "backgroundColor": "",
+              "fontSize": 14,
+              "bold": false,
+              "color": ""
+            },
+            "columnSetting": {
+              "responsiveType": "FIT",
+              "columnWidth": 200
+            },
+            "layerHonorMode": "WEBMAP",
+            "showCount": true
+          }
+        ],
+        "arrangeType": "TABS"
+      },
+      "id": "widget_30",
+      "dataActions": {
+        "showOnMap": {
+          "config": {
+            "isUseCustomSymbol": true,
+            "symbolOption": {
+              "pointSymbol": {
+                "type": "esriSMS",
+                "color": [
+                  255,
+                  255,
+                  0,
+                  150
+                ],
+                "angle": 0,
+                "xoffset": 0,
+                "yoffset": 0,
+                "size": 12,
+                "style": "esriSMSCircle",
+                "outline": {
+                  "type": "esriSLS",
+                  "color": [
+                    255,
+                    255,
+                    0,
+                    150
+                  ],
+                  "width": 1,
+                  "style": "esriSLSSolid"
+                }
+              },
+              "polylineSymbol": {
+                "type": "esriSLS",
+                "color": [
+                  255,
+                  255,
+                  0,
+                  150
+                ],
+                "width": 0.75,
+                "style": "esriSLSSolid"
+              },
+              "polygonSymbol": {
+                "type": "esriSFS",
+                "color": [
+                  255,
+                  255,
+                  0,
+                  150
+                ],
+                "outline": {
+                  "type": "esriSLS",
+                  "color": [
+                    255,
+                    255,
+                    0,
+                    150
+                  ],
+                  "width": 1,
+                  "style": "esriSLSSolid"
+                },
+                "style": "esriSFSSolid"
+              }
+            }
+          }
         }
-      }
+      },
+      "useDataSources": [
+        {
+          "dataSourceId": "widget_29_output_config_0-output",
+          "mainDataSourceId": "widget_29_output_config_0",
+          "dataViewId": "output",
+          "fields": [
+            "Default Address",
+            "objectid",
+            "what3words",
+            "Shape",
+            "Status",
+            "Score",
+            "Match_addr",
+            "Addr_type"
+          ]
+        }
+      ]
+    },
+    "widget_31": {
+      "uri": "widgets/common/add-data/",
+      "version": "1.15.0",
+      "label": "Add Data",
+      "config": {
+        "itemCategoriesInfo": [
+          {
+            "type": "MY_CONTENT",
+            "customLabel": "",
+            "enabled": true,
+            "id": "MY_CONTENT"
+          },
+          {
+            "type": "MY_GROUP",
+            "customLabel": "",
+            "enabled": true,
+            "id": "MY_GROUP"
+          },
+          {
+            "type": "MY_ORGANIZATION",
+            "customLabel": "",
+            "enabled": true,
+            "id": "MY_ORGANIZATION"
+          },
+          {
+            "type": "PUBLIC",
+            "customLabel": "",
+            "enabled": true,
+            "id": "PUBLIC"
+          },
+          {
+            "type": "LIVING_ATLAS",
+            "customLabel": "",
+            "enabled": true,
+            "id": "LIVING_ATLAS"
+          }
+        ]
+      },
+      "id": "widget_31"
     }
   },
   "exbVersion": "1.15.0",
@@ -1483,6 +1530,27 @@
       "itemId": "046eda0ccfe64a81bad70f7439fa78dd",
       "portalUrl": "https://w3w.maps.arcgis.com",
       "label": "Map"
+    },
+    "dataSource_2": {
+      "id": "dataSource_2",
+      "type": "WEB_MAP",
+      "sourceLabel": "BNG BASEMAP",
+      "itemId": "c30a1d7815d44ec98dd2b68e479ef571",
+      "portalUrl": "https://w3w.maps.arcgis.com"
+    },
+    "dataSource_3": {
+      "id": "dataSource_3",
+      "type": "WEB_MAP",
+      "sourceLabel": "Vector",
+      "itemId": "132a726a33974e1495c62802b2225c8f",
+      "portalUrl": "https://w3w.maps.arcgis.com"
+    },
+    "dataSource_4": {
+      "id": "dataSource_4",
+      "type": "WEB_MAP",
+      "sourceLabel": "Satellite",
+      "itemId": "e78ce7b107784ed5bc0851c65c6baa53",
+      "portalUrl": "https://w3w.maps.arcgis.com"
     },
     "widget_29_output_config_0": {
       "id": "widget_29_output_config_0",
@@ -1981,82 +2049,16 @@
         }
       },
       "geometryType": "esriGeometryPoint"
-    },
-    "dataSource_2": {
-      "id": "dataSource_2",
-      "type": "WEB_MAP",
-      "sourceLabel": "BNG BASEMAP",
-      "itemId": "c30a1d7815d44ec98dd2b68e479ef571",
-      "portalUrl": "https://w3w.maps.arcgis.com"
-    },
-    "dataSource_3": {
-      "id": "dataSource_3",
-      "type": "WEB_MAP",
-      "sourceLabel": "Vector",
-      "itemId": "132a726a33974e1495c62802b2225c8f",
-      "portalUrl": "https://w3w.maps.arcgis.com"
-    },
-    "dataSource_4": {
-      "id": "dataSource_4",
-      "type": "WEB_MAP",
-      "sourceLabel": "Satellite",
-      "itemId": "e78ce7b107784ed5bc0851c65c6baa53",
-      "portalUrl": "https://w3w.maps.arcgis.com"
     }
   },
   "messageConfigs": {
     "messageConfig_1": {
       "id": "messageConfig_1",
-      "widgetId": "widget_23",
-      "messageType": "EXTENT_CHANGE",
-      "actions": [
-        {
-          "actionId": "filter-data-record-action-1734612834907",
-          "messageWidgetId": "widget_23",
-          "actionName": "filter data record action",
-          "description": null,
-          "config": [
-            {
-              "messageUseDataSource": null,
-              "actionUseDataSource": null,
-              "sqlExprObj": null,
-              "enableQueryWithCurrentExtent": true
-            }
-          ],
-          "version": "1.15.0",
-          "useDataSources": []
-        }
-      ]
-    },
-    "messageConfig_2": {
-      "id": "messageConfig_2",
-      "widgetId": "widget_23",
-      "messageType": "DATA_RECORDS_SELECTION_CHANGE",
-      "actions": [
-        {
-          "actionId": "widget_24-openWidget-1734612742070",
-          "widgetId": "widget_24",
-          "messageWidgetId": "widget_23",
-          "actionName": "openWidget",
-          "description": null,
-          "config": {
-            "widgetIds": [
-              "widget_28"
-            ],
-            "controllerId": "widget_24"
-          },
-          "version": "1.15.0",
-          "useDataSources": []
-        }
-      ]
-    },
-    "messageConfig_3": {
-      "id": "messageConfig_3",
       "widgetId": "widget_29",
       "messageType": "DATA_RECORD_SET_CHANGE",
       "actions": [
         {
-          "actionId": "widget_23-showOnMap-1734620176805",
+          "actionId": "widget_23-showOnMap-1734998704355",
           "widgetId": "widget_23",
           "messageWidgetId": "widget_29",
           "actionName": "showOnMap",
@@ -2068,41 +2070,41 @@
                 "type": "esriPMS",
                 "angle": 0,
                 "xoffset": 0,
-                "yoffset": 12,
+                "yoffset": 10,
                 "contentType": "image/png",
-                "imageData": "iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAACXBIWXMAAA7BAAAOwQG4kWvtAAAAGHRFWHRTb2Z0d2FyZQBQYWludC5ORVQgdjMuMzap5+IlAAANKUlEQVR4Xu1ZCVRV5RY+3HuZuYAUKmhmOeCQQk6piJpZWuKznHICAQFJGfR3QCFxVuZ5uFwGRQYZVAYB0bRXr171apn1eg3mwzlxRlQUgcv39v+T6/Vaunqr7sVbyVrfOsdz791nf9/e/7+/c5Skx3+PFXiswGMFHivwWIGOVkA5wlTqPkUp9XlVKfV1MZGeogQsOzqJjr6ffIaF5MI6y9aF2imqYrvLv0vvoahTPaWo4+drOxtUL39SFjbbWhpLiSk6Ojmd3s/RTHJa11WerX5ace09ByMc7W+Mr/ob4WvCv/oZ4Qu69klvBY70lENlJ7u27kmDHBcraYhOk+qo4NMtpXnJ3WW17xPR7waZ4vzzStS/YIPGsZ1x50U7NI7vipvOtrgy1Bon+5vhi15GONhDjkRb6fRcS2l+R+Wpk/vMNJM8M3oo6o85WeGHMd3Q6OqA1nmOaPMegrYlw6AJGI5W/+Fo8R2Ke+5OuDN9IK5N6IXvh3TBh73NkdHFoGGumeStk+R0HdTZWHo5s5fpxa9cnsYV10Fonvs8NG+NQNuq0cD6ccDWicC2CWjb6ILWdWPQvGoUmpYMR+OC59EwdTBOj++HT5zskGVvdGWakfSarvPVavzekmQb1dPso2MT+uKSq6Mg3+pP5EOdgWhXYKcvULQSKAgA0mahLfJFtG5yRvOaUbjjPwy3Fjih/rXn8O8XB+LjYT0R28Xs0wmS1E2rSeoy2JvWCv/9I3rg9KuDqa0d0eJH7R4yisi/ChQT8Q+zgWMVwD8KgIqNJMIMtG13QctGZzQFj8Rtv6G4MWsQLk/sj6/GDECNQzf4WSlW6DJnbcY2j+lm+Pej4/vi2pRBtLafR8vKkWjb7AKo5wFHEoGTHwENZ9F24RjaPs1BW7E/2uJfRstmEiCUBAgahhvujrg6ZQBOufTDp4OeRbKN8dEBkmSjzUR1EquvQhqTbS+/dnzU07j1uhOafIehJWQ02raRADmeaPssE5rLn0LTeg6aW19Cc6IImvfXo63IDa2qabi3eSxuLycBvJ1w9Y2BuDBhAL50sMc+M0WTq0Iap5OktRl0jqUUkGtnoKntb4FbU/vhLq395rdHQxP/CtrK34LmaCI0p8qhufQ+NOdqoPlSDc3hYGhKF6G5xBNNWW/i9obxqPdxwhVaBhecn8F3tqaolMvgZSIxbeaqk1irbaTwUnsZTj0jQ4OzFRo9Haiq49BS6AZNxWJojqyB5rM4aL4g4keToXkvTFxvKfHAvaKFuJvvgcb0OagPGomLk7rjXB8jnLQwwLsKBdZaGCToJGltBg3tJCXs70oCkKurH2qMm290wp2IMbiXO4NEmIPWvQuhqVwKzUEGTXUQNOW+aN3jgWYS6O6uuWjMmI5bSVNxPXg4zo80wbluEs6ZyfGB3BBh5gYZ2sxVJ7GCLaWIfZ0lnHhKhmuDDXFjrj1uRznjbso43EufgObsyWjJeQ2tu1zpOJXgStdc0ZQ+GY2JL+FmpAvqN43E1ZAROP/yE7jQRUKdoQJ/U8gRqpSSdJK0NoN6KCWWYyO1fWNngEsOMlz36I2b4S64HTcOdxLHoyn1RTSljcc9FT8SUsfjbtI4NMa54CYJdWPLaFwLewGXVw/HhWk9cdVahjqZAoeNZVhkKa3RZq46iTWUHGC20qDh6JPUuj0kXHXrQxUdjYbto3EregwJMRaNCYREIs2P8WNxK8YFDRHOqN86ksiPwOXgoahbNoQcZB/cNFbgjEyOamtZ8xRLaZJOktZyUOskC9mxD6wM8L0tte/rXXFpzQBcCSOfv+U5XN8+GPURg3Ej0pGOhPDBuL51EK5uHIjL6/qjLtgBPyzrjQu+RH5sd9w0MMTXpjJk28m+eaGz1EXLueomnLeJFFJlosA/zQ1w5gUTnF3yBM6vtMWFkM6oW98VFzfY4dImO1zcSKDzurCuOB9ii7OrnsCZQBuc87HBlXm2uOOgxAWFDB/bG4LZK9ZTtjLdZKzlqAPpDU+SifyrozS6/m0rx+mZpqj1M0dtgAVOrSCsUuJUMGE1gc5P0rXaIHOcpO+cXWiBi7Ot0DBZiWud5Pi2iyHUzxp/M/FJqY+W09RtuAWm8hl7jOS3vqEN7HQfE5yarcQJdyW+97LA974WOO7XDn5+wotEcFPiLBGve70Trk61wpV+xjhhb4Ty/uaNgU+bzNNttrqJLvcxk1aWGcqavpWTCA5mODPFGqen04uPmdaondV+PDWjE85O64Tzrk+gbooN6l6zwrkhpviulymqHJXNQb1M1lJ6ct2kqPuoikXmUmCRqXTlcxpjtd2NUTvKEqcnEulXOuHcJFrvkwmTOuHMJBLkJUvUDrfA546WKBmivB7Yx4Q/ARrqPk0d32GyufRSgo1BTam17PbnXRQ43tcUx4fREhitxHEXSxwfa4XjZJuPjbBE+XCrxhRH5aG/2Msn6jitDg9vPsdWmpnylFGGqofxx1k9jc8X9DJtyO9n1pA10OKHNCerT9KGWGR59JDPoswsOjy7Dr5ht8XuixAfFkZYB183L9D9u3dwDo/2doEsDNlZ+QJLlr3NBfhz/S0l0pkZeQJ+gaF/PgH8gkKhVu8S8A0I+fMJsDgwBCpVjoC3/9o/nwDeS9cgNW0HUlN3YNHS4F8twF+PHGTvHq5h775Tw44IHCQcEODX+ed6ubksems1klOyBTzfWvV/C8BJvnOomh2qqWQ11RXsQFU5q6os/RFlrGp/Oavcz4+lrLqyTHx+8MB+dph+o1dieC1eiaSkTAEPv5W/KAAnwIlwYvvL97Ly0hJWuq+Y7dtTyPaW7G5H8W62p7iQlYgj/Zs+K91bJL5bWbFPCMbj6EVHeC5egYTEDIGFdP6wpA6/Uy0S5wTKiDAnWlyYxwoLdrGCvByWn7uD5e3KZnk5dCTk7sxuRw5do8925+9iRbvzxO/Ky0pER+iFCAt9GeLi0wXc6fxBArxzqEq0dum+IqpqPpHJEWRzdmSw7Kx0lpWhYhnqVKZO/xGqVJaelsLSVSl0LYVlqtPYjiw1iZElfstF4N3DO+mRd4G7D0NMrErgQQLwdV5J7c7beHdBDttFJDjpDCKrSktiqSkJLCUpniUnxrGkxFgCHRM4+Hms+CwtJZGpSQz+u1wSjncOXw68ox75fuDmsxxRMakC7r7/uwT47s03ME6+gCq3I1stKsoJcaIJ8TEsLjaKxcVEstjoCBYTHU5Hfk6IiRDXE+KihThpqYmiS3JIwMLCXFZWWiwEeOQdsMB7GSKiUgR4N/w0IV798rI9rHB3LttJ7Z6uSmbJVNF4IsUJR0eFs+jI7QJREdsEoiPDWQxd5wLEkziJJBLvgvS0ZJaVqRL7wZ6SAra/Yq9+7AELFgVhe0SSwM+t8KGaKlr3JSyfNrmszHRReU6IVzgq4r+k28lzIYh4VCRVPkpUnneJaH/qmh3U/nm51P5F+ayifA87WKMH659Xe75XILaFJ2Ir4edW+NABEmAvCZBLAqjTWWpSIhGLoQpHsMjwbQLtQmwX10TF42JZckI8S01OaF/3JBzfN3bTtOCbHyfPvcMjb/37CczzDMCWbfECP7fC3MXx3bqQxtfO7AymSk2iDogV7R/FW5+3OnUDF4W3uSo1mTbHNEGaTwje7nz0cY/A4/A1z/cVvSHPE5m70B+btsYJPMgK1xyoYPvIxOTn7hTjjBPllRZr/McNjo+8bDHm+LzPpV0+nzbO9nlfRZsor/i7R/SM+P0qcCe4YXOMwMOsMCdRUlzAcnZmitHHx1tCfLRY39wD5O3aIdY2H23VldzyVtIGV6VflX5Y23EnGLYxWuBhVriGDAsfhXwt3x+DfKzxyVBEE0JsavSdRz7Tf83a4k7w7Q1RhMiHWmFObm9JIa3rTDHLObgn4FXn3fG7JH5fLD77Q8IiBB5mhbkT5Lv4T8kXkZurJj//a0TXq99wJ7h23XaBBwlwiNZzSRGtf6o+9/q88twYVVeV/f7J80pwJxgcuk3g51b48KEDrHRPcXvr03jLVKvELl9ZUfrHIC8EICe4au0WgZ9aYb6u+TM8n/9qerrj5PljbjW96NCrFv6tyXAnuGLNZgG+HO7H48/8fNfnY487Oj7juZn5rffTu99zJ7h89SYBN1oOPEH+oMLXOp/z3NJyZ8fNkN4lr42EuBMMWrlBwM07SAjADQ+f8/xZn7u/0r3Ff0zynOzsBX4IWLFeYIGnvxAgPo4eauiFRmZGmpj1eufftVH5+zGmv+kF/+XrsJQwZ8FiIcD6sFDxsoOPO7318NoQYXXwWri+MR8ePkFY5Mcwc44n3D28sGoVI5ubqR/v7LRB9EExkpMSsGSpP6ZMm435C/3g5rUEb8yaj/lu7li9eiXK6EWIru6tF3FTUxIREBCIadNnY66bN+a7+2DGzDfh4+OLbVu3/OL/D+gFid+SBL3qQmxsDIKWLYfv4iUCy+g8MiIcuwvy/tjV/6lwarVKVHzrls1IV6U9ssr/B/nPip6ML1zOAAAAAElFTkSuQmCC",
-                "url": "https://static.arcgis.com/images/Symbols/Basic/RedStickpin.png",
+                "imageData": "iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAZdEVYdFNvZnR3YXJlAEFkb2JlIEltYWdlUmVhZHlxyWU8AAADImlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS4wLWMwNjAgNjEuMTM0Nzc3LCAyMDEwLzAyLzEyLTE3OjMyOjAwICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOnhtcE1NPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvbW0vIiB4bWxuczpzdFJlZj0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL3NUeXBlL1Jlc291cmNlUmVmIyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDo1MzA4NzI3NkQyN0MxMUUwQUU5NUVFMEYwMTY0NzUwNSIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDo1MzA4NzI3N0QyN0MxMUUwQUU5NUVFMEYwMTY0NzUwNSI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOjUzMDg3Mjc0RDI3QzExRTBBRTk1RUUwRjAxNjQ3NTA1IiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjUzMDg3Mjc1RDI3QzExRTBBRTk1RUUwRjAxNjQ3NTA1Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQg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",
+                "url": "https://static.arcgis.com/images/Symbols/Shapes/RedPin1LargeB.png",
                 "height": 24,
                 "width": 24
               },
               "polylineSymbol": {
                 "type": "esriSLS",
                 "color": [
-                  192,
-                  80,
-                  77,
-                  255
+                  255,
+                  255,
+                  0,
+                  150
                 ],
-                "width": 1,
+                "width": 0.75,
                 "style": "esriSLSSolid"
               },
               "polygonSymbol": {
                 "type": "esriSFS",
                 "color": [
-                  192,
-                  80,
-                  77,
-                  128
+                  255,
+                  255,
+                  0,
+                  150
                 ],
                 "outline": {
                   "type": "esriSLS",
                   "color": [
-                    160,
-                    63,
-                    60,
-                    255
+                    255,
+                    255,
+                    0,
+                    150
                   ],
-                  "width": 1.5,
+                  "width": 1,
                   "style": "esriSLSSolid"
                 },
                 "style": "esriSFSSolid"
@@ -2113,7 +2115,7 @@
           "useDataSources": []
         },
         {
-          "actionId": "widget_23-zoomToFeature-1734620199120",
+          "actionId": "widget_23-zoomToFeature-1734998763390",
           "widgetId": "widget_23",
           "messageWidgetId": "widget_29",
           "actionName": "zoomToFeature",
@@ -2141,7 +2143,7 @@
           "useDataSources": []
         },
         {
-          "actionId": "widget_23-panTo-1734620203154",
+          "actionId": "widget_23-panTo-1734998767939",
           "widgetId": "widget_23",
           "messageWidgetId": "widget_29",
           "actionName": "panTo",
@@ -2150,99 +2152,38 @@
         }
       ]
     },
-    "messageConfig_4": {
-      "id": "messageConfig_4",
+    "messageConfig_2": {
+      "id": "messageConfig_2",
       "widgetId": "widget_29",
       "messageType": "DATA_RECORDS_SELECTION_CHANGE",
       "actions": [
         {
-          "actionId": "select-data-record-action-1734620546185",
+          "actionId": "widget_23-zoomToFeature-1734998786004",
+          "widgetId": "widget_23",
           "messageWidgetId": "widget_29",
-          "actionName": "select data record action",
+          "actionName": "zoomToFeature",
           "description": null,
           "config": {
-            "messageUseDataSource": {
-              "dataSourceId": "widget_29_output_config_0-output",
+            "useDataSource": {
+              "dataSourceId": "widget_29_output_config_0",
               "mainDataSourceId": "widget_29_output_config_0",
-              "dataViewId": "output"
+              "rootDataSourceId": null
             },
-            "actionUseDataSource": null,
-            "sqlExprObj": null,
-            "enabledDataRelationShip": true
-          },
-          "version": "1.15.0",
-          "useDataSources": [
-            {
-              "dataSourceId": "widget_29_output_config_0-output",
-              "mainDataSourceId": "widget_29_output_config_0",
-              "dataViewId": "output"
-            }
-          ]
-        },
-        {
-          "actionId": "widget_24-openWidget-1734620558952",
-          "widgetId": "widget_24",
-          "messageWidgetId": "widget_29",
-          "actionName": "openWidget",
-          "description": null,
-          "config": {
-            "widgetIds": [
-              "widget_28"
-            ],
-            "controllerId": "widget_24"
+            "useDataSources": [
+              {
+                "dataSourceId": "widget_29_output_config_0",
+                "mainDataSourceId": "widget_29_output_config_0",
+                "rootDataSourceId": null
+              }
+            ]
           },
           "version": "1.15.0",
           "useDataSources": []
-        }
-      ]
-    },
-    "messageConfig_5": {
-      "id": "messageConfig_5",
-      "widgetId": "widget_26",
-      "messageType": "DATA_RECORDS_SELECTION_CHANGE",
-      "actions": [
-        {
-          "actionId": "select-data-record-action-1734993120947",
-          "messageWidgetId": "widget_26",
-          "actionName": "select data record action",
-          "description": null,
-          "config": {
-            "messageUseDataSource": {
-              "dataSourceId": "widget_29_output_config_0-output",
-              "mainDataSourceId": "widget_29_output_config_0",
-              "dataViewId": "output",
-              "fields": []
-            },
-            "actionUseDataSource": {
-              "dataSourceId": "widget_29_output_config_0-output",
-              "mainDataSourceId": "widget_29_output_config_0",
-              "dataViewId": "output",
-              "fields": []
-            },
-            "sqlExprObj": null,
-            "enabledDataRelationShip": true,
-            "connectionType": "SET_CUSTOM_FIELDS"
-          },
-          "version": "1.15.0",
-          "useDataSources": [
-            {
-              "dataSourceId": "widget_29_output_config_0-output",
-              "mainDataSourceId": "widget_29_output_config_0",
-              "dataViewId": "output",
-              "fields": []
-            },
-            {
-              "dataSourceId": "widget_29_output_config_0-output",
-              "mainDataSourceId": "widget_29_output_config_0",
-              "dataViewId": "output",
-              "fields": []
-            }
-          ]
         },
         {
-          "actionId": "widget_23-flash-1734993152773",
+          "actionId": "widget_23-flash-1734998812719",
           "widgetId": "widget_23",
-          "messageWidgetId": "widget_26",
+          "messageWidgetId": "widget_29",
           "actionName": "flash",
           "description": null,
           "config": {
@@ -2265,22 +2206,22 @@
           ]
         },
         {
-          "actionId": "widget_23-zoomToFeature-1734993163342",
+          "actionId": "widget_23-panTo-1734998820057",
           "widgetId": "widget_23",
-          "messageWidgetId": "widget_26",
-          "actionName": "zoomToFeature",
+          "messageWidgetId": "widget_29",
+          "actionName": "panTo",
           "description": null,
           "config": {
             "useDataSource": {
-              "dataSourceId": "widget_29_output_config_0-output",
+              "dataSourceId": "widget_29_output_config_0",
               "mainDataSourceId": "widget_29_output_config_0",
-              "dataViewId": "output"
+              "rootDataSourceId": null
             },
             "useDataSources": [
               {
-                "dataSourceId": "widget_29_output_config_0-output",
+                "dataSourceId": "widget_29_output_config_0",
                 "mainDataSourceId": "widget_29_output_config_0",
-                "dataViewId": "output"
+                "rootDataSourceId": null
               }
             ]
           },
@@ -2288,9 +2229,9 @@
           "useDataSources": []
         },
         {
-          "actionId": "widget_23-filter-1734993178153",
+          "actionId": "widget_23-filter-1734998825189",
           "widgetId": "widget_23",
-          "messageWidgetId": "widget_26",
+          "messageWidgetId": "widget_29",
           "actionName": "filter",
           "description": null,
           "config": {
@@ -2313,34 +2254,9 @@
           ]
         },
         {
-          "actionId": "widget_23-filter-1734993189485",
-          "widgetId": "widget_23",
-          "messageWidgetId": "widget_26",
-          "actionName": "filter",
-          "description": null,
-          "config": {
-            "messageUseDataSource": {
-              "dataSourceId": "widget_29_output_config_0-output",
-              "mainDataSourceId": "widget_29_output_config_0",
-              "dataViewId": "output"
-            },
-            "actionUseDataSource": null,
-            "sqlExprObj": null,
-            "enabledDataRelationShip": true
-          },
-          "version": "1.15.0",
-          "useDataSources": [
-            {
-              "dataSourceId": "widget_29_output_config_0-output",
-              "mainDataSourceId": "widget_29_output_config_0",
-              "dataViewId": "output"
-            }
-          ]
-        },
-        {
-          "actionId": "widget_24-openWidget-1734993196567",
+          "actionId": "widget_24-openWidget-1734998898854",
           "widgetId": "widget_24",
-          "messageWidgetId": "widget_26",
+          "messageWidgetId": "widget_29",
           "actionName": "openWidget",
           "description": null,
           "config": {
@@ -2353,6 +2269,170 @@
           "useDataSources": []
         }
       ]
+    },
+    "messageConfig_3": {
+      "id": "messageConfig_3",
+      "widgetId": "widget_29",
+      "messageType": "DATA_SOURCE_FILTER_CHANGE",
+      "actions": [
+        {
+          "actionId": "widget_23-zoomToFeature-1734999151581",
+          "widgetId": "widget_23",
+          "messageWidgetId": "widget_29",
+          "actionName": "zoomToFeature",
+          "description": null,
+          "config": {
+            "useDataSource": {
+              "dataSourceId": "widget_29_output_config_0",
+              "mainDataSourceId": "widget_29_output_config_0",
+              "rootDataSourceId": null
+            },
+            "useDataSources": [
+              {
+                "dataSourceId": "widget_29_output_config_0",
+                "mainDataSourceId": "widget_29_output_config_0",
+                "rootDataSourceId": null
+              }
+            ]
+          },
+          "version": "1.15.0",
+          "useDataSources": []
+        }
+      ]
+    },
+    "messageConfig_4": {
+      "id": "messageConfig_4",
+      "widgetId": "widget_30",
+      "messageType": "DATA_RECORDS_SELECTION_CHANGE",
+      "actions": [
+        {
+          "actionId": "select-data-record-action-1734999188850",
+          "messageWidgetId": "widget_30",
+          "actionName": "select data record action",
+          "description": null,
+          "config": {
+            "messageUseDataSource": null,
+            "actionUseDataSource": {
+              "dataSourceId": "widget_29_output_config_0-output",
+              "mainDataSourceId": "widget_29_output_config_0",
+              "dataViewId": "output"
+            },
+            "sqlExprObj": null,
+            "enabledDataRelationShip": true
+          },
+          "version": "1.15.0",
+          "useDataSources": [
+            {
+              "dataSourceId": "widget_29_output_config_0-output",
+              "mainDataSourceId": "widget_29_output_config_0",
+              "dataViewId": "output",
+              "fields": []
+            }
+          ]
+        },
+        {
+          "actionId": "filter-data-record-action-1734999208382",
+          "messageWidgetId": "widget_30",
+          "actionName": "filter data record action",
+          "description": null,
+          "config": {
+            "messageUseDataSource": null,
+            "actionUseDataSource": {
+              "dataSourceId": "widget_29_output_config_0-output",
+              "mainDataSourceId": "widget_29_output_config_0",
+              "dataViewId": "output"
+            },
+            "sqlExprObj": null,
+            "enabledDataRelationShip": true,
+            "enableQueryWithCurrentExtent": true
+          },
+          "version": "1.15.0",
+          "useDataSources": [
+            {
+              "dataSourceId": "widget_29_output_config_0-output",
+              "mainDataSourceId": "widget_29_output_config_0",
+              "dataViewId": "output",
+              "fields": []
+            }
+          ]
+        },
+        {
+          "actionId": "widget_23-flash-1734999223816",
+          "widgetId": "widget_23",
+          "messageWidgetId": "widget_30",
+          "actionName": "flash",
+          "description": null,
+          "config": {
+            "messageUseDataSource": null,
+            "actionUseDataSource": null,
+            "sqlExprObj": null,
+            "enabledDataRelationShip": true
+          },
+          "version": "1.15.0",
+          "useDataSources": []
+        },
+        {
+          "actionId": "widget_23-filter-1734999235009",
+          "widgetId": "widget_23",
+          "messageWidgetId": "widget_30",
+          "actionName": "filter",
+          "description": null,
+          "config": {
+            "messageUseDataSource": null,
+            "actionUseDataSource": null,
+            "sqlExprObj": null,
+            "enabledDataRelationShip": true
+          },
+          "version": "1.15.0",
+          "useDataSources": []
+        },
+        {
+          "actionId": "widget_24-openWidget-1734999246215",
+          "widgetId": "widget_24",
+          "messageWidgetId": "widget_30",
+          "actionName": "openWidget",
+          "description": null,
+          "config": {
+            "widgetIds": [
+              "widget_28"
+            ],
+            "controllerId": "widget_24"
+          },
+          "version": "1.15.0",
+          "useDataSources": []
+        }
+      ]
+    },
+    "messageConfig_5": {
+      "id": "messageConfig_5",
+      "widgetId": "widget_31",
+      "messageType": "DATA_SOURCES_CHANGE",
+      "actions": [
+        {
+          "actionId": "widget_23-addToMap-1734999297815",
+          "widgetId": "widget_23",
+          "messageWidgetId": "widget_31",
+          "actionName": "addToMap",
+          "description": null,
+          "version": "1.15.0"
+        },
+        {
+          "actionId": "widget_23-panTo-1734999300783",
+          "widgetId": "widget_23",
+          "messageWidgetId": "widget_31",
+          "actionName": "panTo",
+          "description": null,
+          "version": "1.15.0"
+        },
+        {
+          "actionId": "widget_23-zoomToFeature-1734999304086",
+          "widgetId": "widget_23",
+          "messageWidgetId": "widget_31",
+          "actionName": "zoomToFeature",
+          "description": null,
+          "version": "1.15.0"
+        }
+      ]
     }
   },
   "pageStructure": [
@@ -2360,7 +2440,7 @@
       "home": []
     }
   ],
-  "timestamp": 1734993217211,
+  "timestamp": 1734999440833,
   "header": {
     "layout": {
       "LARGE": "layout_58"

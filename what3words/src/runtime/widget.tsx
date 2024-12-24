@@ -10,6 +10,7 @@ import { CopyButton } from 'jimu-ui/basic/copy-button'
 import { ShareArrowCurveOutlined } from 'jimu-icons/outlined/editor/share-arrow-curve'
 import type { Extent } from 'esri/geometry'
 import { add } from 'esri/views/3d/externalRenderers'
+import { debounce } from 'lodash'
 
 interface State {
   w3wLocator: string
@@ -212,17 +213,23 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
     }
     if(!this._basemapHandle) {
       this._basemapHandle = this.mapView.watch('basemap', () => {
-        // console.log('Basemap changed. Re-evaluating marker icon...')
-        this.handleBasemapChange()
+        console.log('Basemap changed. Re-evaluating marker icon...')
+        this.handleZoomChange(this.state.currentZoomLevel) 
       })
     }
     
     // Watch the `stationary` property to detect when the map stops moving
     if (!this._stationaryHandle) {
-      this._stationaryHandle = this.mapView.watch('stationary', () => {
-        // console.log('Map is stationary. Updating current map point and address...')
-        this.handleBasemapChange() 
-      })
+      const debouncedStationaryHandler = debounce(() => {
+        // console.log('Map is stationary. Updating current map point and address...');
+        this.handleZoomChange(this.state.currentZoomLevel);
+      }, 300); // Trigger after 300ms of no movement
+
+      this._stationaryHandle = this.mapView.watch('stationary', (isStationary) => {
+        if (isStationary) {
+          debouncedStationaryHandler();
+        }
+      });
     }
 
     // Watch the `center` property to update the current map point
@@ -243,7 +250,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
   handleZoomChange = async (zoomLevel: number) => {
     const isZoomInRange = this.isZoomLevelInRange()
     this.setState({ isZoomInRange })
-    
+    // console.log('Zoom level changed:', zoomLevel, 'Is zoom in range:', isZoomInRange)
     const { currentAddress, currentMapPoint } = this.state
     
     // Do not add graphics if the widget is deactivated
@@ -253,22 +260,6 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
     if (currentAddress && currentMapPoint) {
       await this.addGraphicsToMap(currentAddress, currentMapPoint, zoomLevel)
     }
-  }
-
-  handleBasemapChange = async () => {
-    const { currentMapPoint } = this.state
-  
-    if (!currentMapPoint) {
-      console.log('No current map point available to update markers.')
-      return
-    }
-  
-    // Clear existing markers
-    this.clearGraphics()
-  
-    // Add the updated marker
-    this.addGraphicsToMap(this.state.currentAddress, currentMapPoint, this.state.currentZoomLevel)
-    // console.log('Markers updated for the new basemap.')
   }
 
   /* Handle Map Click */
@@ -412,6 +403,10 @@ export default class Widget extends React.PureComponent<AllWidgetProps<any>, Sta
 
   addGraphicsToMap = async (address: any, mapPoint: any, zoomLevel: number) => {
     try {
+      if (!address) {
+        console.error('Error adding graphics to map: address is null');
+        return;
+      }
       const proximityFactor = 1 // Optional proximity adjustment for styling
       const { config } = this.props
 

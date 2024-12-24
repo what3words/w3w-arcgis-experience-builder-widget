@@ -1,0 +1,34 @@
+{
+  "itemCategoriesInfo": [
+    {
+      "type": "MY_CONTENT",
+      "customLabel": "",
+      "enabled": true,
+      "id": "MY_CONTENT"
+    },
+    {
+      "type": "MY_GROUP",
+      "customLabel": "",
+      "enabled": true,
+      "id": "MY_GROUP"
+    },
+    {
+      "type": "MY_ORGANIZATION",
+      "customLabel": "",
+      "enabled": true,
+      "id": "MY_ORGANIZATION"
+    },
+    {
+      "type": "PUBLIC",
+      "customLabel": "",
+      "enabled": true,
+      "id": "PUBLIC"
+    },
+    {
+      "type": "LIVING_ATLAS",
+      "customLabel": "",
+      "enabled": true,
+      "id": "LIVING_ATLAS"
+    }
+  ]
+}
