@@ -485,9 +485,9 @@
           "canExtentNavigate": true,
           "canOverviewMap": true
         },
-        "isUseCustomMapState": true,
+        "isUseCustomMapState": false,
         "initialMapState": null,
-        "initialMapDataSourceID": "dataSource_3",
+        "initialMapDataSourceID": "dataSource_5",
         "clientQueryDataSourceIds": [],
         "layoutIndex": 1
       },
@@ -502,8 +502,8 @@
       "label": "Map",
       "useDataSources": [
         {
-          "dataSourceId": "dataSource_3",
-          "mainDataSourceId": "dataSource_3"
+          "dataSourceId": "dataSource_5",
+          "mainDataSourceId": "dataSource_5"
         }
       ],
       "dataActions": {
@@ -614,7 +614,7 @@
           "w3wApiKey": "F4KKWPJ7",
           "geocodeServiceUrl": "https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer"
         },
-        "mode": "apiKey"
+        "mode": "locatorUrl"
       },
       "id": "widget_28",
       "useMapWidgetIds": [
@@ -2049,6 +2049,13 @@
         }
       },
       "geometryType": "esriGeometryPoint"
+    },
+    "dataSource_5": {
+      "id": "dataSource_5",
+      "type": "WEB_MAP",
+      "sourceLabel": "PublicTestWebMapViewer",
+      "itemId": "046eda0ccfe64a81bad70f7439fa78dd",
+      "portalUrl": "https://w3w.maps.arcgis.com"
     }
   },
   "messageConfigs": {
@@ -2440,7 +2447,7 @@
       "home": []
     }
   ],
-  "timestamp": 1734999440833,
+  "timestamp": 1735641804459,
   "header": {
     "layout": {
       "LARGE": "layout_58"
@@ -2531,5 +2538,5 @@
       "index": 1
     }
   },
-  "publishTimestamp": 1734999442233
+  "publishTimestamp": 1735641806053
 }
