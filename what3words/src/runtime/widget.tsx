@@ -718,7 +718,7 @@ State
       const renderer = new Renderer({
         symbol: {
           type: 'simple-line',
-          color: [255, 31, 38, 0.5], // Red with 60% opacity
+          color: [255, 31, 38, 0.5],
           width: 0.5
         }
       })
@@ -745,10 +745,9 @@ State
         id: 'w3wGridLayer',
         source: w3wGridLines,
         renderer,
-        popupEnabled: false // Make grid lines not selectable
+        popupEnabled: false
       })
 
-      // add w3wGridLayer under w3wLayer
       this.mapView.map.add(this.gridLayer)
     } else {
       this.gridLayer?.destroy()
@@ -794,11 +793,6 @@ State
             id: index,
             value: value * 10000,
             norm: norm * 10000
-          },
-          symbol: {
-            type: 'simple-line',
-            color: [255, 31, 38, 0.5], // Red with 50% opacity
-            width: 0.5
           },
           geometry: {
             type: 'polyline',
