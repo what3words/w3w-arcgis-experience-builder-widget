@@ -42,11 +42,11 @@ export function getW3WStyle (theme: IMThemeVariables): SerializedStyles {
       }
 
       .w3w-placeholder {
-        font-size: 14px; 
-        line-height: 1.2; 
-        font-weight: 400; 
+        font-size: 14px;
+        line-height: 1.2;
+        font-weight: 400;
         color: #525252;
-        text-align: center; 
+        text-align: center;
       }
 
       .w3w-error {
@@ -86,21 +86,28 @@ export function getW3WStyle (theme: IMThemeVariables): SerializedStyles {
         margin: 0;
       }
 
+      .show-grid-title {
+        font-size: 14px;
+        color: #0A3049;
+        font-weight: bold;
+        margin-inline-start: 8px;
+      }
+
       .button-group-container {
-        width: 100%; 
+        width: 100%;
       }
 
       .full-width {
         display: flex;
-        width: 100%; 
-        margin: 0; 
-        padding: 0; 
+        width: 100%;
+        margin: 0;
+        padding: 0;
         box-sizing: border-box;
         flex-wrap: wrap;
       }
 
       .full-width .jimu-btn span {
-        margin-left: 6px; 
+        margin-left: 6px;
         flex-shrink: 1; /* Allow text to resize or ellipsis if needed */
         text-overflow: ellipsis; /* Truncate text if it's too long */
         white-space: nowrap; /* Prevent wrapping of text */

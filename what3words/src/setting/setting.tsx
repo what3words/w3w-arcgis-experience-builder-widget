@@ -1,5 +1,12 @@
 /** @jsx jsx */
-import { React, jsx, getAppStore, FormattedMessage, type ImmutableArray, type UseUtility } from 'jimu-core'
+import {
+  React,
+  jsx,
+  getAppStore,
+  FormattedMessage,
+  type ImmutableArray,
+  type UseUtility
+} from 'jimu-core'
 import { type AllWidgetSettingProps } from 'jimu-for-builder'
 import AddressSettings from './components/locator-settings'
 import {
@@ -9,8 +16,19 @@ import {
 } from 'jimu-ui/advanced/setting-components'
 import defaultMessages from './translations/default'
 import { getWidgetDisplayOptionsStyle } from './lib/style'
-import { Switch, CollapsablePanel, TextInput, Radio, Select, Option } from 'jimu-ui'
-import { getAvailableLanguages } from '../runtime/language-utils'
+import {
+  Switch,
+  CollapsablePanel,
+  TextInput,
+  Radio,
+  Select,
+  Option
+} from 'jimu-ui'
+import {
+  type AvailableLanguage,
+  getAvailableLanguages
+} from '../runtime/language-utils'
+import { type IMConfig } from '../config'
 
 interface State {
   isAddressSettingsOpen: boolean
@@ -19,25 +37,34 @@ interface State {
   apiKeyError: boolean
 }
 
-export default class Setting extends React.PureComponent<AllWidgetSettingProps<any>, State> {
+export default class Setting extends React.PureComponent<
+AllWidgetSettingProps<IMConfig>,
+State
+> {
   private readonly isRTL: boolean
+  private readonly exbVersion: string
 
-  constructor (props) {
+  constructor (props: AllWidgetSettingProps<IMConfig>) {
     super(props)
     this.state = {
       isAddressSettingsOpen: true,
       languages: [],
-      tempApiKey: this.props.config?.addressSettings?.w3wApiKey || '',
+      tempApiKey:
+        this.props.config.mode === 'apiKey' ? this.props.config.w3wApiKey : '',
       apiKeyError: false
     }
 
     const appState = getAppStore().getState()
     this.isRTL = appState?.appContext?.isRTL || false // Default to false if undefined
+    this.exbVersion = appState?.appConfig?.exbVersion || 'Unknown'
   }
 
   /** Localize strings */
   nls = (id: string) => {
-    return this.props.intl.formatMessage({ id, defaultMessage: defaultMessages[id] })
+    return this.props.intl.formatMessage({
+      id,
+      defaultMessage: defaultMessages[id]
+    })
   }
 
   componentDidMount () {
@@ -46,10 +73,13 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<a
 
   /** Fetch available languages using the saved API key */
   async fetchLanguages () {
-    const apiKey = this.props.config?.addressSettings?.w3wApiKey
-
+    if (this.props.config.mode !== 'apiKey') {
+      console.warn('API key is not used. Skipping language fetch.')
+      return
+    }
+    const apiKey = this.props.config.w3wApiKey
     try {
-      const languages = await getAvailableLanguages(apiKey)
+      const languages = await getAvailableLanguages(apiKey, this.exbVersion)
       this.setState({ languages })
     } catch (error) {
       console.error('Error fetching languages:', error)
@@ -59,13 +89,16 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<a
   setW3wApiKey = async (w3wApiKey: string) => {
     this.props.onSettingChange({
       id: this.props.id,
-      config: this.props.config.setIn(['addressSettings', 'w3wApiKey'], w3wApiKey)
+      config: this.props.config.setIn(['w3wApiKey'], w3wApiKey)
     })
 
     try {
       await this.fetchLanguages() // Fetch languages after the API key is saved
     } catch (error) {
-      console.error('Error fetching languages with the updated API key:', error)
+      console.error(
+        'Error fetching languages with the updated API key:',
+        error
+      )
     }
   }
 
@@ -110,7 +143,7 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<a
       this.setState({ languages: [], apiKeyError: false }) // Clear languages and reset error
       this.props.onSettingChange({
         id: this.props.id,
-        config: this.props.config.setIn(['addressSettings', 'w3wApiKey'], '')
+        config: this.props.config.setIn(['w3wApiKey'], '')
       })
       return
     }
@@ -118,12 +151,12 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<a
     // Save the API key to the configuration
     this.props.onSettingChange({
       id: this.props.id,
-      config: this.props.config.setIn(['addressSettings', 'w3wApiKey'], tempApiKey)
+      config: this.props.config.setIn(['w3wApiKey'], tempApiKey)
     })
 
     // Fetch languages directly using the temporary API key
     try {
-      const languages = await getAvailableLanguages(tempApiKey)
+      const languages = await getAvailableLanguages(tempApiKey, this.exbVersion)
       this.setState({ languages, apiKeyError: false }) // Clear error if successful
       console.log('API Key saved and languages fetched successfully.')
     } catch (error) {
@@ -139,10 +172,13 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<a
   }
 
   /** Update address settings */
-  updateAddressSettings = (property: string, value: string | number | ImmutableArray<UseUtility> | [] | boolean) => {
+  updateAddressSettings = (
+    property: string,
+    value: string | number | ImmutableArray<UseUtility> | [] | boolean
+  ) => {
     this.props.onSettingChange({
       id: this.props.id,
-      config: this.props.config.setIn(['addressSettings', property], value)
+      config: this.props.config.setIn([property], value)
     })
   }
 
@@ -151,7 +187,10 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<a
     const { tempApiKey } = this.state
 
     return (
-      <div css={getWidgetDisplayOptionsStyle(theme)} className="widget-what3words-setting">
+      <div
+        css={getWidgetDisplayOptionsStyle(theme)}
+        className="widget-what3words-setting"
+      >
         {/* Map Widget Selector Section */}
         <SettingSection
           className="map-selector-section"
@@ -162,9 +201,9 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<a
         >
           <SettingRow>
             <MapWidgetSelector
-            useMapWidgetIds={useMapWidgetIds}
-            onSelect={this.onMapWidgetSelected}
-          />
+              useMapWidgetIds={useMapWidgetIds}
+              onSelect={this.onMapWidgetSelected}
+            />
           </SettingRow>
         </SettingSection>
 
@@ -173,7 +212,7 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<a
           <SettingRow flow="wrap">
             <Radio
               value="apiKey"
-              checked={config?.mode === 'apiKey'}
+              checked={config.mode === 'apiKey'}
               onChange={this.handleModeChange}
             />
             <label>Use API Key</label>
@@ -181,7 +220,7 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<a
           <SettingRow>
             <Radio
               value="locatorUrl"
-              checked={config?.mode === 'locatorUrl'}
+              checked={config.mode === 'locatorUrl'}
               onChange={this.handleModeChange}
             />
             <label>Use Locator URL</label>
@@ -189,9 +228,9 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<a
         </SettingSection>
 
         {/* API Key Section */}
-        {config?.mode === 'apiKey' && (
+        {config.mode === 'apiKey' && (
           <SettingSection title="API Key">
-            <SettingRow flow="wrap" className='api-key-input-row'>
+            <SettingRow flow="wrap" className="api-key-input-row">
               <TextInput
                 className="w-100"
                 placeholder="Enter your what3words API key"
@@ -209,30 +248,40 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<a
         )}
 
         {/* Language Dropdown */}
-        {config?.mode === 'apiKey' && (
+        {config.mode === 'apiKey' && (
           <SettingSection title="Select Language">
-            <SettingRow className='lang-dropdown'>
+            <SettingRow className="lang-dropdown">
               <Select
-                className='lang-select'
-                value={config?.w3wLanguage || 'en'}
-                onChange={(e: any) => { this.setW3wLanguage(e.target.value) }}
+                className="lang-select"
+                value={config.w3wLanguage || 'en'}
+                onChange={(e: any) => {
+                  this.setW3wLanguage(e.target.value)
+                }}
                 disabled={this.state.languages.length === 0}
-                placeholder='Select a language'
+                placeholder="Select a language"
               >
                 {this.state.languages.map((language) => (
-                <Option key={language.code} value={language.code}>
-                  <div style={{ display: 'flex', flexDirection: 'column', height: 'auto' }} >
-                    <strong>{language.nativeName}</strong>
-                    <small>{`${language.name} (${language.code})`}</small>
-                  </div>
-                </Option>
+                  <Option key={language.code} value={language.code}>
+                    <div
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        height: 'auto'
+                      }}
+                    >
+                      <strong>{language.nativeName}</strong>
+                      <small>{`${language.name} (${language.code})`}</small>
+                    </div>
+                  </Option>
                 ))}
               </Select>
             </SettingRow>
             {/* Show message when dropdown is disabled */}
             {this.state.languages.length === 0 && (
               <SettingRow className="no-languages-message">
-                <p style={{ color: 'inherit', fontSize: '14px' }}> {/* Error-like styling */}
+                <p style={{ color: 'inherit', fontSize: '14px' }}>
+                  {' '}
+                  {/* Error-like styling */}
                   No languages available. Enter a valid API key.
                 </p>
               </SettingRow>
@@ -246,11 +295,10 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<a
               </SettingRow>
             )}
           </SettingSection>
-
         )}
 
         {/* Address Settings Section */}
-        {config?.mode === 'locatorUrl' && (
+        {config.mode === 'locatorUrl' && (
           <SettingSection>
             <CollapsablePanel
               defaultIsOpen
@@ -264,7 +312,7 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<a
                   intl={intl}
                   theme={theme}
                   portalSelf={this.props.portalSelf}
-                  config={config?.addressSettings || {}} // Fallback to empty object
+                  config={config} // Fallback to empty object
                   isRTL={this.isRTL}
                   onAddressSettingsUpdated={this.updateAddressSettings}
                 />
@@ -283,7 +331,9 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<a
         >
           {[
             { key: 'displayCoordinates', label: 'displayCoordinates' },
-            ...(config?.mode === 'apiKey' ? [{ key: 'displayNearestPlace', label: 'displayNearestPlace' }] : []),
+            ...(config.mode === 'apiKey'
+              ? [{ key: 'displayNearestPlace', label: 'displayNearestPlace' }]
+              : []),
             { key: 'displayCopyButton', label: 'displayCopyButton' },
             { key: 'displayMapsiteButton', label: 'displayMapsiteButton' },
             { key: 'displayMapAnnotation', label: 'displayMapAnnotation' }
@@ -296,12 +346,18 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<a
                     onChange={(event) => {
                       this.props.onSettingChange({
                         id: this.props.id,
-                        config: this.props.config.set(key, event.currentTarget.checked)
+                        config: this.props.config.set(
+                          key,
+                          event.currentTarget.checked
+                        )
                       })
                     }}
                   />
                   <label>
-                    <FormattedMessage id={label} defaultMessage={defaultMessages[label]} />
+                    <FormattedMessage
+                      id={label}
+                      defaultMessage={defaultMessages[label]}
+                    />
                   </label>
                 </div>
               </div>
