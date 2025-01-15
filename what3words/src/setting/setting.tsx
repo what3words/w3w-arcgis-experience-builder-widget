@@ -26,7 +26,7 @@ import {
 } from 'jimu-ui'
 import {
   type AvailableLanguage,
-  getAvailableLanguages
+  fetchAvailableLanguages
 } from '../lib/w3w'
 import { type IMConfig } from '../config'
 
@@ -79,7 +79,7 @@ State
     }
     const apiKey = this.props.config.w3wApiKey
     try {
-      const languages = await getAvailableLanguages({
+      const languages = await fetchAvailableLanguages({
         apiKey,
         exbVersion: this.exbVersion
       })
@@ -159,7 +159,7 @@ State
 
     // Fetch languages directly using the temporary API key
     try {
-      const languages = await getAvailableLanguages({
+      const languages = await fetchAvailableLanguages({
         apiKey: tempApiKey,
         exbVersion: this.exbVersion
       })

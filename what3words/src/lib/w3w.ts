@@ -48,7 +48,43 @@ export const fetchW3WAddress = async ({ latitude, longitude }: Coordinates, opts
     nearestPlace: response.nearestPlace || 'No nearby place available'
   }
 }
-export const getAvailableLanguages = async (opts: Options): Promise<AvailableLanguage[]> => {
+
+export const fetchGrid = async (extent: __esri.Extent, opts: Options) => {
+  const { apiKey, exbVersion } = opts
+  if (!apiKey) {
+    return
+  }
+  const boundingBox = `${extent.ymin},${extent.xmin},${extent.ymax},${extent.xmax}`
+  return await fetch(
+    'https://api.what3words.com/v3/grid-section?' +
+    new URLSearchParams({
+      key: apiKey,
+      'bounding-box': boundingBox,
+      format: 'geojson'
+    }).toString(),
+    {
+      headers: {
+        'X-W3W-Wrapper': `ArcGIS Experience App ${exbVersion}`
+      }
+    })
+    .then(res => res.json())
+    .catch(error => {
+      return {
+        features: [
+          {
+            geometry: {
+              coordinates: [],
+              type: 'MultiLineString'
+            },
+            type: 'Feature',
+            properties: {}
+          }
+        ],
+        type: 'FeatureCollection'
+      }
+    })
+}
+export const fetchAvailableLanguages = async (opts: Options): Promise<AvailableLanguage[]> => {
   const { apiKey, exbVersion } = opts
   if (!apiKey) {
     throw new Error('API key is required to fetch available languages.')

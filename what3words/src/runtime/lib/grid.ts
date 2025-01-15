@@ -1,7 +1,6 @@
 import { loadArcGISJSAPIModules } from 'jimu-arcgis'
 
 const GRID_LAYER_ID = 'w3wGridLayer'
-
 const getW3wGridLineGraphics = async (
   w3wGrid: any
 ) => {
@@ -34,48 +33,11 @@ const getW3wGridLineGraphics = async (
   })
 }
 
-export const getGridData = async (extent: __esri.Extent, apiKey: string) => {
-  if (!apiKey) {
-    return
-  }
-  const boundingBox = `${extent.ymin},${extent.xmin},${extent.ymax},${extent.xmax}`
-  return await fetch(
-    'https://api.what3words.com/v3/grid-section?' +
-    new URLSearchParams({
-      key: apiKey,
-      'bounding-box': boundingBox,
-      format: 'geojson'
-    }).toString(),
-    {
-      headers: {
-        'X-W3W-Wrapper': `ArcGIS Experience App ${0.1}` // (v${this.exbVersion})`
-      }
-    })
-    .then(res => res.json())
-    .catch(error => {
-      return {
-        features: [
-          {
-            geometry: {
-              coordinates: [],
-              type: 'MultiLineString'
-            },
-            type: 'Feature',
-            properties: {}
-          }
-        ],
-        type: 'FeatureCollection'
-      }
-    })
-}
-
 export const fillW3wGridLayer = async (mapView: __esri.MapView | __esri.SceneView, gridData: any) => {
   const [FeatureLayer, Renderer] = await loadArcGISJSAPIModules([
     'esri/layers/FeatureLayer',
     'esri/renderers/SimpleRenderer'
   ])
-
-  console.log('Map view extent: ', mapView.extent.spatialReference.wkid)
 
   let gridLayer = mapView.map.findLayerById(GRID_LAYER_ID)
   const w3wGridLines = await getW3wGridLineGraphics(gridData)

@@ -29,8 +29,8 @@ import { CopyButton } from 'jimu-ui/basic/copy-button'
 import { ShareArrowCurveOutlined } from 'jimu-icons/outlined/editor/share-arrow-curve'
 import { debounce } from 'lodash'
 
-import { clearGridLayer, fillW3wGridLayer, getGridData } from './lib/grid'
-import { type Address, fetchW3WAddress } from '../lib/w3w'
+import { clearGridLayer, fillW3wGridLayer } from './lib/grid'
+import { type Address, fetchW3WAddress, fetchGrid } from '../lib/w3w'
 
 interface State {
   w3wLocator: string
@@ -224,14 +224,17 @@ State
     }
   }
 
-  drawGridOnMap = async () => {
-    if (this.state.displayGrid) {
+  drawGridOnMap = async (displayGrid: boolean) => {
+    if (displayGrid) {
       const extent = await this.projectToWGS84(this.mapView.extent)
       if (!this.state.isZoomInRange) {
         clearGridLayer(this.mapView)
         return
       }
-      const grid = await getGridData(extent, getApiKey(this.props.config))
+      const grid = await fetchGrid(extent, {
+        apiKey: getApiKey(this.props.config),
+        exbVersion: this.exbVersion
+      })
       fillW3wGridLayer(this.mapView, grid)
     } else {
       clearGridLayer(this.mapView)
@@ -329,7 +332,7 @@ State
             'Map is stationary. Updating current map point and address...'
           )
           this.drawLocationOnMap()
-          this.drawGridOnMap()
+          this.drawGridOnMap(this.state.displayGrid)
         }
         break
       case 'zoom':
@@ -399,6 +402,8 @@ State
     const prevState = prevProps.state
     const currentState = this.props.state
     console.log(`Component did updated - current state: ${currentState} previous state: ${prevState}`)
+    if (prevState === currentState) return
+
     if (prevState !== currentState) {
       if (currentState === 'OPENED') {
         this.activateWidget()
@@ -476,10 +481,12 @@ State
   deactivateWidget = () => {
     console.log('Deactivating widget')
     // Clear the graphics layer
+    clearGridLayer(this.mapView)
     this.clearGraphics()
     this.removeHandlers()
     // Reset the widget state
     this.resetWidgetState()
+    this.setState({ displayGrid: false })
   }
 
   resetWidgetState = () => {
@@ -509,20 +516,7 @@ State
     this.setState({
       displayGrid: checked
     })
-    if (checked) {
-      this.projectToWGS84(this.mapView.extent).then((extent) => {
-        if (!this.state.isZoomInRange) {
-          clearGridLayer(this.mapView)
-          return
-        }
-        getGridData(extent, getApiKey(this.props.config))
-          .then(gridData => {
-            fillW3wGridLayer(this.mapView, gridData)
-          })
-      })
-    } else {
-      clearGridLayer(this.mapView)
-    }
+    this.drawGridOnMap(checked)
   }
 
   /* Renders the widget UI */
