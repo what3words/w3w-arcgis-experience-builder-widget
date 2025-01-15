@@ -27,7 +27,7 @@ import {
 import {
   type AvailableLanguage,
   getAvailableLanguages
-} from '../lib/w3w-utils'
+} from '../lib/w3w'
 import { type IMConfig } from '../config'
 
 interface State {

@@ -12,7 +12,7 @@ import {
   loadArcGISJSAPIModules,
   type JimuMapView
 } from 'jimu-arcgis'
-import { getApiKey, getGeocodeServiceURL, validApiKey, validLocator } from './lib/mode-utils'
+import { getApiKey, getGeocodeServiceURL, validApiKey, validLocator } from './lib/mode'
 
 import {
   getMarkerGraphic,
@@ -20,7 +20,7 @@ import {
   getSquareMapLabelGraphic,
   getSquareMarkerGraphic,
   getAddressFromGeocodeService
-} from './lib/locator-utils'
+} from './lib/locator'
 import { type IMConfig } from '../config'
 import { getW3WStyle } from './lib/style'
 import defaultMessages from './translations/default'
@@ -29,8 +29,8 @@ import { CopyButton } from 'jimu-ui/basic/copy-button'
 import { ShareArrowCurveOutlined } from 'jimu-icons/outlined/editor/share-arrow-curve'
 import { debounce } from 'lodash'
 
-import { clearGridLayer, fillW3wGridLayer, getGridData } from './lib/grid-utils'
-import { type Address, fetchW3WAddress } from '../lib/w3w-utils'
+import { clearGridLayer, fillW3wGridLayer, getGridData } from './lib/grid'
+import { type Address, fetchW3WAddress } from '../lib/w3w'
 
 interface State {
   w3wLocator: string
