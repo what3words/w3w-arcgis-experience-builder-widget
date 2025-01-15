@@ -27,7 +27,7 @@ import {
 import {
   type AvailableLanguage,
   getAvailableLanguages
-} from '../runtime/language-utils'
+} from '../lib/w3w-utils'
 import { type IMConfig } from '../config'
 
 interface State {
@@ -79,7 +79,10 @@ State
     }
     const apiKey = this.props.config.w3wApiKey
     try {
-      const languages = await getAvailableLanguages(apiKey, this.exbVersion)
+      const languages = await getAvailableLanguages({
+        apiKey,
+        exbVersion: this.exbVersion
+      })
       this.setState({ languages })
     } catch (error) {
       console.error('Error fetching languages:', error)
@@ -156,9 +159,11 @@ State
 
     // Fetch languages directly using the temporary API key
     try {
-      const languages = await getAvailableLanguages(tempApiKey, this.exbVersion)
+      const languages = await getAvailableLanguages({
+        apiKey: tempApiKey,
+        exbVersion: this.exbVersion
+      })
       this.setState({ languages, apiKeyError: false }) // Clear error if successful
-      console.log('API Key saved and languages fetched successfully.')
     } catch (error) {
       console.error('Error fetching languages with the saved API key:', error)
       this.setState({ languages: [], apiKeyError: true }) // Set error and clear languages
@@ -257,10 +262,10 @@ State
                 onChange={(e: any) => {
                   this.setW3wLanguage(e.target.value)
                 }}
-                disabled={this.state.languages.length === 0}
+                disabled={!this.state.languages || this.state.languages.length === 0}
                 placeholder="Select a language"
               >
-                {this.state.languages.map((language) => (
+                {this.state.languages?.map((language) => (
                   <Option key={language.code} value={language.code}>
                     <div
                       style={{
@@ -277,7 +282,7 @@ State
               </Select>
             </SettingRow>
             {/* Show message when dropdown is disabled */}
-            {this.state.languages.length === 0 && (
+            {(!this.state.languages || this.state.languages.length === 0) && (
               <SettingRow className="no-languages-message">
                 <p style={{ color: 'inherit', fontSize: '14px' }}>
                   {' '}
