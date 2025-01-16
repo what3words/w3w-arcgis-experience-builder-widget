@@ -341,7 +341,7 @@ State
                   intl={intl}
                   theme={theme}
                   portalSelf={this.props.portalSelf}
-                  config={config} // Fallback to empty object
+                  config={config}
                   isRTL={this.isRTL}
                   onAddressSettingsUpdated={this.updateAddressSettings}
                 />
