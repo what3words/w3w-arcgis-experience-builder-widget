@@ -118,7 +118,6 @@ export const fetchAvailableLanguages = async (opts: Options): Promise<AvailableL
     }
   )
     .then(res => res.json())
-    // .then(({ languages }) => languages)
     .then(({ error, languages }) => {
       if (error) {
         throw new Error(`${error?.code || 'Error'}: ${error?.message || 'Unable to fetch available languages'}`)
