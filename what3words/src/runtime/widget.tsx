@@ -13,7 +13,6 @@ import {
   type JimuMapView
 } from 'jimu-arcgis'
 import { getApiKey, getGeocodeServiceURL } from './lib/mode'
-
 import {
   getMarkerGraphic,
   getMapLabelGraphic,
@@ -39,7 +38,6 @@ interface State {
   longitude: string
   what3words: string | null
   isCopyMessageOpen: boolean
-  currentZoomLevel: number
   isZoomInRange: boolean
   nearestPlace: string | null
   currentAddress: Address
@@ -56,6 +54,7 @@ State
   private readonly isRTL: boolean
   private clickHandle: __esri.Handle
   private eventHandle: __esri.WatchHandle
+  private readonly widgetVersion: string
   private readonly exbVersion: string
 
   constructor (props: AllWidgetProps<IMConfig>) {
@@ -63,7 +62,9 @@ State
 
     const appState = getAppStore().getState()
     this.isRTL = appState?.appContext?.isRTL
-    this.exbVersion = appState?.appConfig?.exbVersion || 'Unknown'
+    this.widgetVersion = appState?.appConfig?.widgets?.[this.props.widgetId]?.manifest?.version || 'Unknown'
+    this.exbVersion = appState?.appConfig?.exbVersion ?? 'Unknown'
+
     this.state = {
       w3wLocator: '',
       jimuMapView: null,
@@ -71,7 +72,6 @@ State
       longitude: '',
       what3words: null,
       isCopyMessageOpen: false,
-      currentZoomLevel: null,
       isZoomInRange: false,
       nearestPlace: null,
       currentAddress: null,
@@ -234,9 +234,11 @@ State
         clearGridLayer(this.mapView)
         return
       }
+      const { widgetVersion, exbVersion } = this
       const grid = await fetchGrid(extent, {
         apiKey: getApiKey(this.props.config),
-        exbVersion: this.exbVersion
+        widgetVersion,
+        exbVersion
       }).catch(error => {
         this.setState({ error: error.message })
         return null
@@ -275,15 +277,15 @@ State
   }
 
   handleZoomChange = async (zoomLevel: number) => {
-    this.setState({ isZoomInRange: this.isZoomLevelInRange(zoomLevel), currentZoomLevel: zoomLevel })
+    this.setState({ isZoomInRange: this.isZoomLevelInRange(zoomLevel) })
   }
 
-  isZoomLevelInRange = (zoomLevel: number) => zoomLevel >= 17 && zoomLevel <= 25
+  isZoomLevelInRange = (zoomLevel: number) => zoomLevel >= 18
 
   zoomToLocation = async (mapPoint: __esri.Point) => {
     await this.mapView.goTo({
       center: [mapPoint.longitude || mapPoint.x, mapPoint.latitude || mapPoint.y],
-      zoom: this.isZoomLevelInRange(this.mapView.zoom) ? this.mapView.zoom : 18
+      zoom: this.isZoomLevelInRange(this.mapView.zoom) ? this.mapView.zoom : 19
     })
   }
 
@@ -301,9 +303,11 @@ State
       this.setState({ latitude, longitude })
       let address: Address | null
       if (this.apiKeyMode) {
+        const { widgetVersion, exbVersion } = this
         address = await fetchW3WAddress({ latitude, longitude }, {
           apiKey: getApiKey(this.props.config),
-          exbVersion: this.exbVersion
+          widgetVersion,
+          exbVersion
         }).catch(error => {
           this.setState({ error: error.message })
           return null
@@ -470,14 +474,14 @@ State
       }
     }
 
-    // this.setState({ error: null })
-
     if (isLocatorMode) this.updateGeocodeURL()
     if (isLocatorMode || isApiKeyMode) {
       this.removeHandlers()
       this.clickHandle = this.mapView.on('click', this.handleMapClick)
       this.eventHandle = this.mapView.watch(['stationary', 'zoom', 'center', 'basemap'], this.handleEvents)
     }
+
+    this.handleZoomChange(this.mapView.zoom)
   }
 
   deactivateWidget = () => {
@@ -487,7 +491,11 @@ State
     this.removeHandlers()
     // Reset the widget state
     this.resetWidgetState()
-    this.setState({ displayGrid: false, error: null })
+    this.setState({
+      displayGrid: false,
+      isZoomInRange: false,
+      error: null
+    })
   }
 
   resetWidgetState = () => {
@@ -496,7 +504,6 @@ State
       longitude: '',
       what3words: null,
       isCopyMessageOpen: false,
-      currentZoomLevel: null,
       currentAddress: null,
       currentMapPoint: null
     })

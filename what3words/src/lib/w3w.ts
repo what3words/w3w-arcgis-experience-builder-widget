@@ -46,11 +46,13 @@ interface Options {
   apiKey: string
   language?: string
   exbVersion: string
+  widgetVersion: string
 }
 
-const W3W_PLUGIN_HEADER = (exbVersion: string) => `ArcGIS Experience App (v${exbVersion})`
+const W3W_PLUGIN_HEADER = (widgetVersion: string, exbVersion: string) =>
+  `what3words-ArcGIS-EXB-Widget/${widgetVersion} (ArcGISExperienceBuilder/${exbVersion})`
 export const fetchW3WAddress = async ({ latitude, longitude }: Coordinates, opts: Options): Promise<Address> => {
-  const { apiKey, language = 'en', exbVersion } = opts
+  const { apiKey, language = 'en', widgetVersion, exbVersion } = opts
   if (!opts.apiKey) {
     throw new Error('API Key is required to fetch address.')
   }
@@ -62,7 +64,7 @@ export const fetchW3WAddress = async ({ latitude, longitude }: Coordinates, opts
       language
     }).toString(),
     {
-      headers: { 'X-W3W-Plugin': W3W_PLUGIN_HEADER(exbVersion) }
+      headers: { 'X-W3W-Plugin': W3W_PLUGIN_HEADER(widgetVersion, exbVersion) }
     })
     .then(res => res.json())
     .then(({ error, words, square, nearestPlace = 'No nearby place available' }) => {
@@ -78,7 +80,7 @@ export const fetchW3WAddress = async ({ latitude, longitude }: Coordinates, opts
 }
 
 export const fetchGrid = async (extent: __esri.Extent, opts: Options): Promise<GeoJsonGridData> => {
-  const { apiKey, exbVersion } = opts
+  const { apiKey, widgetVersion, exbVersion } = opts
   if (!apiKey) {
     return
   }
@@ -91,7 +93,7 @@ export const fetchGrid = async (extent: __esri.Extent, opts: Options): Promise<G
       format: 'geojson'
     }).toString(),
     {
-      headers: { 'X-W3W-Plugin': W3W_PLUGIN_HEADER(exbVersion) }
+      headers: { 'X-W3W-Plugin': W3W_PLUGIN_HEADER(widgetVersion, exbVersion) }
     })
     .then(res => res.json())
     .then(({ error, features, type }) => {
@@ -105,7 +107,7 @@ export const fetchGrid = async (extent: __esri.Extent, opts: Options): Promise<G
     })
 }
 export const fetchAvailableLanguages = async (opts: Options): Promise<AvailableLanguage[]> => {
-  const { apiKey, exbVersion } = opts
+  const { apiKey, widgetVersion, exbVersion } = opts
   if (!apiKey) {
     throw new Error('API key is required to fetch available languages.')
   }
@@ -114,10 +116,11 @@ export const fetchAvailableLanguages = async (opts: Options): Promise<AvailableL
     'https://api.what3words.com/v3/available-languages?' +
       new URLSearchParams({ key: apiKey }).toString(),
     {
-      headers: { 'X-W3W-Plugin': W3W_PLUGIN_HEADER(exbVersion) }
+      headers: { 'X-W3W-Plugin': W3W_PLUGIN_HEADER(widgetVersion, exbVersion) }
     }
   )
     .then(res => res.json())
+    // .then(({ languages }) => languages)
     .then(({ error, languages }) => {
       if (error) {
         throw new Error(`${error?.code || 'Error'}: ${error?.message || 'Unable to fetch available languages'}`)

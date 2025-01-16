@@ -42,6 +42,7 @@ AllWidgetSettingProps<IMConfig>,
 State
 > {
   private readonly isRTL: boolean
+  private readonly widgetVersion: string
   private readonly exbVersion: string
 
   constructor (props: AllWidgetSettingProps<IMConfig>) {
@@ -56,6 +57,7 @@ State
 
     const appState = getAppStore().getState()
     this.isRTL = appState?.appContext?.isRTL || false // Default to false if undefined
+    this.widgetVersion = appState?.appConfig?.widgets?.[this.props.widgetId]?.manifest?.version || 'Unknown'
     this.exbVersion = appState?.appConfig?.exbVersion || 'Unknown'
   }
 
@@ -79,9 +81,11 @@ State
     }
     const apiKey = this.props.config.w3wApiKey
     try {
+      const { widgetVersion, exbVersion } = this
       const languages = await fetchAvailableLanguages({
         apiKey,
-        exbVersion: this.exbVersion
+        widgetVersion,
+        exbVersion
       }).catch((error) => {
         console.error(error?.message || 'Error fetching available languages')
         return [
@@ -168,9 +172,11 @@ State
 
     // Fetch languages directly using the temporary API key
     try {
+      const { widgetVersion, exbVersion } = this
       const languages = await fetchAvailableLanguages({
         apiKey: tempApiKey,
-        exbVersion: this.exbVersion
+        widgetVersion,
+        exbVersion
       }).catch((error) => {
         console.error(error?.message || 'Error fetching available languages')
         return [

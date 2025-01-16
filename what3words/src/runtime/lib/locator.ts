@@ -300,7 +300,7 @@ export const getMarkerIcon = (
   ]
 
   // Get the current basemap title
-  const currentBasemapTitle = mapView.map.basemap?.title || ''
+  const currentBasemapTitle = mapView.map?.basemap?.title || ''
 
   // Check if the current basemap is a dark mode basemap
   const isDarkMode = darkBasemaps.some((title) =>

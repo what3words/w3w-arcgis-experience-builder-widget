@@ -40,10 +40,10 @@ export const fillW3wGridLayer = async (mapView: __esri.MapView | __esri.SceneVie
     'esri/renderers/SimpleRenderer'
   ])
 
-  let gridLayer = mapView.map.findLayerById(GRID_LAYER_ID)
+  let gridLayer = mapView.map?.findLayerById(GRID_LAYER_ID)
   if (gridLayer) {
     gridLayer.destroy()
-    mapView.map.remove(gridLayer)
+    mapView.map?.remove(gridLayer)
   }
 
   const w3wGridLines = await getW3wGridLineGraphics(gridData)
@@ -85,9 +85,9 @@ export const fillW3wGridLayer = async (mapView: __esri.MapView | __esri.SceneVie
 }
 
 export const clearGridLayer = (mapView: __esri.MapView | __esri.SceneView) => {
-  const gridLayer = mapView.map.findLayerById(GRID_LAYER_ID)
+  const gridLayer = mapView.map?.findLayerById(GRID_LAYER_ID)
   if (gridLayer) {
     gridLayer.destroy()
-    mapView.map.remove(gridLayer)
+    mapView.map?.remove(gridLayer)
   }
 }
