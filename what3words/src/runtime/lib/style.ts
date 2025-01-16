@@ -119,7 +119,7 @@ export function getW3WStyle (theme: IMThemeVariables): SerializedStyles {
       }
 
       .full-width .jimu-btn.active {
-        background-color: #00456b; 
+        background-color: #00456b;
       }
 
       .action-buttons {

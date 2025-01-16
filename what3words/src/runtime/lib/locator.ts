@@ -1,6 +1,6 @@
 import type Point from 'esri/geometry/Point'
 import { loadArcGISJSAPIModules } from 'jimu-arcgis'
-import { type Address } from '../../lib/w3w-utils'
+import { type Address } from '../../lib/w3w'
 
 /**
  * Fetches an address from a geocode service.
@@ -242,7 +242,7 @@ export const getMarkerGraphic = async (
  * @param what3words - The what3words address to display.
  * @returns A promise resolving to a Graphic.
  */
-export const getMapLabelGraphic = (
+export const getMapLabelGraphic = async (
   point: Point,
   what3words: string
 ): Promise<__esri.Graphic | null> => {

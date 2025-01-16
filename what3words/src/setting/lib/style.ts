@@ -8,7 +8,7 @@ export function getAddressSettingsStyle (theme: IMThemeVariables): SerializedSty
     background-color: ${theme.ref.palette.neutral[800]};
     padding: 2px;
   }
-  
+
   .locator-url label {
     word-break: break-all;
   }
@@ -41,7 +41,7 @@ export function getAlertPopupStyle (theme: IMThemeVariables): SerializedStyles {
     .alertValidationContent {
       height: 42px;
     }
-    
+
     .locaterUrlTextInput .input-wrapper input {
       padding: ${isRTL ? '0 1px' : '0'};
     }
@@ -80,10 +80,10 @@ export function getWidgetDisplayOptionsStyle (theme: IMThemeVariables): Serializ
       }
 
       .lang-dropdown {
-        max-width: 300px; 
-        max-height: 200px; 
-        overflow-y: auto; 
-        font-size: 14px; 
+        max-width: 300px;
+        max-height: 200px;
+        overflow-y: auto;
+        font-size: 14px;
         scrollbar-width: thin;
         scrollbar-color: #888 #f0f0f0;
       }
@@ -97,7 +97,7 @@ export function getWidgetDisplayOptionsStyle (theme: IMThemeVariables): Serializ
         height: auto;
       }
       .lang-item {
-        display: 'flex' !important; 
+        display: 'flex' !important;
         flex-direction: 'column' !important;
         font-size: 14px;
         padding: 5px; /* Optional: Add spacing for better readability */

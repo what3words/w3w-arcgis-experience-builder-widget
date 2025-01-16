@@ -57,11 +57,3 @@ export const getApiKey = (config: Config): string | null => {
   }
   return apiKey
 }
-
-export const validApiKey = (config: Config) =>
-  config.mode === 'apiKey' && config.w3wApiKey
-
-export const validLocator = (config: Config) =>
-  config.mode === 'locatorUrl' &&
-  config.useUtilitiesGeocodeService &&
-  config.useUtilitiesGeocodeService.length > 0

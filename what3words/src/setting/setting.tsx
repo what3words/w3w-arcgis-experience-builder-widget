@@ -82,6 +82,15 @@ State
       const languages = await fetchAvailableLanguages({
         apiKey,
         exbVersion: this.exbVersion
+      }).catch((error) => {
+        console.error(error?.message || 'Error fetching available languages')
+        return [
+          {
+            code: 'en',
+            name: 'English',
+            nativeName: 'English'
+          } as AvailableLanguage
+        ]
       })
       this.setState({ languages })
     } catch (error) {
@@ -162,6 +171,15 @@ State
       const languages = await fetchAvailableLanguages({
         apiKey: tempApiKey,
         exbVersion: this.exbVersion
+      }).catch((error) => {
+        console.error(error?.message || 'Error fetching available languages')
+        return [
+          {
+            code: 'en',
+            name: 'English',
+            nativeName: 'English'
+          } as AvailableLanguage
+        ]
       })
       this.setState({ languages, apiKeyError: false }) // Clear error if successful
     } catch (error) {

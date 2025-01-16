@@ -1,10 +1,11 @@
 import { loadArcGISJSAPIModules } from 'jimu-arcgis'
+import { type GeoJsonGridData } from '../../lib/w3w'
 
 const GRID_LAYER_ID = 'w3wGridLayer'
 const getW3wGridLineGraphics = async (
-  w3wGrid: any
+  w3wGrid: GeoJsonGridData
 ) => {
-  if (!w3wGrid || !w3wGrid.features || w3wGrid.features.length === 0) {
+  if (!w3wGrid?.features?.length) {
     console.warn('No grid data provided.')
     return []
   }
@@ -33,27 +34,31 @@ const getW3wGridLineGraphics = async (
   })
 }
 
-export const fillW3wGridLayer = async (mapView: __esri.MapView | __esri.SceneView, gridData: any) => {
+export const fillW3wGridLayer = async (mapView: __esri.MapView | __esri.SceneView, gridData: GeoJsonGridData) => {
   const [FeatureLayer, Renderer] = await loadArcGISJSAPIModules([
     'esri/layers/FeatureLayer',
     'esri/renderers/SimpleRenderer'
   ])
 
   let gridLayer = mapView.map.findLayerById(GRID_LAYER_ID)
-  const w3wGridLines = await getW3wGridLineGraphics(gridData)
-
-  const renderer = new Renderer({
-    symbol: {
-      type: 'simple-line',
-      color: [255, 31, 38, 0.5],
-      width: 0.5
-    }
-  })
-
   if (gridLayer) {
     gridLayer.destroy()
     mapView.map.remove(gridLayer)
   }
+
+  const w3wGridLines = await getW3wGridLineGraphics(gridData)
+  if (!w3wGridLines.length) {
+    return
+  }
+
+  const renderer = new Renderer({
+    symbol: {
+      type: 'simple-line',
+      color: [194, 194, 194, 0.5],
+      width: 0.5
+    }
+  })
+
   gridLayer = new FeatureLayer({
     visible: true,
     objectIdField: 'id',

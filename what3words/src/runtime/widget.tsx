@@ -12,7 +12,7 @@ import {
   loadArcGISJSAPIModules,
   type JimuMapView
 } from 'jimu-arcgis'
-import { getApiKey, getGeocodeServiceURL, validApiKey, validLocator } from './lib/mode'
+import { getApiKey, getGeocodeServiceURL } from './lib/mode'
 
 import {
   getMarkerGraphic,
@@ -80,6 +80,9 @@ State
       error: null
     }
   }
+
+  private get apiKeyMode () { return this.props.config.mode === 'apiKey' }
+  private get locatorUrlMode () { return this.props.config.mode === 'locatorUrl' }
 
   /* Localize strings */
   nls = (id: string) => {
@@ -166,7 +169,7 @@ State
       // Clear previous graphics
       this.clearGraphics()
 
-      if (validApiKey(this.props.config)) {
+      if (this.apiKeyMode) {
         // Handle API Key mode: add picture marker or square based on zoom level
         if (!isZoomInRange) {
           // Add a picture marker for zoom levels below 17
@@ -205,7 +208,7 @@ State
         }
       }
 
-      if (validLocator(this.props.config)) {
+      if (this.locatorUrlMode) {
         // Handle Locator URL mode
         const marker = await getMarkerGraphic(currentMapPoint, this.mapView)
         const label = await getMapLabelGraphic(currentMapPoint, currentAddress.words)
@@ -234,6 +237,9 @@ State
       const grid = await fetchGrid(extent, {
         apiKey: getApiKey(this.props.config),
         exbVersion: this.exbVersion
+      }).catch(error => {
+        this.setState({ error: error.message })
+        return null
       })
       fillW3wGridLayer(this.mapView, grid)
     } else {
@@ -275,7 +281,6 @@ State
   isZoomLevelInRange = (zoomLevel: number) => zoomLevel >= 17 && zoomLevel <= 25
 
   zoomToLocation = async (mapPoint: __esri.Point) => {
-    console.log('Zoom level is: ', { currentZoomLevel: this.state.currentZoomLevel, mapZoom: this.mapView.zoom })
     await this.mapView.goTo({
       center: [mapPoint.longitude || mapPoint.x, mapPoint.latitude || mapPoint.y],
       zoom: this.isZoomLevelInRange(this.mapView.zoom) ? this.mapView.zoom : 18
@@ -285,8 +290,6 @@ State
   /* Handle Map Click */
   handleMapClick = async (mapClick: __esri.ViewClickEvent) => {
     if (!this.isWidgetActive()) return
-    const { latitude, longitude } = mapClick.mapPoint
-    console.log('Map clicked at:', { latitude, longitude })
 
     try {
       this.clearGraphics()
@@ -296,19 +299,25 @@ State
 
       const { latitude, longitude } = this.extractCoordinates(point)
       this.setState({ latitude, longitude })
-      let address: Address
-      if (validApiKey(this.props.config)) {
+      let address: Address | null
+      if (this.apiKeyMode) {
         address = await fetchW3WAddress({ latitude, longitude }, {
           apiKey: getApiKey(this.props.config),
           exbVersion: this.exbVersion
+        }).catch(error => {
+          this.setState({ error: error.message })
+          return null
         })
       }
 
-      if (validLocator(this.props.config)) {
-        address = await getAddressFromGeocodeService(this.state.w3wLocator, point)
+      if (this.locatorUrlMode) {
+        address = await getAddressFromGeocodeService(this.state.w3wLocator, point).catch(error => {
+          this.setState({ error: error.message })
+          return null
+        })
       }
 
-      if (!address) throw new Error('Address fetch failed.')
+      if (!address) return
 
       this.updateStateWithAddress(address)
 
@@ -328,9 +337,6 @@ State
     switch (propertyName) {
       case 'stationary':
         if (newValue) {
-          console.log(
-            'Map is stationary. Updating current map point and address...'
-          )
           this.drawLocationOnMap()
           this.drawGridOnMap(this.state.displayGrid)
         }
@@ -338,23 +344,15 @@ State
       case 'zoom':
         const debouncedZoomHandler = debounce((zoomLevel: number) => {
           this.handleZoomChange(zoomLevel)
-          console.log('Zoom level changed:', { before: oldValue, after: newValue })
         }, 100)
         debouncedZoomHandler(newValue)
         break
-      case 'basemap':
-        console.log('Base map event: ', { oldValue, newValue })
-        break
       default:
-        // console.log('Unhandled property change:', { propertyName, oldValue, newValue })
         break
     }
   }
 
-  isWidgetActive = (): boolean =>
-    validApiKey(this.props.config) &&
-    getApiKey(this.props.config) &&
-    this.props.state === 'OPENED'
+  isWidgetActive = (): boolean => this.props.state === 'OPENED' && !!this.props.config.mode && (this.apiKeyMode || this.locatorUrlMode)
 
   extractCoordinates = (mapPoint: any) => {
     const latitude = mapPoint.latitude?.toFixed(6) || mapPoint.y?.toFixed(6)
@@ -381,12 +379,10 @@ State
         nearestPlace: address.nearestPlace || 'Unknown location'
       })
     }
-    console.log('Updated state with address:', address)
   }
 
   /* Lifecycle method */
   componentDidMount = () => {
-    console.log('Component did mount - state: ', this.props.state)
     try {
       if (this.props.state === 'OPENED') {
         this.activateWidget()
@@ -399,17 +395,12 @@ State
   }
 
   componentDidUpdate = (prevProps: AllWidgetProps<IMConfig>) => {
-    const prevState = prevProps.state
     const currentState = this.props.state
-    console.log(`Component did updated - current state: ${currentState} previous state: ${prevState}`)
-    if (prevState === currentState) return
 
-    if (prevState !== currentState) {
-      if (currentState === 'OPENED') {
-        this.activateWidget()
-      } else if (currentState === 'CLOSED') {
-        this.deactivateWidget()
-      }
+    if (currentState === 'OPENED') {
+      this.activateWidget()
+    } else if (currentState === 'CLOSED') {
+      this.deactivateWidget()
     }
 
     // ignore if nothing changed
@@ -417,10 +408,6 @@ State
 
     const prevMode = prevProps.config.mode
     const currentMode = this.props.config.mode
-    // check if currentMode and prevMode are different
-    if (prevMode !== currentMode) {
-      console.log(`Mode changed from ${prevMode} to ${currentMode}`)
-    }
 
     if (currentMode === 'locatorUrl') {
       const currentLocator = this.props.config.geocodeServiceUrl
@@ -453,22 +440,37 @@ State
   }
 
   componentWillUnmount = () => {
-    console.log('Component will unmount - state:', this.props.state)
     this.clearGraphics()
     this.deactivateWidget() // Ensure all resources are cleaned up
   }
 
   /* Widget Activity */
   activateWidget = () => {
-    console.log('Activating widget')
     if (!this.mapView) return
 
-    const isApiKeyMode = validApiKey(this.props.config)
-    const isLocatorMode = validLocator(this.props.config)
-
-    if (!isApiKeyMode && !isLocatorMode) {
+    if (!['apiKey', 'locatorUrl'].includes(this.props.config.mode)) {
+      this.setState({ error: 'Please select a mode: API or Locator URL to display what3words addresses' })
       return
     }
+
+    const isApiKeyMode = this.props.config.mode === 'apiKey'
+    const isLocatorMode = this.props.config.mode === 'locatorUrl'
+
+    if (isApiKeyMode) {
+      if (!this.props.config.w3wApiKey) {
+        this.setState({ error: 'Please provide a valid API key' })
+        return
+      }
+    }
+
+    if (isLocatorMode) {
+      if (!this.props.config.useUtilitiesGeocodeService?.length) {
+        this.setState({ error: 'Please provide a valid Locator Service' })
+        return
+      }
+    }
+
+    // this.setState({ error: null })
 
     if (isLocatorMode) this.updateGeocodeURL()
     if (isLocatorMode || isApiKeyMode) {
@@ -479,18 +481,16 @@ State
   }
 
   deactivateWidget = () => {
-    console.log('Deactivating widget')
     // Clear the graphics layer
     clearGridLayer(this.mapView)
     this.clearGraphics()
     this.removeHandlers()
     // Reset the widget state
     this.resetWidgetState()
-    this.setState({ displayGrid: false })
+    this.setState({ displayGrid: false, error: null })
   }
 
   resetWidgetState = () => {
-    console.log('Resetting widget state...')
     this.setState({
       latitude: '',
       longitude: '',
@@ -521,13 +521,9 @@ State
 
   /* Renders the widget UI */
   render () {
-    const { what3words, latitude, longitude, nearestPlace, isZoomInRange } = this.state
+    const { what3words, latitude, longitude, nearestPlace, isZoomInRange, error } = this.state
     const { config, theme, useMapWidgetIds } = this.props
     const isApiKeyMode = config.mode === 'apiKey'
-    const isLocatorMode = config.mode === 'locatorUrl'
-    const isModeMissing = !isApiKeyMode && !isLocatorMode
-    const isApiKeyInvalid = isApiKeyMode && !config.w3wApiKey
-    const isLocatorInvalid = isLocatorMode && !config.useUtilitiesGeocodeService?.length
 
     if (!useMapWidgetIds || useMapWidgetIds.length === 0) {
       console.error(
@@ -552,25 +548,15 @@ State
           <h5 className="card-title">what3words Address</h5>
 
           {/* W3W Address Block */}
-          {isModeMissing && (
-            <div className="w3w-error">
-              <span>Please select a mode: API or Locator URL to display what3words addresses</span>
-            </div>
-          )}
-          {isApiKeyInvalid && (
-            <div className="w3w-error">
-              <span>Please provide a valid API key</span>
-            </div>
-          )}
-          {isLocatorInvalid && (
-            <div className="w3w-error">
-              <span>Please provide a valid Locator Service</span>
-            </div>
-          )}
-
-          {/* TODO: Display error when API key is invalid */}
           {
-            !isModeMissing &&
+            error && (
+              <div className="w3w-error">
+                <span>{error}</span>
+              </div>
+            )
+          }
+          {
+            !error &&
             <div className="w3w-address-row">
               <span className="w3w-address">
                 {what3words
@@ -600,17 +586,17 @@ State
                     )}
               </span>
               <div className="w3w-actions">
-                {config.displayCopyButton &&
-                  what3words &&
-                  !what3words.startsWith('Error') && (
+                {!error &&
+                  config.displayCopyButton &&
+                  what3words && (
                     <CopyButton
                       text={`///${what3words}`}
                       onCopy={this.onCopyClick.bind(this)}
                     />
                 )}
-                {config.displayMapsiteButton &&
-                  what3words &&
-                  !what3words.startsWith('Error') && (
+                {!error &&
+                  config.displayMapsiteButton &&
+                  what3words && (
                     <Button
                       type="tertiary"
                       aria-label="Open Mapsite"
@@ -628,7 +614,7 @@ State
           }
 
           {/* Subtitle: Nearest Places */}
-          {config.displayNearestPlace &&
+          {!error && config.displayNearestPlace &&
             isApiKeyMode &&
             nearestPlace &&
             what3words && (
@@ -640,13 +626,13 @@ State
           )}
 
           {/* Subtitle: Lat & Long */}
-          {config.displayCoordinates && what3words && (
+          {!error && config.displayCoordinates && what3words && (
             <p className="card-subtitle">
               Latitude: {latitude || 'N/A'}, Longitude: {longitude || 'N/A'}
             </p>
           )}
 
-          {isApiKeyMode && isZoomInRange && (
+          {!error && isApiKeyMode && isZoomInRange && (
             <div className="button-group-container">
               <div className="action-buttons full-width">
                 <Label centric check>
