@@ -61,6 +61,7 @@ export const fillW3wGridLayer = async (mapView: __esri.MapView | __esri.SceneVie
 
   gridLayer = new FeatureLayer({
     visible: true,
+    title: 'What3Words Grid',
     objectIdField: 'id',
     fields: [
       {
