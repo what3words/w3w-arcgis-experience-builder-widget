@@ -38,7 +38,7 @@ interface State {
   longitude: string
   what3words: string | null
   isCopyMessageOpen: boolean
-  isZoomInRange: boolean
+  zoomed: boolean
   nearestPlace: string | null
   currentAddress: Address
   currentMapPoint: __esri.Point
@@ -72,7 +72,7 @@ State
       longitude: '',
       what3words: null,
       isCopyMessageOpen: false,
-      isZoomInRange: false,
+      zoomed: false,
       nearestPlace: null,
       currentAddress: null,
       currentMapPoint: null,
@@ -83,6 +83,11 @@ State
 
   private get apiKeyMode () { return this.props.config.mode === 'apiKey' }
   private get locatorUrlMode () { return this.props.config.mode === 'locatorUrl' }
+  private get maxZoomLevel () {
+    // Return a default value if the map view is not available
+    if (this.mapView.type !== '2d') return 20
+    return this.mapView.constraints.effectiveMaxZoom
+  }
 
   /* Localize strings */
   nls = (id: string) => {
@@ -143,6 +148,11 @@ State
   onActiveViewChange = async (jimuMapView: JimuMapView) => {
     console.info('Active View Change')
     if (!jimuMapView) return
+    if (jimuMapView.view.type !== '2d') {
+      this.setState({ error: '3D maps are not supported' })
+      return
+    }
+
     this.mapView = jimuMapView.view
 
     try {
@@ -157,7 +167,7 @@ State
   }
 
   drawLocationOnMap = async () => {
-    const { currentMapPoint, currentAddress, isZoomInRange } = this.state
+    const { currentMapPoint, currentAddress, zoomed } = this.state
     try {
       if (!currentAddress) {
         console.error('Error adding graphics to map: address is null')
@@ -170,42 +180,14 @@ State
       this.clearGraphics()
 
       if (this.apiKeyMode) {
-        // Handle API Key mode: add picture marker or square based on zoom level
-        if (!isZoomInRange) {
-          // Add a picture marker for zoom levels below 17
-          const marker = await getMarkerGraphic(currentMapPoint, this.mapView)
-          const label = await getMapLabelGraphic(currentMapPoint, currentAddress.words)
-
-          if (marker) this.mapView.graphics.add(marker)
-          if (
-            config.displayMapAnnotation &&
-            label &&
-            !currentAddress.words.startsWith('Error')
-          ) {
-            this.mapView.graphics.add(label)
-          }
-        } else if (currentAddress.square) {
-          const squareGraphic = await getSquareMarkerGraphic(
-            currentAddress.square,
-            this.mapView,
-            proximityFactor
-          )
-          const label = await getSquareMapLabelGraphic(
-            currentAddress.square,
-            currentAddress.words
-          )
-
-          if (squareGraphic) this.mapView.graphics.add(squareGraphic)
-          if (
-            config.displayMapAnnotation &&
-            label &&
-            !currentAddress.words.startsWith('Error')
-          ) {
-            this.mapView.graphics.add(label)
-          }
-        } else {
-          console.warn('Square data is missing for the current address.')
-        }
+        const marker = zoomed
+          ? await getSquareMarkerGraphic(currentAddress.square, this.mapView, proximityFactor)
+          : await getMarkerGraphic(currentMapPoint, this.mapView)
+        const label = zoomed
+          ? await getSquareMapLabelGraphic(currentAddress.square, currentAddress.words)
+          : await getMapLabelGraphic(currentMapPoint, currentAddress.words)
+        if (marker) this.mapView.graphics.add(marker)
+        if (config.displayMapAnnotation && label) this.mapView.graphics.add(label)
       }
 
       if (this.locatorUrlMode) {
@@ -230,7 +212,7 @@ State
   drawGridOnMap = async (displayGrid: boolean) => {
     if (displayGrid) {
       const extent = await this.projectToWGS84(this.mapView.extent)
-      if (!this.state.isZoomInRange) {
+      if (!this.state.zoomed) {
         clearGridLayer(this.mapView)
         return
       }
@@ -276,16 +258,31 @@ State
     return projectedGeometry as T
   }
 
-  handleZoomChange = async (zoomLevel: number) => {
-    this.setState({ isZoomInRange: this.isZoomLevelInRange(zoomLevel) })
+  handleZoomChange = async () => {
+    const extent = await this.projectToWGS84(this.mapView.extent)
+    const [Point, geodesicUtils] = await loadArcGISJSAPIModules([
+      'esri/geometry/Point',
+      'esri/geometry/support/geodesicUtils'
+    ])
+    const diagonalDistance = geodesicUtils.geodesicDistance(
+      new Point({
+        y: extent.ymax,
+        x: extent.xmax
+      }),
+      new Point({
+        y: extent.ymin,
+        x: extent.xmin
+      }),
+      'kilometers'
+    )
+    this.setState({ zoomed: diagonalDistance.distance <= 0.5 })
   }
 
-  isZoomLevelInRange = (zoomLevel: number) => zoomLevel >= 18
-
   zoomToLocation = async (mapPoint: __esri.Point) => {
+    const { zoomed } = this.state
     await this.mapView.goTo({
       center: [mapPoint.longitude || mapPoint.x, mapPoint.latitude || mapPoint.y],
-      zoom: this.isZoomLevelInRange(this.mapView.zoom) ? this.mapView.zoom : 19
+      zoom: zoomed ? this.mapView.zoom : this.maxZoomLevel * 0.85
     })
   }
 
@@ -346,10 +343,10 @@ State
         }
         break
       case 'zoom':
-        const debouncedZoomHandler = debounce((zoomLevel: number) => {
-          this.handleZoomChange(zoomLevel)
+        const debouncedZoomHandler = debounce(() => {
+          this.handleZoomChange()
         }, 100)
-        debouncedZoomHandler(newValue)
+        debouncedZoomHandler()
         break
       default:
         break
@@ -481,7 +478,7 @@ State
       this.eventHandle = this.mapView.watch(['stationary', 'zoom', 'center', 'basemap'], this.handleEvents)
     }
 
-    this.handleZoomChange(this.mapView.zoom)
+    this.handleZoomChange()
   }
 
   deactivateWidget = () => {
@@ -493,7 +490,7 @@ State
     this.resetWidgetState()
     this.setState({
       displayGrid: false,
-      isZoomInRange: false,
+      zoomed: false,
       error: null
     })
   }
@@ -528,7 +525,7 @@ State
 
   /* Renders the widget UI */
   render () {
-    const { what3words, latitude, longitude, nearestPlace, isZoomInRange, error } = this.state
+    const { what3words, latitude, longitude, nearestPlace, zoomed, error } = this.state
     const { config, theme, useMapWidgetIds } = this.props
     const isApiKeyMode = config.mode === 'apiKey'
 
@@ -639,7 +636,7 @@ State
             </p>
           )}
 
-          {!error && isApiKeyMode && isZoomInRange && (
+          {!error && isApiKeyMode && zoomed && (
             <div className="button-group-container">
               <div className="action-buttons full-width">
                 <Label centric check>
