@@ -291,7 +291,7 @@ State
 
   /* Handle Map Click */
   handleMapClick = async (mapClick: __esri.ViewClickEvent) => {
-    if (!this.isWidgetActive()) return
+    if (this.widgetMode && !this.isWidgetActive()) return
 
     try {
       this.clearGraphics()
