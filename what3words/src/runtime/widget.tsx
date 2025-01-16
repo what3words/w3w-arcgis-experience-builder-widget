@@ -634,7 +634,7 @@ State
             </p>
           )}
 
-          {!error && isApiKeyMode && zoomed && (
+          {!error && isApiKeyMode && (
             <div className="button-group-container">
               <div className="action-buttons full-width">
                 <Label centric check>
@@ -642,8 +642,9 @@ State
                     aria-label="Display Grid"
                     checked={this.state.displayGrid}
                     onChange={this.toggleGrid.bind(this)}
+                    disabled={!zoomed}
                   />
-                  <span className="show-grid-title">Display Grid</span>
+                    <span className={`show-grid-title${!zoomed ? ' disabled' : ''}`}>Display Grid</span>
                 </Label>
               </div>
             </div>

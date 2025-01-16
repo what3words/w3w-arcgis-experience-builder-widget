@@ -91,6 +91,11 @@ export function getW3WStyle (theme: IMThemeVariables): SerializedStyles {
         color: #0A3049;
         font-weight: bold;
         margin-inline-start: 8px;
+        user-select: none;
+      }
+
+      .show-grid-title.disabled {
+        color: #646464;
       }
 
       .button-group-container {
