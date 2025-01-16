@@ -56,14 +56,22 @@ State
   private eventHandle: __esri.WatchHandle
   private readonly widgetVersion: string
   private readonly exbVersion: string
+  private readonly widgetMode: boolean
 
   constructor (props: AllWidgetProps<IMConfig>) {
     super(props)
 
     const appState = getAppStore().getState()
     this.isRTL = appState?.appContext?.isRTL
-    this.widgetVersion = appState?.appConfig?.widgets?.[this.props.widgetId]?.manifest?.version || 'Unknown'
+
+    // Get the widget and the experience builder version
+    const widget = appState?.appConfig?.widgets?.[this.props.widgetId]
+    this.widgetVersion = widget?.version || 'Unknown'
     this.exbVersion = appState?.appConfig?.exbVersion ?? 'Unknown'
+
+    // Get the widget runtime info and check if there's a controller widget
+    const widgetRuntimeInfo = appState?.widgetsRuntimeInfo?.[this.props.id]
+    this.widgetMode = !!widgetRuntimeInfo.controllerWidgetId
 
     this.state = {
       w3wLocator: '',
@@ -154,15 +162,10 @@ State
     }
 
     this.mapView = jimuMapView.view
-
-    try {
-      if (this.props.state === 'OPENED') {
-        this.activateWidget()
-      } else if (this.props.state === 'CLOSED') {
-        this.deactivateWidget()
-      }
-    } catch (error) {
-      console.error('Error in onActiveViewChange:', error)
+    if (!this.widgetMode || this.props.state === 'OPENED') {
+      this.activateWidget()
+    } else if (this.props.state === 'CLOSED') {
+      this.deactivateWidget()
     }
   }
 
@@ -384,21 +387,16 @@ State
 
   /* Lifecycle method */
   componentDidMount = () => {
-    try {
-      if (this.props.state === 'OPENED') {
-        this.activateWidget()
-      } else if (this.props.state === 'CLOSED') {
-        this.deactivateWidget()
-      }
-    } catch (error) {
-      console.error('Error in componentDidMount:', error)
+    if (!this.widgetMode || this.props.state === 'OPENED') {
+      this.activateWidget()
+    } else if (this.props.state === 'CLOSED') {
+      this.deactivateWidget()
     }
   }
 
   componentDidUpdate = (prevProps: AllWidgetProps<IMConfig>) => {
     const currentState = this.props.state
-
-    if (currentState === 'OPENED') {
+    if (!this.widgetMode || currentState === 'OPENED') {
       this.activateWidget()
     } else if (currentState === 'CLOSED') {
       this.deactivateWidget()
