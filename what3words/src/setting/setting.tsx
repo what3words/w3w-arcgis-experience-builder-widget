@@ -105,7 +105,7 @@ State
   setW3wApiKey = async (w3wApiKey: string) => {
     this.props.onSettingChange({
       id: this.props.id,
-      config: this.props.config.setIn(['w3wApiKey'], w3wApiKey)
+      config: this.props.config.set('w3wApiKey', w3wApiKey)
     })
 
     try {
@@ -143,9 +143,19 @@ State
   /** Handle mode change */
   handleModeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const mode = event.target.value
+    let config = this.props.config.set('mode', mode)
+    if (config.mode === 'apiKey') {
+      // Reset the API key if the mode is changed to API key
+      const tempApiKey = config.w3wApiKey
+      this.setState({ tempApiKey })
+    }
+    if (config.mode === 'locatorUrl') {
+      // Clear the geocode service URL if the mode is changed to locator URL mode
+      config = config.set('useUtilitiesGeocodeService', [])
+    }
     this.props.onSettingChange({
       id: this.props.id,
-      config: this.props.config.set('mode', mode) // Update mode
+      config
     })
   }
 
@@ -159,7 +169,7 @@ State
       this.setState({ languages: [], apiKeyError: false }) // Clear languages and reset error
       this.props.onSettingChange({
         id: this.props.id,
-        config: this.props.config.setIn(['w3wApiKey'], '')
+        config: this.props.config.set('w3wApiKey', '')
       })
       return
     }
@@ -167,7 +177,7 @@ State
     // Save the API key to the configuration
     this.props.onSettingChange({
       id: this.props.id,
-      config: this.props.config.setIn(['w3wApiKey'], tempApiKey)
+      config: this.props.config.set('w3wApiKey', tempApiKey)
     })
 
     // Fetch languages directly using the temporary API key
@@ -179,6 +189,10 @@ State
         exbVersion
       }).catch((error) => {
         console.error(error?.message || 'Error fetching available languages')
+        this.props.onSettingChange({
+          id: this.props.id,
+          config: this.props.config.set('w3wLanguage', 'en')
+        })
         return [
           {
             code: 'en',
@@ -207,7 +221,7 @@ State
   ) => {
     this.props.onSettingChange({
       id: this.props.id,
-      config: this.props.config.setIn([property], value)
+      config: this.props.config.set(property, value)
     })
   }
 

@@ -471,6 +471,7 @@ State
 
     if (isLocatorMode) this.updateGeocodeURL()
     if (isLocatorMode || isApiKeyMode) {
+      this.setState({ error: null })
       this.removeHandlers()
       this.clickHandle = this.mapView.on('click', this.handleMapClick)
       this.eventHandle = this.mapView.watch(['stationary', 'zoom', 'center', 'basemap'], this.handleEvents)
