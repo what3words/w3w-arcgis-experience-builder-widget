@@ -173,7 +173,6 @@ State
     const { currentMapPoint, currentAddress, zoomed } = this.state
     try {
       if (!currentAddress) {
-        console.error('Error adding graphics to map: address is null')
         return
       }
       const proximityFactor = 1 // Optional proximity adjustment for styling
@@ -202,7 +201,7 @@ State
         if (
           config.displayMapAnnotation &&
           label &&
-          !currentAddress.words.startsWith('Error')
+          currentAddress.words
         ) {
           this.mapView.graphics.add(label)
         }
@@ -306,6 +305,7 @@ State
         const { widgetVersion, exbVersion } = this
         address = await fetchW3WAddress({ latitude, longitude }, {
           apiKey: getApiKey(this.props.config),
+          language: this.props.config.w3wLanguage,
           widgetVersion,
           exbVersion
         }).catch(error => {
