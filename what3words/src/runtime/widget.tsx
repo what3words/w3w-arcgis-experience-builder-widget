@@ -154,7 +154,6 @@ State
 
   /* Handle Map View */
   onActiveViewChange = async (jimuMapView: JimuMapView) => {
-    console.info('Active View Change')
     if (!jimuMapView) return
     if (jimuMapView.view.type !== '2d') {
       this.setState({ error: '3D maps are not supported' })
@@ -433,8 +432,13 @@ State
           useGeocodeService?.length
 
       if ((hasService && hasServiceChanged) || serviceRemoved) {
+        this.setState({ error: null })
         this.updateGeocodeURL()
       }
+    }
+
+    if (currentMode === 'apiKey' && !!this.props.config.w3wApiKey) {
+      this.setState({ error: null })
     }
   }
 
@@ -471,7 +475,6 @@ State
 
     if (isLocatorMode) this.updateGeocodeURL()
     if (isLocatorMode || isApiKeyMode) {
-      this.setState({ error: null })
       this.removeHandlers()
       this.clickHandle = this.mapView.on('click', this.handleMapClick)
       this.eventHandle = this.mapView.watch(['stationary', 'zoom', 'center', 'basemap'], this.handleEvents)

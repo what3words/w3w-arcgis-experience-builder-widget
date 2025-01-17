@@ -34,7 +34,7 @@ interface State {
   isAddressSettingsOpen: boolean
   languages: AvailableLanguage[]
   tempApiKey: string
-  apiKeyError: boolean
+  apiError: string
 }
 
 export default class Setting extends React.PureComponent<
@@ -52,7 +52,7 @@ State
       languages: [],
       tempApiKey:
         this.props.config.mode === 'apiKey' ? this.props.config.w3wApiKey : '',
-      apiKeyError: false
+      apiError: null
     }
 
     const appState = getAppStore().getState()
@@ -70,52 +70,27 @@ State
   }
 
   componentDidMount () {
-    this.fetchLanguages()
+    this.props.config.mode === 'apiKey' && this.fetchLanguages(this.props.config.w3wApiKey)
   }
 
   /** Fetch available languages using the saved API key */
-  async fetchLanguages () {
-    if (this.props.config.mode !== 'apiKey') {
-      console.warn('API key is not used. Skipping language fetch.')
-      return
-    }
-    const apiKey = this.props.config.w3wApiKey
-    try {
-      const { widgetVersion, exbVersion } = this
-      const languages = await fetchAvailableLanguages({
-        apiKey,
-        widgetVersion,
-        exbVersion
-      }).catch((error) => {
-        console.error(error?.message || 'Error fetching available languages')
-        return [
-          {
-            code: 'en',
-            name: 'English',
-            nativeName: 'English'
-          } as AvailableLanguage
-        ]
-      })
-      this.setState({ languages })
-    } catch (error) {
+  async fetchLanguages (apiKey: string) {
+    const { widgetVersion, exbVersion } = this
+    const languages = await fetchAvailableLanguages({
+      apiKey,
+      widgetVersion,
+      exbVersion
+    }).catch((error) => {
       console.error('Error fetching languages:', error)
-    }
-  }
-
-  setW3wApiKey = async (w3wApiKey: string) => {
-    this.props.onSettingChange({
-      id: this.props.id,
-      config: this.props.config.set('w3wApiKey', w3wApiKey)
+      this.setState({ apiError: error.message })
+      this.props.onSettingChange({
+        id: this.props.id,
+        // Only set w3wApiKey with a valid value downstream
+        config: this.props.config.set('w3wApiKey', '')
+      })
+      return []
     })
-
-    try {
-      await this.fetchLanguages() // Fetch languages after the API key is saved
-    } catch (error) {
-      console.error(
-        'Error fetching languages with the updated API key:',
-        error
-      )
-    }
+    this.setState({ languages })
   }
 
   setW3wLanguage = (w3wLanguage: string) => {
@@ -162,11 +137,12 @@ State
   /** Save the API key and fetch languages */
   handleApiKeySave = async () => {
     const { tempApiKey } = this.state
-
+    // Reset error
+    this.setState({ apiError: null })
     // If API key is empty, clear languages and update the configuration
     if (!tempApiKey.trim()) {
       console.warn('API Key is empty. Clearing languages.')
-      this.setState({ languages: [], apiKeyError: false }) // Clear languages and reset error
+      this.setState({ languages: [], apiError: 'Enter a valid API Key' })
       this.props.onSettingChange({
         id: this.props.id,
         config: this.props.config.set('w3wApiKey', '')
@@ -179,33 +155,7 @@ State
       id: this.props.id,
       config: this.props.config.set('w3wApiKey', tempApiKey)
     })
-
-    // Fetch languages directly using the temporary API key
-    try {
-      const { widgetVersion, exbVersion } = this
-      const languages = await fetchAvailableLanguages({
-        apiKey: tempApiKey,
-        widgetVersion,
-        exbVersion
-      }).catch((error) => {
-        console.error(error?.message || 'Error fetching available languages')
-        this.props.onSettingChange({
-          id: this.props.id,
-          config: this.props.config.set('w3wLanguage', 'en')
-        })
-        return [
-          {
-            code: 'en',
-            name: 'English',
-            nativeName: 'English'
-          } as AvailableLanguage
-        ]
-      })
-      this.setState({ languages, apiKeyError: false }) // Clear error if successful
-    } catch (error) {
-      console.error('Error fetching languages with the saved API key:', error)
-      this.setState({ languages: [], apiKeyError: true }) // Set error and clear languages
-    }
+    await this.fetchLanguages(tempApiKey)
   }
 
   /** Handle input changes for the temporary API key */
@@ -319,21 +269,11 @@ State
                 ))}
               </Select>
             </SettingRow>
-            {/* Show message when dropdown is disabled */}
-            {(!this.state.languages || this.state.languages.length === 0) && (
-              <SettingRow className="no-languages-message">
-                <p style={{ color: 'inherit', fontSize: '14px' }}>
-                  {' '}
-                  {/* Error-like styling */}
-                  No languages available. Enter a valid API key.
-                </p>
-              </SettingRow>
-            )}
-            {/* Show error message if API key is invalid */}
-            {this.state.apiKeyError && (
+            {/* Show error message */}
+            {this.state.apiError && (
               <SettingRow className="api-key-error">
                 <p style={{ color: 'inherit', fontSize: '14px' }}>
-                  Invalid API key. Please enter a valid key and try again.
+                  {this.state.apiError}. Please try again.
                 </p>
               </SettingRow>
             )}
