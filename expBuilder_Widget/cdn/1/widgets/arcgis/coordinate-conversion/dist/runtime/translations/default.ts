@@ -1,0 +1,22 @@
+export default {
+  _widgetLabel: 'Coordinate Conversion',
+  basemap: 'Basemap',
+  inputLabel: 'Input',
+  coordinateLabel: 'Label',
+  addConversion: 'Add Conversion',
+  addConversionCheckboxLabel: 'Add new conversion at the top of the list',
+  outputSettings: 'Output Format Settings',
+  expandOutput: 'Expand Output',
+  removeCoordinate: 'Remove Coordinate',
+  outputSettingsEditPopupTitle: 'Edit Conversion',
+  xLabel: 'X',
+  yLabel: 'Y',
+  latLabel: 'Lat',
+  lonLabel: 'Lon',
+  eastingLabel: 'Easting',
+  northingLabel: 'Northing',
+  zoneLabel: 'Zone',
+  bandLabel: 'Band',
+  gzdLabel: 'GZD',
+  gridSquareLabel: 'Grid Sq'
+}

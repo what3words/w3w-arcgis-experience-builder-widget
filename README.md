@@ -1,8 +1,8 @@
 # <image src="https://what3words.com/assets/images/w3w_square_red.png" width="32" height="32"> &nbsp; what3words ArcGIS Experience Builder Widget
 
 
-A custom widget for [ArcGIS Experience Builder](https://developers.arcgis.com/experience-builder//) providing reverse geocoding via the [what3words ArcGIS locator](https://developer.what3words.com/tools/gis-extensions/arcgis) and the what3words API key.
-![Final ArcGIS Experience Builder - what3words widget](./docs/ScreenShot-01-show-final-widget.png)
+A custom widget for [ArcGIS Experience Builder](https://developers.arcgis.com/experience-builder//) providing reverse geocoding via the [what3words ArcGIS locator](https://developer.what3words.com/tools/gis-extensions/arcgis) and the what3words API key. By using the what3words API key you will be able to display the what3words Grid.
+![Final ArcGIS Experience Builder - what3words widget](./docs/ScreenShot-01-show-final-widget-with-api-key.png)
 
 ## Demo App
 
@@ -12,10 +12,6 @@ You can find the Custom Web AppBuilder what3words widget in this [Github page](h
 - An installed and configured instance of [ArcGIS Experience Builder (Developer Edition)](https://developers.arcgis.com/experience-builder/guide/install-guide/);
 - A URL of your what3words ArcGIS Locator that has been added to your ArcGIS online or your Portal for ArcGIS by following this [instruction](https://developer.what3words.com/tools/gis-extensions/arcgis) on the what3words developer site;
 - A copy of this widget `what3words`.
-- Install `axios` via npm packages in the root directory of your project:
-  ```js
-  npm install axios
-  ```
 
 ## Installation and Configuration
 
@@ -34,10 +30,10 @@ On the widget you can display the what3words address, the coordinates in WGS84, 
 On the Content panel of the widget on the right hand side, you have 3 sections:
     1. Select a map that you want your widget to work on;
     2. Select your `Mode Selection` by using the:
-      - what3words API key
-      - or what3words Locator URL  
-    If you choose the API key, you need to `enter your what3words API key`. Click `Save` and then choose your `what3words language`.
-    If you choose the locator URL, you can `Select Utility`. Search among your locators on your ArcGIS Online account and pick the one you want to use.
+        - `what3words API key`:
+        If you choose the API key, you need to `enter your what3words API key`. Click `Save` and then choose your `what3words language`.
+        - or `what3words Locator URL`:
+        If you choose the locator URL, you can `Select Utility`. Search among your locators on your ArcGIS Online account and pick the one you want to use.
     3. Display some widget options:
         - The Latitude & Longitude coordinates options allows you to display the WGS84 coordinates of the related what3words address;
         - The Copy button allows you to copy the what3words to your clipboard;
@@ -46,10 +42,15 @@ On the Content panel of the widget on the right hand side, you have 3 sections:
         - The Nearest Place Text is only available if you choose the API mode and displays the nearest places for that what3words address.
 
 ### API mode
-![Drag and drop widget with API mode](./docs/ScreenShot-03-drag-and-drop-w3w-api.png)
+![Drag and drop widget with API mode](./docs/ScreenShot-06-settings-page-for-api-mode.png)
+
+#### Display what3words Grid
+When users select the API mode, a checkbox `Display Grid` is shown on the what3words widget. If checked, users will be able to display the grid while panning around the map. The what3words grid is added to the map as a layer and visible within the Group of Layers if this feature is enabled on the basemap.
+The grid will be displayed only at zoom levels where the what3words squares are appropriately visible within the grid.
+![Display Grid with API mode](./docs/ScreenShot-05-display-grid.png)
 
 ### Locator URL mode
-![Drag and drop widget with Locator URL mode](./docs/ScreenShot-03-drag-and-drop-w3w.png)
+![Drag and drop widget with Locator URL mode](./docs/ScreenShot-06-settings-page-for-locator-mode.png)
 
 
 - Configure the widget with your `what3words Locator URL`. By using the what3words locator, you would be able to retrieve the correct what3words address in any coordinate systems used on your web map.
@@ -67,7 +68,7 @@ Example of a what3words Locator: `https://utility.arcgis.com/usrsvcs/servers/<My
 
 - The widget is now ready to run inside your Experience Builder app. Click on the map to retrieve the what3words address at the clicked location. For example, the point selected on the map returned this what3words address: `///filled.count.soap`.
 
-![Final ArcGIS Experience Builder - what3words widget](./docs/ScreenShot-01-show-final-widget.png)
+![Final ArcGIS Experience Builder - what3words widget](./docs/ScreenShot-01-show-final-widget-with-locator-url.png)
 
 ## Troubleshooting
 If after installing correctly the what3words locator across your ArcGIS platform, you cannot display your what3words locator on your Experience app, it could be that your what3words locator hasn’t been put at the top of your `Geocoding services`.
