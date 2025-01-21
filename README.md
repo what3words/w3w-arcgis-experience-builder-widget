@@ -92,13 +92,14 @@ All contributions are welcome; please submit a pull request.
 1. Create new Pull Request
 
 ## Revision History
-* `v1.0.0`  - Add the locator to the ArcGIS Experience Builder
+* `v1.0.0` - Add the locator to the ArcGIS Experience Builder
 * `v1.0.2` - Add a temporary fix to validate any Locator URLs
 * `v1.0.3` - Publish the app on a web server
 * `v1.0.4` - Fix bug - What3words widget can be displayed on maps with layers
 * `v1.0.5` - update offset marker and label on the map to the actual location of the point
 * `v1.0.6` - Fix the issue of retrieving null what3wrods at first tap on the map.Compatible to exp builder v1.15
 * `v1.1.0` - New UI, add API key mode and new features
+* `v1.2.0` - Add Grid, Support dark/light mode, major refactor and restructure of the app
 
 
 
