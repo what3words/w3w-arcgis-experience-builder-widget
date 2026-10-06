@@ -241,16 +241,23 @@ State
       return geometry
     }
 
+    // esri/geometry/projection was removed in 5.0; projectOperator is only stable from 4.32
+    const [kernel] = await loadArcGISJSAPIModules(['esri/kernel'])
+    const [major, minor] = kernel.version.split('.').map(Number)
+    const useProjectOperator = major > 4 || minor >= 32
+
     const [SpatialReference, projection] = await loadArcGISJSAPIModules([
       'esri/geometry/SpatialReference',
-      'esri/geometry/projection'
+      useProjectOperator ? 'esri/geometry/operators/projectOperator' : 'esri/geometry/projection'
     ])
     if (!projection.isLoaded()) {
       await projection.load()
     }
 
     const wgs84SpatialReference = new SpatialReference({ wkid: 4326 })
-    const projectedGeometry = projection.project(geometry, wgs84SpatialReference) as __esri.Extent
+    const projectedGeometry = (useProjectOperator
+      ? projection.execute(geometry, wgs84SpatialReference)
+      : projection.project(geometry, wgs84SpatialReference)) as __esri.Extent
 
     if (!projectedGeometry) {
       console.error('Failed to project geometry to WGS84.')
