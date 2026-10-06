@@ -16,6 +16,5 @@ export default {
   showFullAddress: 'Display the full address along with the place name.',
   showFullAddressHint: 'Hint: Some POIs return only the placename, and users can enable this option to get the full address.',
   locationSymbol: 'Location symbol',
-  symbolLocationHint: 'Hint: Symbol for current coordinate location',
-  zoomScale: 'Zoom scale'
+  symbolLocationHint: 'Hint: Symbol for current coordinate location'
 }

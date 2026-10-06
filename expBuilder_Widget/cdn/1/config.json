@@ -115,7 +115,7 @@
       ]
     }
   },
-  "exbVersion": "1.16.0",
+  "exbVersion": "1.21.0",
   "mainSizeMode": "LARGE",
   "theme": "themes/default/",
   "forBuilderAttributes": {
@@ -125,7 +125,7 @@
   "widgets": {
     "widget_1": {
       "uri": "widgets/arcgis/arcgis-map/",
-      "version": "1.16.0",
+      "version": "1.21.0",
       "label": "Map",
       "config": {
         "toolConfig": {
@@ -230,7 +230,7 @@
     },
     "widget_28": {
       "uri": "widgets/common/controller/",
-      "version": "1.16.0",
+      "version": "1.21.0",
       "label": "Widget Controller",
       "config": {
         "behavior": {
@@ -263,7 +263,7 @@
     },
     "widget_29": {
       "uri": "widgets/what3words/",
-      "version": "1.2.0",
+      "version": "1.2.1",
       "label": "what3words - with API key",
       "config": {
         "displayCoordinates": true,
@@ -274,7 +274,7 @@
         "w3wLanguage": "en",
         "w3wLocator": "https://utility.arcgis.com/usrsvcs/servers/<Enter Your Unique Path ID>/rest/services/what3words_EN_English/GeocodeServer",
         "mode": "apiKey",
-        "w3wApiKey": "JQEEOPN8"
+        "w3wApiKey": "__W3W_API_KEY__"
       },
       "id": "widget_29",
       "useMapWidgetIds": [
@@ -283,26 +283,235 @@
     },
     "widget_30": {
       "uri": "widgets/arcgis/directions/",
-      "version": "1.16.0",
+      "version": "1.21.0",
       "label": "Directions",
-      "config": {},
-      "id": "widget_30"
+      "config": {
+        "routeConfig": {
+          "useUtility": {
+            "utilityId": "utility_2"
+          }
+        },
+        "searchConfig": {
+          "dataConfig": [
+            {
+              "configId": "config_default_geocode_utility_7_0",
+              "icon": null,
+              "label": "dazi_test",
+              "hint": "dazi's",
+              "useUtility": {
+                "utilityId": "utility_7"
+              },
+              "searchServiceType": "GeocodeService",
+              "singleLineFieldName": "SingleLine",
+              "isSupportSuggest": true,
+              "spatialReference": {
+                "wkid": 4326,
+                "latestWkid": 4326
+              },
+              "zoomScale": 10000
+            },
+            {
+              "configId": "config_default_geocode_utility_3_0",
+              "icon": null,
+              "label": "what3words Locator EN",
+              "hint": "Search for 3 word address",
+              "useUtility": {
+                "utilityId": "utility_3"
+              },
+              "searchServiceType": "GeocodeService",
+              "singleLineFieldName": "SingleLine",
+              "isSupportSuggest": true,
+              "spatialReference": {
+                "wkid": 4326,
+                "latestWkid": 4326
+              },
+              "zoomScale": 10000
+            },
+            {
+              "configId": "config_default_geocode_utility_4_0",
+              "icon": null,
+              "label": "ArcGIS World Geocoding Service",
+              "useUtility": {
+                "utilityId": "utility_4"
+              },
+              "searchServiceType": "GeocodeService",
+              "singleLineFieldName": "SingleLine",
+              "isSupportSuggest": true,
+              "spatialReference": {
+                "latestWkid": 4326,
+                "wkid": 4326
+              },
+              "zoomScale": null
+            },
+            {
+              "configId": "config_default_geocode_utility_1_0",
+              "icon": null,
+              "label": "what3words_EN_English_paid_plan",
+              "hint": "",
+              "useUtility": {
+                "utilityId": "utility_1"
+              },
+              "searchServiceType": "GeocodeService",
+              "singleLineFieldName": "SingleLine",
+              "isSupportSuggest": true,
+              "spatialReference": {
+                "wkid": 4326,
+                "latestWkid": 4326
+              },
+              "zoomScale": 10000
+            },
+            {
+              "configId": "config_default_geocode_utility_5_0",
+              "icon": null,
+              "label": "what3words_EN_English_zero_c2c",
+              "hint": "",
+              "useUtility": {
+                "utilityId": "utility_5"
+              },
+              "searchServiceType": "GeocodeService",
+              "singleLineFieldName": "SingleLine",
+              "isSupportSuggest": true,
+              "spatialReference": {
+                "wkid": 4326,
+                "latestWkid": 4326
+              },
+              "zoomScale": 10000
+            },
+            {
+              "configId": "config_default_geocode_utility_8_0",
+              "icon": null,
+              "label": "Welland_test",
+              "hint": "welland",
+              "useUtility": {
+                "utilityId": "utility_8"
+              },
+              "searchServiceType": "GeocodeService",
+              "singleLineFieldName": "SingleLine",
+              "isSupportSuggest": true,
+              "spatialReference": {
+                "wkid": 4326,
+                "latestWkid": 4326
+              },
+              "zoomScale": 10000
+            }
+          ]
+        }
+      },
+      "id": "widget_30",
+      "useUtilities": [
+        {
+          "utilityId": "utility_2"
+        },
+        {
+          "utilityId": "utility_7"
+        },
+        {
+          "utilityId": "utility_3"
+        },
+        {
+          "utilityId": "utility_4"
+        },
+        {
+          "utilityId": "utility_1"
+        },
+        {
+          "utilityId": "utility_5"
+        },
+        {
+          "utilityId": "utility_8"
+        }
+      ],
+      "outputDataSources": [
+        "widget_30_output_stop",
+        "widget_30_output_direction_point",
+        "widget_30_output_direction_line",
+        "widget_30_output_route"
+      ],
+      "useMapWidgetIds": [
+        "widget_1"
+      ]
     },
     "widget_31": {
       "uri": "widgets/arcgis/coordinate-conversion/",
-      "version": "1.16.0",
+      "version": "1.21.0",
       "label": "Coordinate Conversion",
       "config": {
         "inputSettings": {
           "defaultCoordinate": "dd",
           "format": "Y°N, X°E"
         },
-        "outputSettings": [],
+        "outputSettings": [
+          {
+            "name": "address",
+            "label": "Address",
+            "defaultPattern": "",
+            "currentPattern": "",
+            "enabled": true,
+            "isCustom": false
+          },
+          {
+            "name": "dd",
+            "label": "DD",
+            "defaultPattern": "Y°‎N, X°‎E",
+            "currentPattern": "Y°‎N, X°‎E",
+            "enabled": true,
+            "isCustom": false
+          },
+          {
+            "name": "ddm",
+            "label": "DDM",
+            "defaultPattern": "Y°‎ A'N, X°‎ B'E",
+            "currentPattern": "Y°‎ A'N, X°‎ B'E",
+            "enabled": true,
+            "isCustom": false
+          },
+          {
+            "name": "dms",
+            "label": "DMS",
+            "defaultPattern": "Y°‎ A' B\"N, X°‎ C' D\"E",
+            "currentPattern": "Y°‎ A' B\"N, X°‎ C' D\"E",
+            "enabled": true,
+            "isCustom": false
+          },
+          {
+            "name": "xy",
+            "label": "Long-Lat",
+            "defaultPattern": "X°‎, Y°‎",
+            "currentPattern": "X°‎, Y°‎",
+            "enabled": true,
+            "isCustom": false
+          },
+          {
+            "name": "mgrs",
+            "label": "MGRS",
+            "defaultPattern": "Z S X Y",
+            "currentPattern": "Z S X Y",
+            "enabled": true,
+            "isCustom": false
+          },
+          {
+            "name": "usng",
+            "label": "USNG",
+            "defaultPattern": "Z S X Y",
+            "currentPattern": "Z S X Y",
+            "enabled": true,
+            "isCustom": false
+          },
+          {
+            "name": "utm",
+            "label": "UTM",
+            "defaultPattern": "ZB X Y",
+            "currentPattern": "ZB X Y",
+            "enabled": true,
+            "isCustom": false
+          }
+        ],
         "addressSettings": {
           "minCandidateScore": 100,
           "maxSuggestions": 6,
           "useUtilitiesGeocodeService": [],
-          "displayFullAddress": false
+          "displayFullAddress": false,
+          "geocodeServiceUrl": "https://utility.arcgis.com/usrsvcs/servers/773222f856e04d38bcde5c805b881840/rest/services/what3words_EN_English/GeocodeServer"
         },
         "generalSettings": {
           "zoomScale": 50000,
@@ -319,11 +528,14 @@
           }
         }
       },
-      "id": "widget_31"
+      "id": "widget_31",
+      "useMapWidgetIds": [
+        "widget_1"
+      ]
     },
     "widget_32": {
       "uri": "widgets/what3words/",
-      "version": "1.2.0",
+      "version": "1.2.1",
       "label": "what3words - with Locator URL",
       "config": {
         "displayCoordinates": true,
@@ -339,7 +551,7 @@
             "utilityId": "utility_1"
           }
         ],
-        "geocodeServiceUrl": "https://utility.arcgis.com/usrsvcs/servers/6123e8aa30f345b7a1d18db626ad7156/rest/services/what3words_EN_English/GeocodeServer"
+        "geocodeServiceUrl": "https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer"
       },
       "id": "widget_32",
       "useMapWidgetIds": [
@@ -403,8 +615,7 @@
   "sharedThemeVariables": {
     "header": {},
     "body": {},
-    "button": {},
-    "logo": {}
+    "button": {}
   },
   "dataSources": {
     "dataSource_1": {
@@ -427,9 +638,759 @@
       "sourceLabel": "Satellite",
       "itemId": "e78ce7b107784ed5bc0851c65c6baa53",
       "portalUrl": "https://w3w.maps.arcgis.com"
+    },
+    "widget_30_output_stop": {
+      "id": "widget_30_output_stop",
+      "label": "Stops",
+      "type": "FEATURE_LAYER",
+      "isOutputFromWidget": true,
+      "geometryType": "esriGeometryPoint",
+      "schema": {
+        "idField": "ObjectID",
+        "fields": {
+          "ObjectID": {
+            "jimuName": "ObjectID",
+            "name": "ObjectID",
+            "type": "NUMBER",
+            "esriType": "esriFieldTypeOID",
+            "alias": "ObjectID",
+            "fieldFormat": {
+              "type": "number",
+              "useGrouping": "never"
+            }
+          },
+          "ArrivalCurbApproach": {
+            "jimuName": "ArrivalCurbApproach",
+            "name": "ArrivalCurbApproach",
+            "type": "NUMBER",
+            "esriType": "esriFieldTypeInteger",
+            "alias": "Arrival Curb Approach",
+            "fieldFormat": {
+              "type": "number",
+              "minimumFractionDigits": 0,
+              "maximumFractionDigits": 0,
+              "useGrouping": "auto"
+            }
+          },
+          "ArrivalTime": {
+            "jimuName": "ArrivalTime",
+            "name": "ArrivalTime",
+            "type": "DATE",
+            "esriType": "esriFieldTypeDate",
+            "alias": "Arrival Time",
+            "fieldFormat": {
+              "type": "date-time",
+              "dateStyle": "short",
+              "timeStyle": "short",
+              "hour12": "auto"
+            }
+          },
+          "ArrivalUTCOffset": {
+            "jimuName": "ArrivalUTCOffset",
+            "name": "ArrivalUTCOffset",
+            "type": "NUMBER",
+            "esriType": "esriFieldTypeInteger",
+            "alias": "Arrival Time Offset",
+            "fieldFormat": {
+              "type": "number",
+              "minimumFractionDigits": 0,
+              "maximumFractionDigits": 0,
+              "useGrouping": "auto"
+            }
+          },
+          "CumulativeCosts": {
+            "jimuName": "CumulativeCosts",
+            "name": "CumulativeCosts",
+            "type": "STRING",
+            "esriType": "esriFieldTypeString",
+            "alias": "Cumulative Costs"
+          },
+          "CumulativeMeters": {
+            "jimuName": "CumulativeMeters",
+            "name": "CumulativeMeters",
+            "type": "NUMBER",
+            "esriType": "esriFieldTypeDouble",
+            "alias": "Cumulative Meters",
+            "fieldFormat": {
+              "type": "number",
+              "minimumFractionDigits": 0,
+              "maximumFractionDigits": 2,
+              "useGrouping": "auto"
+            }
+          },
+          "CumulativeMinutes": {
+            "jimuName": "CumulativeMinutes",
+            "name": "CumulativeMinutes",
+            "type": "NUMBER",
+            "esriType": "esriFieldTypeDouble",
+            "alias": "Cumulative Minutes",
+            "fieldFormat": {
+              "type": "number",
+              "minimumFractionDigits": 0,
+              "maximumFractionDigits": 2,
+              "useGrouping": "auto"
+            }
+          },
+          "CurbApproach": {
+            "jimuName": "CurbApproach",
+            "name": "CurbApproach",
+            "type": "NUMBER",
+            "esriType": "esriFieldTypeInteger",
+            "alias": "Curb Approach",
+            "fieldFormat": {
+              "type": "number",
+              "minimumFractionDigits": 0,
+              "maximumFractionDigits": 0,
+              "useGrouping": "auto"
+            }
+          },
+          "DepartureCurbApproach": {
+            "jimuName": "DepartureCurbApproach",
+            "name": "DepartureCurbApproach",
+            "type": "NUMBER",
+            "esriType": "esriFieldTypeInteger",
+            "alias": "Departure Curb Approach",
+            "fieldFormat": {
+              "type": "number",
+              "minimumFractionDigits": 0,
+              "maximumFractionDigits": 0,
+              "useGrouping": "auto"
+            }
+          },
+          "DepartureTime": {
+            "jimuName": "DepartureTime",
+            "name": "DepartureTime",
+            "type": "DATE",
+            "esriType": "esriFieldTypeDate",
+            "alias": "Departure Time",
+            "fieldFormat": {
+              "type": "date-time",
+              "dateStyle": "short",
+              "timeStyle": "short",
+              "hour12": "auto"
+            }
+          },
+          "DepartureUTCOffset": {
+            "jimuName": "DepartureUTCOffset",
+            "name": "DepartureUTCOffset",
+            "type": "NUMBER",
+            "esriType": "esriFieldTypeInteger",
+            "alias": "Departure Time Offset",
+            "fieldFormat": {
+              "type": "number",
+              "minimumFractionDigits": 0,
+              "maximumFractionDigits": 0,
+              "useGrouping": "auto"
+            }
+          },
+          "LateMinutes": {
+            "jimuName": "LateMinutes",
+            "name": "LateMinutes",
+            "type": "NUMBER",
+            "esriType": "esriFieldTypeDouble",
+            "alias": "Minutes Late",
+            "fieldFormat": {
+              "type": "number",
+              "minimumFractionDigits": 0,
+              "maximumFractionDigits": 2,
+              "useGrouping": "auto"
+            }
+          },
+          "LocationType": {
+            "jimuName": "LocationType",
+            "name": "LocationType",
+            "type": "NUMBER",
+            "esriType": "esriFieldTypeInteger",
+            "alias": "Location Type",
+            "fieldFormat": {
+              "type": "number",
+              "minimumFractionDigits": 0,
+              "maximumFractionDigits": 0,
+              "useGrouping": "auto"
+            }
+          },
+          "Name": {
+            "jimuName": "Name",
+            "name": "Name",
+            "type": "STRING",
+            "esriType": "esriFieldTypeString",
+            "alias": "Name"
+          },
+          "RouteName": {
+            "jimuName": "RouteName",
+            "name": "RouteName",
+            "type": "STRING",
+            "esriType": "esriFieldTypeString",
+            "alias": "Route Name"
+          },
+          "Sequence": {
+            "jimuName": "Sequence",
+            "name": "Sequence",
+            "type": "NUMBER",
+            "esriType": "esriFieldTypeInteger",
+            "alias": "Sequence",
+            "fieldFormat": {
+              "type": "number",
+              "minimumFractionDigits": 0,
+              "maximumFractionDigits": 0,
+              "useGrouping": "auto"
+            }
+          },
+          "ServiceCosts": {
+            "jimuName": "ServiceCosts",
+            "name": "ServiceCosts",
+            "type": "STRING",
+            "esriType": "esriFieldTypeString",
+            "alias": "Service Costs"
+          },
+          "ServiceMeters": {
+            "jimuName": "ServiceMeters",
+            "name": "ServiceMeters",
+            "type": "NUMBER",
+            "esriType": "esriFieldTypeDouble",
+            "alias": "Service Meters",
+            "fieldFormat": {
+              "type": "number",
+              "minimumFractionDigits": 0,
+              "maximumFractionDigits": 2,
+              "useGrouping": "auto"
+            }
+          },
+          "ServiceMinutes": {
+            "jimuName": "ServiceMinutes",
+            "name": "ServiceMinutes",
+            "type": "NUMBER",
+            "esriType": "esriFieldTypeDouble",
+            "alias": "Service Minutes",
+            "fieldFormat": {
+              "type": "number",
+              "minimumFractionDigits": 0,
+              "maximumFractionDigits": 2,
+              "useGrouping": "auto"
+            }
+          },
+          "Status": {
+            "jimuName": "Status",
+            "name": "Status",
+            "type": "NUMBER",
+            "esriType": "esriFieldTypeInteger",
+            "alias": "Status",
+            "fieldFormat": {
+              "type": "number",
+              "minimumFractionDigits": 0,
+              "maximumFractionDigits": 0,
+              "useGrouping": "auto"
+            }
+          },
+          "TimeWindowEnd": {
+            "jimuName": "TimeWindowEnd",
+            "name": "TimeWindowEnd",
+            "type": "DATE",
+            "esriType": "esriFieldTypeDate",
+            "alias": "Time Window End",
+            "fieldFormat": {
+              "type": "date-time",
+              "dateStyle": "short",
+              "timeStyle": "short",
+              "hour12": "auto"
+            }
+          },
+          "TimeWindowEndUTCOffset": {
+            "jimuName": "TimeWindowEndUTCOffset",
+            "name": "TimeWindowEndUTCOffset",
+            "type": "NUMBER",
+            "esriType": "esriFieldTypeInteger",
+            "alias": "Time Window End Offset",
+            "fieldFormat": {
+              "type": "number",
+              "minimumFractionDigits": 0,
+              "maximumFractionDigits": 0,
+              "useGrouping": "auto"
+            }
+          },
+          "TimeWindowStart": {
+            "jimuName": "TimeWindowStart",
+            "name": "TimeWindowStart",
+            "type": "DATE",
+            "esriType": "esriFieldTypeDate",
+            "alias": "Time Window Start",
+            "fieldFormat": {
+              "type": "date-time",
+              "dateStyle": "short",
+              "timeStyle": "short",
+              "hour12": "auto"
+            }
+          },
+          "TimeWindowStartUTCOffset": {
+            "jimuName": "TimeWindowStartUTCOffset",
+            "name": "TimeWindowStartUTCOffset",
+            "type": "NUMBER",
+            "esriType": "esriFieldTypeInteger",
+            "alias": "Time Window Start Offset",
+            "fieldFormat": {
+              "type": "number",
+              "minimumFractionDigits": 0,
+              "maximumFractionDigits": 0,
+              "useGrouping": "auto"
+            }
+          },
+          "WaitMinutes": {
+            "jimuName": "WaitMinutes",
+            "name": "WaitMinutes",
+            "type": "NUMBER",
+            "esriType": "esriFieldTypeDouble",
+            "alias": "Minutes Wait",
+            "fieldFormat": {
+              "type": "number",
+              "minimumFractionDigits": 0,
+              "maximumFractionDigits": 2,
+              "useGrouping": "auto"
+            }
+          }
+        }
+      }
+    },
+    "widget_30_output_direction_point": {
+      "id": "widget_30_output_direction_point",
+      "label": "Direction points",
+      "type": "FEATURE_LAYER",
+      "isOutputFromWidget": true,
+      "geometryType": "esriGeometryPoint",
+      "schema": {
+        "idField": "ObjectID",
+        "fields": {
+          "ObjectID": {
+            "jimuName": "ObjectID",
+            "name": "ObjectID",
+            "type": "NUMBER",
+            "esriType": "esriFieldTypeOID",
+            "alias": "ObjectID",
+            "fieldFormat": {
+              "type": "number",
+              "useGrouping": "never"
+            }
+          },
+          "AlternateName": {
+            "jimuName": "AlternateName",
+            "name": "AlternateName",
+            "type": "STRING",
+            "esriType": "esriFieldTypeString",
+            "alias": "Alternate Name"
+          },
+          "ArrivalTime": {
+            "jimuName": "ArrivalTime",
+            "name": "ArrivalTime",
+            "type": "DATE",
+            "esriType": "esriFieldTypeDate",
+            "alias": "Arrival Time",
+            "fieldFormat": {
+              "type": "date-time",
+              "dateStyle": "short",
+              "timeStyle": "short",
+              "hour12": "auto"
+            }
+          },
+          "ArrivalUTCOffset": {
+            "jimuName": "ArrivalUTCOffset",
+            "name": "ArrivalUTCOffset",
+            "type": "NUMBER",
+            "esriType": "esriFieldTypeInteger",
+            "alias": "Arrival Time Offset",
+            "fieldFormat": {
+              "type": "number",
+              "minimumFractionDigits": 0,
+              "maximumFractionDigits": 0,
+              "useGrouping": "auto"
+            }
+          },
+          "Azimuth": {
+            "jimuName": "Azimuth",
+            "name": "Azimuth",
+            "type": "NUMBER",
+            "esriType": "esriFieldTypeDouble",
+            "alias": "Azimuth",
+            "fieldFormat": {
+              "type": "number",
+              "minimumFractionDigits": 0,
+              "maximumFractionDigits": 2,
+              "useGrouping": "auto"
+            }
+          },
+          "BranchName": {
+            "jimuName": "BranchName",
+            "name": "BranchName",
+            "type": "STRING",
+            "esriType": "esriFieldTypeString",
+            "alias": "Branch Name"
+          },
+          "DirectionPointType": {
+            "jimuName": "DirectionPointType",
+            "name": "DirectionPointType",
+            "type": "NUMBER",
+            "esriType": "esriFieldTypeInteger",
+            "alias": "Directions Point Type",
+            "fieldFormat": {
+              "type": "number",
+              "minimumFractionDigits": 0,
+              "maximumFractionDigits": 0,
+              "useGrouping": "auto"
+            }
+          },
+          "DisplayText": {
+            "jimuName": "DisplayText",
+            "name": "DisplayText",
+            "type": "STRING",
+            "esriType": "esriFieldTypeString",
+            "alias": "Display Text"
+          },
+          "ExitName": {
+            "jimuName": "ExitName",
+            "name": "ExitName",
+            "type": "STRING",
+            "esriType": "esriFieldTypeString",
+            "alias": "Exit Name"
+          },
+          "IntersectingName": {
+            "jimuName": "IntersectingName",
+            "name": "IntersectingName",
+            "type": "STRING",
+            "esriType": "esriFieldTypeString",
+            "alias": "Intersecting Name"
+          },
+          "Level": {
+            "jimuName": "Level",
+            "name": "Level",
+            "type": "NUMBER",
+            "esriType": "esriFieldTypeInteger",
+            "alias": "Level",
+            "fieldFormat": {
+              "type": "number",
+              "minimumFractionDigits": 0,
+              "maximumFractionDigits": 0,
+              "useGrouping": "auto"
+            }
+          },
+          "Name": {
+            "jimuName": "Name",
+            "name": "Name",
+            "type": "STRING",
+            "esriType": "esriFieldTypeString",
+            "alias": "Name"
+          },
+          "Sequence": {
+            "jimuName": "Sequence",
+            "name": "Sequence",
+            "type": "NUMBER",
+            "esriType": "esriFieldTypeInteger",
+            "alias": "Sequence",
+            "fieldFormat": {
+              "type": "number",
+              "minimumFractionDigits": 0,
+              "maximumFractionDigits": 0,
+              "useGrouping": "auto"
+            }
+          },
+          "ShortVoiceInstruction": {
+            "jimuName": "ShortVoiceInstruction",
+            "name": "ShortVoiceInstruction",
+            "type": "STRING",
+            "esriType": "esriFieldTypeString",
+            "alias": "Short Voice Instruction"
+          },
+          "StopID": {
+            "jimuName": "StopID",
+            "name": "StopID",
+            "type": "NUMBER",
+            "esriType": "esriFieldTypeInteger",
+            "alias": "Stop ID",
+            "fieldFormat": {
+              "type": "number",
+              "minimumFractionDigits": 0,
+              "maximumFractionDigits": 0,
+              "useGrouping": "auto"
+            }
+          },
+          "TowardName": {
+            "jimuName": "TowardName",
+            "name": "TowardName",
+            "type": "STRING",
+            "esriType": "esriFieldTypeString",
+            "alias": "Toward Name"
+          },
+          "VoiceInstruction": {
+            "jimuName": "VoiceInstruction",
+            "name": "VoiceInstruction",
+            "type": "STRING",
+            "esriType": "esriFieldTypeString",
+            "alias": "Voice Instruction"
+          }
+        }
+      }
+    },
+    "widget_30_output_direction_line": {
+      "id": "widget_30_output_direction_line",
+      "label": "Direction lines",
+      "type": "FEATURE_LAYER",
+      "isOutputFromWidget": true,
+      "geometryType": "esriGeometryPolyline",
+      "schema": {
+        "idField": "ObjectID",
+        "fields": {
+          "ObjectID": {
+            "jimuName": "ObjectID",
+            "name": "ObjectID",
+            "type": "NUMBER",
+            "esriType": "esriFieldTypeOID",
+            "alias": "ObjectID",
+            "fieldFormat": {
+              "type": "number",
+              "useGrouping": "never"
+            }
+          },
+          "DirectionLineType": {
+            "jimuName": "DirectionLineType",
+            "name": "DirectionLineType",
+            "type": "NUMBER",
+            "esriType": "esriFieldTypeInteger",
+            "alias": "Line Type",
+            "fieldFormat": {
+              "type": "number",
+              "minimumFractionDigits": 0,
+              "maximumFractionDigits": 0,
+              "useGrouping": "auto"
+            }
+          },
+          "DirectionPointID": {
+            "jimuName": "DirectionPointID",
+            "name": "DirectionPointID",
+            "type": "NUMBER",
+            "esriType": "esriFieldTypeInteger",
+            "alias": "Direction Point ID",
+            "fieldFormat": {
+              "type": "number",
+              "minimumFractionDigits": 0,
+              "maximumFractionDigits": 0,
+              "useGrouping": "auto"
+            }
+          },
+          "FromLevel": {
+            "jimuName": "FromLevel",
+            "name": "FromLevel",
+            "type": "NUMBER",
+            "esriType": "esriFieldTypeInteger",
+            "alias": "From Level",
+            "fieldFormat": {
+              "type": "number",
+              "minimumFractionDigits": 0,
+              "maximumFractionDigits": 0,
+              "useGrouping": "auto"
+            }
+          },
+          "Meters": {
+            "jimuName": "Meters",
+            "name": "Meters",
+            "type": "NUMBER",
+            "esriType": "esriFieldTypeDouble",
+            "alias": "Meters",
+            "fieldFormat": {
+              "type": "number",
+              "minimumFractionDigits": 0,
+              "maximumFractionDigits": 2,
+              "useGrouping": "auto"
+            }
+          },
+          "Minutes": {
+            "jimuName": "Minutes",
+            "name": "Minutes",
+            "type": "NUMBER",
+            "esriType": "esriFieldTypeDouble",
+            "alias": "Minutes",
+            "fieldFormat": {
+              "type": "number",
+              "minimumFractionDigits": 0,
+              "maximumFractionDigits": 2,
+              "useGrouping": "auto"
+            }
+          },
+          "ToLevel": {
+            "jimuName": "ToLevel",
+            "name": "ToLevel",
+            "type": "NUMBER",
+            "esriType": "esriFieldTypeInteger",
+            "alias": "To Level",
+            "fieldFormat": {
+              "type": "number",
+              "minimumFractionDigits": 0,
+              "maximumFractionDigits": 0,
+              "useGrouping": "auto"
+            }
+          }
+        }
+      }
+    },
+    "widget_30_output_route": {
+      "id": "widget_30_output_route",
+      "label": "Route",
+      "type": "FEATURE_LAYER",
+      "isOutputFromWidget": true,
+      "geometryType": "esriGeometryPolyline",
+      "schema": {
+        "idField": "ObjectID",
+        "fields": {
+          "ObjectID": {
+            "jimuName": "ObjectID",
+            "name": "ObjectID",
+            "type": "NUMBER",
+            "esriType": "esriFieldTypeOID",
+            "alias": "ObjectID",
+            "fieldFormat": {
+              "type": "number",
+              "useGrouping": "never"
+            }
+          },
+          "AnalysisSettings": {
+            "jimuName": "AnalysisSettings",
+            "name": "AnalysisSettings",
+            "type": "STRING",
+            "esriType": "esriFieldTypeString",
+            "alias": "Analysis Settings"
+          },
+          "EndTime": {
+            "jimuName": "EndTime",
+            "name": "EndTime",
+            "type": "DATE",
+            "esriType": "esriFieldTypeDate",
+            "alias": "End Time",
+            "fieldFormat": {
+              "type": "date-time",
+              "dateStyle": "short",
+              "timeStyle": "short",
+              "hour12": "auto"
+            }
+          },
+          "EndUTCOffset": {
+            "jimuName": "EndUTCOffset",
+            "name": "EndUTCOffset",
+            "type": "NUMBER",
+            "esriType": "esriFieldTypeInteger",
+            "alias": "End Time Offset",
+            "fieldFormat": {
+              "type": "number",
+              "minimumFractionDigits": 0,
+              "maximumFractionDigits": 0,
+              "useGrouping": "auto"
+            }
+          },
+          "Messages": {
+            "jimuName": "Messages",
+            "name": "Messages",
+            "type": "STRING",
+            "esriType": "esriFieldTypeString",
+            "alias": "Messages"
+          },
+          "RouteName": {
+            "jimuName": "RouteName",
+            "name": "RouteName",
+            "type": "STRING",
+            "esriType": "esriFieldTypeString",
+            "alias": "Route Name"
+          },
+          "StartTime": {
+            "jimuName": "StartTime",
+            "name": "StartTime",
+            "type": "DATE",
+            "esriType": "esriFieldTypeDate",
+            "alias": "Start Time",
+            "fieldFormat": {
+              "type": "date-time",
+              "dateStyle": "short",
+              "timeStyle": "short",
+              "hour12": "auto"
+            }
+          },
+          "StartUTCOffset": {
+            "jimuName": "StartUTCOffset",
+            "name": "StartUTCOffset",
+            "type": "NUMBER",
+            "esriType": "esriFieldTypeInteger",
+            "alias": "Start Time Offset",
+            "fieldFormat": {
+              "type": "number",
+              "minimumFractionDigits": 0,
+              "maximumFractionDigits": 0,
+              "useGrouping": "auto"
+            }
+          },
+          "TotalCosts": {
+            "jimuName": "TotalCosts",
+            "name": "TotalCosts",
+            "type": "STRING",
+            "esriType": "esriFieldTypeString",
+            "alias": "Total Costs"
+          },
+          "TotalLateMinutes": {
+            "jimuName": "TotalLateMinutes",
+            "name": "TotalLateMinutes",
+            "type": "NUMBER",
+            "esriType": "esriFieldTypeDouble",
+            "alias": "Total Late Minutes",
+            "fieldFormat": {
+              "type": "number",
+              "minimumFractionDigits": 0,
+              "maximumFractionDigits": 2,
+              "useGrouping": "auto"
+            }
+          },
+          "TotalMeters": {
+            "jimuName": "TotalMeters",
+            "name": "TotalMeters",
+            "type": "NUMBER",
+            "esriType": "esriFieldTypeDouble",
+            "alias": "Total Meters",
+            "fieldFormat": {
+              "type": "number",
+              "minimumFractionDigits": 0,
+              "maximumFractionDigits": 2,
+              "useGrouping": "auto"
+            }
+          },
+          "TotalMinutes": {
+            "jimuName": "TotalMinutes",
+            "name": "TotalMinutes",
+            "type": "NUMBER",
+            "esriType": "esriFieldTypeDouble",
+            "alias": "Total Minutes",
+            "fieldFormat": {
+              "type": "number",
+              "minimumFractionDigits": 0,
+              "maximumFractionDigits": 2,
+              "useGrouping": "auto"
+            }
+          },
+          "TotalWaitMinutes": {
+            "jimuName": "TotalWaitMinutes",
+            "name": "TotalWaitMinutes",
+            "type": "NUMBER",
+            "esriType": "esriFieldTypeDouble",
+            "alias": "Total Wait Minutes",
+            "fieldFormat": {
+              "type": "number",
+              "minimumFractionDigits": 0,
+              "maximumFractionDigits": 2,
+              "useGrouping": "auto"
+            }
+          },
+          "Version": {
+            "jimuName": "Version",
+            "name": "Version",
+            "type": "STRING",
+            "esriType": "esriFieldTypeString",
+            "alias": "Version"
+          }
+        }
+      }
     }
   },
-  "originExbVersion": "1.16.0",
   "pageStructure": [
     {
       "page_0": []
@@ -548,8 +1509,51 @@
       },
       "taskName": "what3words_EN_English_test",
       "index": 4
+    },
+    "utility_7": {
+      "id": "utility_7",
+      "type": "GEOCODING",
+      "name": "geocode",
+      "label": "dazi_test",
+      "url": "https://utility.arcgis.com/usrsvcs/servers/773222f856e04d38bcde5c805b881840/rest/services/what3words_EN_English/GeocodeServer",
+      "source": "org",
+      "orgSetting": {
+        "name": "dazi_test",
+        "singleLineFieldName": "SingleLine",
+        "suggest": true,
+        "itemId": "773222f856e04d38bcde5c805b881840",
+        "placeholder": "dazi's",
+        "placefinding": true,
+        "batch": true,
+        "zoomScale": 10000,
+        "ordinal": 0
+      },
+      "taskName": "dazi_test",
+      "index": 0
+    },
+    "utility_8": {
+      "id": "utility_8",
+      "type": "GEOCODING",
+      "name": "geocode",
+      "label": "Welland_test",
+      "url": "https://utility.arcgis.com/usrsvcs/servers/8bba9bee50aa4e7a993d4e739e671a36/rest/services/what3words_EN_English/GeocodeServer",
+      "source": "org",
+      "orgSetting": {
+        "name": "Welland_test",
+        "singleLineFieldName": "SingleLine",
+        "suggest": true,
+        "itemId": "8bba9bee50aa4e7a993d4e739e671a36",
+        "placeholder": "welland",
+        "placefinding": true,
+        "batch": true,
+        "zoomScale": 10000,
+        "ordinal": 5
+      },
+      "taskName": "Welland_test",
+      "index": 5
     }
   },
-  "timestamp": 1737457651537,
-  "publishTimestamp": 1737457652245
+  "timestamp": 1791320402353,
+  "publishTimestamp": 1791320405039,
+  "mainLocale": "en-us"
 }

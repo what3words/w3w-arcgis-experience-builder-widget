@@ -1,5 +1,6 @@
 export default {
   loading: 'Loading',
+  loaded: 'Loaded',
   apply: 'Apply',
   ok: 'OK',
   publish: 'Publish',
@@ -10,7 +11,7 @@ export default {
   close: 'Close',
   new: 'New',
   classic: 'Classic',
-  widgetLoadError: 'Fail to load',
+  widgetLoadError: 'The widget could not be loaded due to an unexpected error.',
   notPublishError: 'This item is not published. Please open this item in Experience Builder, then click <b>&nbsp;Publish&nbsp;</b> to publish it.',
   versionUpdateMsg: 'New updates are available. Click Reload to get the latest updates.',
   userLocaleChangeMsg: 'The user locale has changed. Click Reload to refresh the page.',
@@ -18,6 +19,8 @@ export default {
   search: 'Search',
   delete: 'Delete',
   about: 'About',
+  failed: 'Failed',
+  continue: 'Continue',
 
   neverUnsupportedBrowserTitle: 'Unsupported browser',
   neverUnsupportedBrowserOnlineContent: 'You are using a browser that is not supported by [ArcGIS Experience Builder]. Please use the latest version of <chrome-link>Google Chrome</chrome-link>, <firefox-link>Mozilla Firefox</firefox-link>, <safari-link>Apple Safari</safari-link>, or <edge-link>Microsoft Edge</edge-link>. Provide your feedback through <feedback-link>GeoNet, the Esri Community</feedback-link>.',
@@ -44,6 +47,9 @@ export default {
   export: 'Export',
   exportAll: 'Export all',
   exportSelected: 'Export selected',
+  exportingData: 'Exporting: {name}',
+  failedToExport: 'Failed to export {name}',
+  viewItem: 'View item:',
   largeWarningTitle: 'Are you sure you want to export all data records? ',
   largeWarningContent: 'Exporting this large dataset will take time.',
   tooLargeWarningTitle: 'You can only export the first {max} records.',
@@ -52,9 +58,12 @@ export default {
   dataAction_ExportCSV: 'Export to CSV',
   dataAction_ExportGeoJson: 'Export to GeoJSON',
   dataAction_ExportItem: 'Export to Item',
+  dataAction_ExportShp: 'Export to Shapefile',
+  dataAction_ExportGDB: 'Export to FGDB',
+  dataAction_ExportKML: 'Export to KML',
   dataAction_SetFilter: 'Set filter',
-  dataAction_DataStatistics: 'Statistics',
-  dataAction_RelatedData: 'Related data',
+  dataAction_DataStatistics: 'Calculate statistics',
+  dataAction_RelatedData: 'View related data',
   selectionMode: 'Selection mode',
   selectionModeSingle: 'Single',
   selectionModeMultiple: 'Multiple',
@@ -70,14 +79,26 @@ export default {
   error: 'Error',
   messageAction_SelectDataRecord: 'Select data records',
   messageAction_FilterDataRecord: 'Filter data records',
+  messageAction_ClearDataSelection: 'Clear data selection',
+  messageAction_ClearDataFilter: 'Clear data filters',
   messageAction_TriggerData: 'Trigger data',
+  messageAction_ChangeView: 'Open view',
+  messageAction_ExecutionTitle: 'Action execution',
+  messageAction_ExecutionFilterDescription: 'Filter records in data source "{name}".',
+  messageAction_ExecutionSelectDescription: 'Select records in data source "{name}".',
+  setAsDefaultView: 'Set as default view',
+  resetToDefaultView: 'Return to default view when selection is cleared',
+  closeSidebarWhenSelectionIsEmpty: 'Close sidebar when selection is cleared',
   action_addedData: 'Added: {label}',
 
   icon: 'Icon',
+  verySmall: 'Very small',
   small: 'Small',
   low: 'Low',
   high: 'High',
   large: 'Large',
+  varyLarge: 'Very large',
+  extraLarge: 'Extra large',
   short: 'Short',
   medium: 'Medium',
   long: 'Long',
@@ -108,6 +129,12 @@ export default {
   dialogConfirmationDefaultText: 'I agree to the above terms and conditions',
   dialogPreventDisplayAgainDefaultText: 'Don\'t show this again',
 
+  // app error
+  page404Error: '404 — Page not found{br}The page you’re looking for doesn’t exist or has been moved.',
+  goToHomePage: 'Go to home page',
+  goToMyExperience: 'Go to my experience',
+  goToMyContent: 'Go to My content',
+
   // privilege and license
   publicUserError: 'Public Account user cannot access this application.',
   noEditPrivilegesError: 'Your account does not have permission to create or modify data.',
@@ -129,6 +156,13 @@ export default {
   switchAccountBtn: 'Switch account',
   switch: 'Switch',
 
+  // restrictions
+  pageRestrictionError: 'Sorry, you do not have permissions to access this page.',
+  homepageRestrictionWarning: 'There is a visibility restriction set to this page. Please review it carefully in Privacy and security settings.',
+  administrator: 'Administrator',
+  publisher: 'Publisher',
+  user: 'User',
+
   // sign-in error
   signInErrorDefault: 'Sorry, you do not have permission to access this resource.',
   signInErrorsDefault: 'Sorry, you do not have permission to access ({names}).',
@@ -136,9 +170,15 @@ export default {
   signInErrorCannotEnterCredential: 'Sorry, your current account does not have permission to access this resource.',
   signInErrorTryAgain: 'Sorry, you do not have permission to access this resource. Please try again.',
   signInErrorInvalidToken: 'Invalid credential. Please login again.',
-  signInBannerListWarning: 'Sorry, you don’t have access to the resources from the following servers or organizations. Click Sign in to provide credentials. Click Ignore to avoid loading the resource until you refresh the app.',
+  signInBannerListWarning: 'Sorry, you don\'t have access to the resources from the following servers or organizations. Click Sign in to provide credentials or click Switch to change another account that have access. Click Ignore to avoid loading the inaccessible resource until you refresh the app.',
   signInBannerIgnore: 'Ignore',
   signInBannerIgnoreAll: 'Ignore all',
+  signInBannerTitle: 'Credential banner',
+
+  // experience state
+  restoreState: 'Restore experience state',
+  restoreStateTips: 'Restore the state of page, view, window, map viewpoint, and layer visibility where you left off.',
+  restoreStateAccept: 'Accept',
 
   //in upgrade
   upgradedFrom: 'Upgraded from previous config',
@@ -152,12 +192,27 @@ export default {
   arcgisEnterpriseText: 'ArcGIS Enterprise',
   setClientIdMessage2: 'Provide the Client ID for Experience Builder registered in the ArcGIS Enterprise you specify above',
 
+  // runtime error
   experienceVersionRemind: 'This experience is in higher version. Incompatible contents may not work.',
   templateVersionRemind: 'This template is in higher version. Incompatible contents may not work.',
   publishedExperienceVersionRemind: 'The published version of this experience is in higher version. Incompatible contents may not work.',
   publishedTemplateVersionRemind: 'The published version of this template is in higher version. Incompatible contents may not work.',
   draftTemplateVersionRemind: 'The draft version of this template is in higher version. Incompatible contents may not work.',
   draftExperienceVersionRemind: 'The draft version of this experience is in higher version. Incompatible contents may not work.',
+  sessionExpiredRemind: 'Your session has expired. Refresh the page to sign in again.',
+  sessionExpiredRemindTitle: 'Your session has expired.',
+  sessionExpiredRemindDescription : 'Sign in again to continue editing and saving.',
+  sessionExpiredRemindDescriptionShort : 'Sign in again to continue.',
+  sessionExpiredRemindRestore: 'Session restored. All changes saved successfully.',
+  sessionExpiredRemindRestoreShort: 'Session restored!',
+  networkBlockedRemind: 'You are offline and app cannot be saved now. Auto save will recover when you reconnect.',
+  networkBlockedRemindShort: 'You are offline now. Please try again later.',
+  unableToReachServerRemind: 'Unable to reach server and app cannot be saved now. Auto save will recover when you reconnect.',
+  unableToReachServerRemindShort: 'Unable to reach server now. Please try again later.',
+  appIsDeletedRemind: 'This experience is deleted from the server. Your editing cannot be processed.',
+  browserBlockedSignInPopupRemind: 'Browser blocked sign-in popup. Please check browser setting.',
+  itemDeletedRemindTitle: 'Item deleted',
+  itemDeletedRemindContent: 'This experience is deleted or inaccessible. Your editing cannot be processed.',
 
   // data source types
   featureLayer: 'Feature Layer',
@@ -188,5 +243,29 @@ export default {
   outputView: '{dataSourceLabel} output view',
   buildingScene: 'Building Scene Layer',
   buildingGroup: 'Building Group Sublayer',
-  buildingComponent: 'Building Component Sublayer'
+  buildingComponent: 'Building Component Sublayer',
+  knowledgeGraphService: 'Knowledge Graph Service',
+  knowledgeGraphLayer: 'Knowledge Graph Layer',
+  knowledgeGraphSublayer: 'Knowledge Graph Sublayer',
+  json: 'JSON',
+  exportItem: 'Item',
+  import: 'Import',
+
+  // a11y
+  a11ySkipTo: 'Skip to',
+  a11ySkipToContent: 'Skip to {content}',
+  a11yMainContent: 'Main content',
+  a11yLandmarkRole: 'ARIA landmark role',
+  a11yLandmarkRoleBanner: 'Header or top banner ({name})',
+  a11yLandmarkRoleMain: 'Main content ({name})',
+  a11yLandmarkRoleNavigation: 'Navigation menu ({name})',
+  a11yLandmarkRoleContentinfo: 'Footer or page info ({name})',
+  a11yLandmarkRoleRegion: 'Custom section ({name})',
+  a11yLandmarkRoleComplementary: 'Secondary content ({name})',
+  a11yLandmarkRoleSearch: 'Search bar ({name})',
+
+  //Copy app
+  copiedAppNotFound: 'The item {id} cannot be found. The item may have been deleted or you may have entered an incorrect URL.',
+  copiedAppNotExperienceItem: 'Could not create a web experience from the provided item.',
+  copiedAppCopyProtected: 'The item {id} is copy protected.'
 }

@@ -1,0 +1,1 @@
+System.register([],function(e){return{execute:function(){e({_widgetLabel:"Widget Controller",_action_openWidget_label:"Widget openen",_action_toggleWidget_label:"Widget in-/uitschakelen",resizerTooltip:"Pas het venster aan via slepen en neerzetten.",moreWidgets:"Meer widgets"})}}});

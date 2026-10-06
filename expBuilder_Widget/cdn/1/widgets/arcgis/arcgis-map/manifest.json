@@ -2,15 +2,16 @@
   "name": "arcgis-map",
   "label": "Map",
   "type": "widget",
-  "version": "1.16.0",
-  "exbVersion": "1.16.0",
+  "version": "1.21.0",
+  "exbVersion": "1.21.0",
   "author": "Esri R&D Center Beijing",
   "description": "This is the widget used in developer guide",
   "copyright": "",
   "license": "http://www.apache.org/licenses/LICENSE-2.0",
   "publishMessages": [
     "EXTENT_CHANGE",
-    "DATA_RECORDS_SELECTION_CHANGE"
+    "DATA_RECORDS_SELECTION_CHANGE",
+    "LOCATION_CHANGE"
   ],
   "messageActions": [
     {
@@ -61,7 +62,9 @@
     "watchViewportVisibility": true,
     "supportAutoSize": false,
     "canConsumeDataAction": true,
-    "needActiveState": true
+    "needActiveState": true,
+    "handleA11yLabelInWidget": true,
+    "hasBuilderSupportModule": true
   },
   "excludeDataActions": [
     "setFilter",
@@ -95,6 +98,19 @@
       "label": "Add to map",
       "uri": "data-actions/add-to-map",
       "icon": "runtime/assets/icons/add-to-map.svg"
+    },
+    {
+      "name": "showPopup",
+      "label": "Show pop-up",
+      "uri": "data-actions/show-popup",
+      "icon": "runtime/assets/icons/show-popup.svg"
+    },
+    {
+      "name": "addMarker",
+      "label": "Add marker",
+      "uri": "data-actions/add-marker",
+      "settingUri": "data-actions/add-marker-setting",
+      "icon": "runtime/assets/icons/pin-esri.svg"
     }
   ],
   "layouts": [
@@ -119,12 +135,20 @@
       "label": "Scale"
     },
     {
+      "name": "level",
+      "label": "Level"
+    },
+    {
       "name": "rotation",
       "label": "Rotation"
     },
     {
       "name": "layer_visibility",
       "label": "Layer visibility"
+    },
+    {
+      "name": "marker",
+      "label": "Marker"
     }
   ],
   "extensions": [
@@ -132,6 +156,11 @@
       "name": "appConfigOperations",
       "point": "APP_CONFIG_OPERATIONS",
       "uri": "tools/app-config-operations"
+    },
+    {
+      "name": "custom-layout",
+      "point": "CONTEXT_TOOL",
+      "uri": "tools/custom-layout"
     }
   ],
   "translatedLocales": [
@@ -157,7 +186,7 @@
     "ko",
     "lt",
     "lv",
-    "nb",
+    "no",
     "nl",
     "pl",
     "pt-br",

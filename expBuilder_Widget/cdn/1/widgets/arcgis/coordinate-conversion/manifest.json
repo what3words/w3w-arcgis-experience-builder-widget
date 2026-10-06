@@ -2,13 +2,22 @@
   "name": "coordinate-conversion",
   "label": "Coordinate Conversion",
   "type": "widget",
-  "version": "1.16.0",
-  "exbVersion": "1.16.0",
+  "version": "1.21.0",
+  "exbVersion": "1.21.0",
   "author": "Esri R&D Center Beijing",
-  "description": "This is the widget used in developer guide",
+  "description": "A widget to convert input coordinates from one coordinate system to multiple systems and notation formats.",
   "copyright": "",
   "license": "http://www.apache.org/licenses/LICENSE-2.0",
-  "properties": {},
+  "properties": {
+    "showDescription": true
+  },
+  "extensions": [
+    {
+      "name": "builderOperations",
+      "point": "BUILDER_OPERATIONS",
+      "uri": "tools/builder-operations"
+    }
+  ],
   "translatedLocales": [
     "en",
     "ar",
@@ -32,7 +41,7 @@
     "ko",
     "lt",
     "lv",
-    "nb",
+    "no",
     "nl",
     "pl",
     "pt-br",
