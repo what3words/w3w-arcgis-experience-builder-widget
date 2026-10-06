@@ -12,6 +12,7 @@ import {
   loadArcGISJSAPIModules,
   type JimuMapView
 } from 'jimu-arcgis'
+import * as reactiveUtils from 'esri/core/reactiveUtils'
 import { getApiKey, getGeocodeServiceURL } from './lib/mode'
 import {
   getMarkerGraphic,
@@ -53,7 +54,7 @@ State
   private mapView: __esri.MapView | __esri.SceneView
   private readonly isRTL: boolean
   private clickHandle: __esri.Handle
-  private eventHandle: __esri.WatchHandle
+  private eventHandles: __esri.Handle[] = []
   private readonly widgetVersion: string
   private readonly exbVersion: string
   private readonly widgetMode: boolean
@@ -484,7 +485,9 @@ State
     if (isLocatorMode || isApiKeyMode) {
       this.removeHandlers()
       this.clickHandle = this.mapView.on('click', this.handleMapClick)
-      this.eventHandle = this.mapView.watch(['stationary', 'zoom', 'center', 'basemap'], this.handleEvents)
+      this.eventHandles = (['stationary', 'zoom', 'center', 'basemap'] as const).map(propertyName =>
+        reactiveUtils.watch(() => this.mapView[propertyName], (newValue, oldValue) => { this.handleEvents(newValue, oldValue, propertyName) })
+      )
     }
 
     this.handleZoomChange()
@@ -522,7 +525,7 @@ State
 
   removeHandlers = () => {
     this.clickHandle?.remove()
-    this.eventHandle?.remove()
+    this.eventHandles.forEach(handle => { handle.remove() })
   }
 
   toggleGrid = (evt: React.ChangeEvent<HTMLInputElement>, checked: boolean) => {
