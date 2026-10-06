@@ -8,6 +8,8 @@ A custom widget for [ArcGIS Experience Builder](https://developers.arcgis.com/ex
 
 You can find the Custom Web AppBuilder what3words widget in this [Github page](https://what3words.github.io/w3w-arcgis-experience-builder-widget/expBuilder_Widget/).
 
+The demo's what3words API key is injected at deploy time from the `W3W_DEMO_API_KEY` repository secret. When regenerating the demo, keep `__W3W_API_KEY__` as the `w3wApiKey` value in `expBuilder_Widget/cdn/1/config.json` and `expBuilder_Widget/cdn/1/resources/config/config.json`.
+
 ## Prerequisites
 - An installed and configured instance of [ArcGIS Experience Builder (Developer Edition)](https://developers.arcgis.com/experience-builder/guide/install-guide/), version 1.16 to 1.21;
 - A URL of your what3words ArcGIS Locator that has been added to your ArcGIS online or your Portal for ArcGIS by following this [instruction](https://developer.what3words.com/tools/gis-extensions/arcgis) on the what3words developer site;
