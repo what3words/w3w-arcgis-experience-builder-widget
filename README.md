@@ -9,7 +9,7 @@ A custom widget for [ArcGIS Experience Builder](https://developers.arcgis.com/ex
 You can find the Custom Web AppBuilder what3words widget in this [Github page](https://what3words.github.io/w3w-arcgis-experience-builder-widget/expBuilder_Widget/).
 
 ## Prerequisites
-- An installed and configured instance of [ArcGIS Experience Builder (Developer Edition)](https://developers.arcgis.com/experience-builder/guide/install-guide/);
+- An installed and configured instance of [ArcGIS Experience Builder (Developer Edition)](https://developers.arcgis.com/experience-builder/guide/install-guide/), version 1.16 to 1.21;
 - A URL of your what3words ArcGIS Locator that has been added to your ArcGIS online or your Portal for ArcGIS by following this [instruction](https://developer.what3words.com/tools/gis-extensions/arcgis) on the what3words developer site;
 - A copy of this widget `what3words`.
 
@@ -100,6 +100,7 @@ All contributions are welcome; please submit a pull request.
 * `v1.0.6` - Fix the issue of retrieving null what3wrods at first tap on the map.Compatible to exp builder v1.15
 * `v1.1.0` - New UI, add API key mode and new features
 * `v1.2.0` - Add Grid, Support dark/light mode, major refactor and restructure of the app
+* `v1.2.1` - Fix map clicks and Grid on Experience Builder 1.21 (ArcGIS Maps SDK for JavaScript 5.x). Compatible with exp builder v1.16 to v1.21
 
 
 
