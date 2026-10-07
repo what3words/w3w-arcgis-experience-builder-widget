@@ -45,3 +45,7 @@ jspm_packages
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Demo app build output and the Experience Builder download (see scripts/build-demo.sh)
+/expBuilder_Widget/
+/.exb/

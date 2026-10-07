@@ -1,10 +1,15 @@
-# Deploys the repository, including the expBuilder_Widget demo, to GitHub Pages
+# Builds the expBuilder_Widget demo with ArcGIS Experience Builder and deploys it, with the README and docs, to GitHub Pages
 name: Deploy static content to Pages
 
 on:
   push:
     branches: ["main"]
   workflow_dispatch:
+    inputs:
+      exb_version:
+        description: 'Experience Builder version to build the demo with, e.g. 1.16 or "latest". Leave empty to use exbVersion from what3words/manifest.json.'
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -24,6 +29,18 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      # corepack provides the pnpm version Experience Builder pins in its packageManager field
+      - name: Build the demo app
+        env:
+          COREPACK_ENABLE_DOWNLOAD_PROMPT: 0
+          EXB_VERSION: ${{ inputs.exb_version }}
+        run: |
+          corepack enable
+          scripts/build-demo.sh
       - name: Inject what3words API key into the demo config
         env:
           W3W_API_KEY: ${{ secrets.W3W_DEMO_API_KEY }}
