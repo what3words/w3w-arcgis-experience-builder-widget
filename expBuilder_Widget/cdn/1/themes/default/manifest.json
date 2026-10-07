@@ -2,23 +2,8 @@
   "name": "default",
   "label": "Default",
   "type": "theme",
-  "thumbnails ": [],
-  "colors": {
-    "primary": "#315dfc",
-    "secondary": "#00c3cc",
-    "success": "#00cca5",
-    "info": "#09acf8",
-    "warning": "#ffab21",
-    "danger": "#f6146f",
-    "light": "#fafbfc",
-    "dark": "#2d3235"
-  },
-  "font": {
-    "fontFamily": "Avenir Next",
-    "color": "#fff"
-  },
-  "version": "1.16.0",
-  "exbVersion": "1.16.0",
+  "version": "1.21.0",
+  "exbVersion": "1.21.0",
   "author": "Esri R&D Center Beijing",
   "description": "This is the default theme. This theme is a placeholder, all info about this theme is in jimu so we never load this theme",
   "copyright": "",
@@ -46,7 +31,7 @@
     "ko",
     "lt",
     "lv",
-    "nb",
+    "no",
     "nl",
     "pl",
     "pt-br",
@@ -67,6 +52,6 @@
   ],
   "styleFiles": {
     "css": false,
-    "js": false
+    "js": true
   }
 }

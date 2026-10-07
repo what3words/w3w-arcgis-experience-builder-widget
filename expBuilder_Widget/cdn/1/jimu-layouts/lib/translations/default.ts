@@ -69,10 +69,11 @@ export default {
   fixedAtTop: 'Floating at the top when scrolling',
   actNormal: 'Act as normal widget',
 
-  hideInDesignView: 'Hide in design view',
-  showInDesignView: 'Show in design view',
+  hideInDesignView: 'Click to hide in design view',
+  showInDesignView: 'Click to show in design view',
 
   unlockGridItem: 'Unlock this widget to reorganize its internal widgets.',
   lockGridItem: 'Lock this widget.',
-  activeViewTip: 'Section. Active view {viewLabel}.'
+  activeViewTip: 'Section. Active view {viewLabel}.',
+  widgetLabel: 'Widget label'
 }

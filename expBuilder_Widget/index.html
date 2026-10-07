@@ -1,4 +1,4 @@
-<!doctype html><html lang="en-us"><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"/><meta http-equiv="X-UA-Compatible" content="IE=EDGE"/><meta name="google-site-verification" content="Gl928UcZRBt8t7njrpXivrsVrbVcc7sLybtCMZ6Dzlg"/><title>expBuilder_Widget</title><link rel="shortcut icon" href="assets/exb.ico"><base href="./cdn/1/"/><style>* {
+<!doctype html><html lang="en-us"><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=yes"/><meta http-equiv="X-UA-Compatible" content="IE=EDGE"/><meta name="google-site-verification" content="Gl928UcZRBt8t7njrpXivrsVrbVcc7sLybtCMZ6Dzlg"/><title>expBuilder_Widget</title><link rel="shortcut icon" href="assets/exb.ico"><base href="./cdn/1/"/><style>* {
 				scrollbar-color: var(--light-600) transparent;
 			}
 			html, body{
@@ -26,9 +26,7 @@
 				position: relative;
 				z-index: 0;
 				display: none;
-			}</style><script type="empty">/**
-			Add this empty script tag can help API module load find the correct "insertPointSibling"
-			*/</script></head><body><div id="loading"><style>.loading-content{
+			}</style></head><body><div id="loading"><style>.loading-content{
           position: absolute;
           top: 0;
           bottom: 0;
@@ -71,13 +69,16 @@
         }
 
         @-webkit-keyframes loading-keys-app-loading{0%,80%,100%{opacity:.75;box-shadow:0 0 #076fe5;height:32px;}40%{opacity:1;box-shadow:0 -8px #076fe5;height:40px;}}
-        @keyframes loading-keys-app-loading{0%,80%,100%{opacity:.75;box-shadow:0 0 #076fe5;height:32px;}40%{opacity:1;box-shadow:0 -8px #076fe5;height:40px;}}</style><div class="loading-content"><div class="justify-content-center jimu-primary-loading-app"></div></div></div><div id="app"></div><script type="webpack-options" id="webpack-options">{
+        @keyframes loading-keys-app-loading{0%,80%,100%{opacity:.75;box-shadow:0 0 #076fe5;height:32px;}40%{opacity:1;box-shadow:0 -8px #076fe5;height:40px;}}</style><div class="loading-content"><div class="justify-content-center jimu-primary-loading-app"></div></div></div><div id="app"></div><script type="download-options" id="download-options">{
+				"downloadLocales": [""]
+			}</script><script type="webpack-options" id="webpack-options">{
 				"mountPath": "/",
 				"isOutOfExb": true,
 				"hostEnv": "prod",
 				"appFolderName": ".",
 				"useStructuralUrl": false,
-				"arcgisJsApiUrl": "https://js.arcgis.com/4.31/",
+				"arcgisJsApiUrl": "https://js.arcgis.com/5.1/",
+				"calciteComponentsUrl": "https://js.arcgis.com/calcite-components/5.1.1/",
 				"isDevEdition": true,
 				"buildNumber": "1",
 				"isBuilder": false,
@@ -88,6 +89,8 @@
 		"jimu-core": "https://BASE_URL/jimu-core/index.js",
 		"jimu-core/": "https://BASE_URL/jimu-core/",
 		"jimu-theme": "https://BASE_URL/jimu-theme/index.js",
+		"jimu-data-source": "https://BASE_URL/jimu-data-source/index.js",
+		"jimu-data-source/": "https://BASE_URL/jimu-data-source/",
 		"jimu-theme/": "https://BASE_URL/jimu-theme/",
 		"jimu-ui": "https://BASE_URL/jimu-ui/index.js",
 		"jimu-ui/": "https://BASE_URL/jimu-ui/",
@@ -109,8 +112,9 @@
 		"calcite-components/": "https://BASE_URL/calcite-components/",
 		"arcgis-charts-components": "https://BASE_URL/arcgis-charts-components/index.js",
 		"arcgis-map-components": "https://BASE_URL/arcgis-map-components/index.js",
+		"arcgis-coding-components": "https://BASE_URL/arcgis-coding-components/index.js",
+		"arcgis-portal-components": "https://BASE_URL/arcgis-portal-components/index.js",
 
-		"arcgis-amd-packages/": "https://amd-packages/",
 		"esri/": "https://API_URL/esri/"
 	}
 }</script><script src="./jimu-core/init.js"></script></body></html>

@@ -1,5 +1,6 @@
 export default {
   _widgetLabel: 'Coordinate Conversion',
+  _widgetDescription: "A widget to convert input coordinates from one coordinate system to multiple systems and notation formats.",
   basemap: 'Basemap',
   inputLabel: 'Input',
   coordinateLabel: 'Label',
@@ -7,6 +8,7 @@ export default {
   addConversionCheckboxLabel: 'Add new conversion at the top of the list',
   outputSettings: 'Output Format Settings',
   expandOutput: 'Expand Output',
+  collapseOutput: 'Collapse Output',
   removeCoordinate: 'Remove Coordinate',
   outputSettingsEditPopupTitle: 'Edit Conversion',
   xLabel: 'X',

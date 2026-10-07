@@ -2,8 +2,8 @@
   "name": "controller",
   "label": "Widget Controller",
   "type": "widget",
-  "version": "1.16.0",
-  "exbVersion": "1.16.0",
+  "version": "1.21.0",
+  "exbVersion": "1.21.0",
   "author": "Esri R&D Center Beijing",
   "description": "This is the widget used in developer guide",
   "copyright": "",
@@ -14,6 +14,12 @@
       "label": "Open widget",
       "uri": "message-actions/open-widgets-action",
       "settingUri": "message-actions/open-widgets-action-setting"
+    },
+    {
+      "name": "toggleWidget",
+      "label": "Toggle widget",
+      "uri": "message-actions/toggle-widgets-action",
+      "settingUri": "message-actions/toggle-widgets-action-setting"
     }
   ],
   "defaultSize": {
@@ -29,6 +35,8 @@
     "supportAutoSize": true,
     "useDragHandler": true,
     "canCrossLayoutBoundary": true,
+    "needHiddenState": true,
+    "defaultInControllerUx": "offPanel",
     "hasBuilderSupportModule": true
   },
   "layouts": [
@@ -88,7 +96,7 @@
     "ko",
     "lt",
     "lv",
-    "nb",
+    "no",
     "nl",
     "pl",
     "pt-br",

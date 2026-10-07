@@ -2,8 +2,8 @@
   "name": "directions",
   "label": "Directions",
   "type": "widget",
-  "version": "1.16.0",
-  "exbVersion": "1.16.0",
+  "version": "1.21.0",
+  "exbVersion": "1.21.0",
   "author": "Esri R&D Center Beijing",
   "description": "This is the widget which can provide a way to build directions.",
   "copyright": "",
@@ -36,6 +36,13 @@
     "canGenerateMultipleOutputDataSources": true
   },
   "dependency": "jimu-arcgis",
+  "extensions": [
+    {
+      "name": "builderOperations",
+      "point": "BUILDER_OPERATIONS",
+      "uri": "tools/builder-operations"
+    }
+  ],
   "translatedLocales": [
     "en",
     "ar",
@@ -59,7 +66,7 @@
     "ko",
     "lt",
     "lv",
-    "nb",
+    "no",
     "nl",
     "pl",
     "pt-br",

@@ -76,10 +76,6 @@ export default {
   // guide insert widget
   insertWidgetStep1Title: 'Insert widget',
   insertWidgetStep1Content: 'Click on the widget and drag it onto the canvas.',
-  // guide express mode
-  expressModeStep1Title: 'Express mode',
-  expressModeStep1Content: 'Use express mode to focus on essential functions and content when designing an experience. You can move an experience from express mode to full mode if you need more advanced features and layout settings.',
-  expressModeLearnMore: 'Learn more',
   // guide general express mode
   // welcome introduction guide
   welcomeStep1Content: 'This tour will show you how to navigate in Experience Builder express mode.',
@@ -92,7 +88,7 @@ export default {
   expressMessageActionContent: 'Configure message actions to communicate with other widgets.',
   // guide widget controller
   widgetControllerTitle: 'Widget controller',
-  widgetControllerContent: 'Click at the Widget controller area, managing buttons will show on the top bar. Configure Widget controller behaviors on the right side.',
+  widgetControllerContent: '<p><b>Click at the Widget controller area,</b> managing buttons will show on the top bar. Configure Widget controller behaviors on the right side.</p>',
   expressWidgetControllerAddWidgetTitle: 'Add or manage widgets in Widget controller',
   expressWidgetControllerAddWidgetContent: 'Click the Add button on the top bar to add widgets to the Widget controller. Use the Manage widget button to reorder or group widgets. To remove a widget, click on it and a Delete button will show on the top bar.',
   // title
@@ -130,10 +126,5 @@ export default {
   expressFullEditModeContent: 'You can switch to full mode which allows advanced experience design.',
   // end guide
   expressEndGuideTitle: 'Congratulations! You have completed the tour!',
-  expressEndGuideContent: 'Now start to build your experience. You can always return to the guide by clicking the Help button on the bottom left corner of the builder if you need a refresher.',
-
-  goToExpressMode: 'Go to express mode',
-  goToFullMode: 'Go to full mode',
-  switchedToExpressMode: 'Switched to express mode',
-  switchedToFullMode: 'Switched to full mode'
+  expressEndGuideContent: 'Now start to build your experience. You can always return to the guide by clicking the Help button on the bottom left corner of the builder if you need a refresher.'
 }
