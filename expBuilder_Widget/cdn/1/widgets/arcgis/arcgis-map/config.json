@@ -1,9 +1,0 @@
-{
-  "toolConfig": {
-    "canZoom": true,
-    "canHome": true,
-    "canSearch": true,
-    "canNavigation": true
-  },
-  "isUseCustomMapState": false
-}

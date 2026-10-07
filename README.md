@@ -8,7 +8,7 @@ A custom widget for [ArcGIS Experience Builder](https://developers.arcgis.com/ex
 
 You can find the Custom Web AppBuilder what3words widget in this [Github page](https://what3words.github.io/w3w-arcgis-experience-builder-widget/expBuilder_Widget/).
 
-The demo's what3words API key is injected at deploy time from the `W3W_DEMO_API_KEY` repository secret. When regenerating the demo, keep `__W3W_API_KEY__` as the `w3wApiKey` value in `expBuilder_Widget/cdn/1/config.json` and `expBuilder_Widget/cdn/1/resources/config/config.json`.
+The demo is built on every push to `main` by `.github/workflows/static.yml`: `scripts/build-demo.sh` downloads ArcGIS Experience Builder (Developer Edition), adds the `what3words` widget and the demo app from `demo/`, and exports it. The what3words API key is injected at deploy time from the `W3W_DEMO_API_KEY` repository secret. To build the demo locally, run `scripts/build-demo.sh`; the output is in `expBuilder_Widget/`.
 
 ## Prerequisites
 - An installed and configured instance of [ArcGIS Experience Builder (Developer Edition)](https://developers.arcgis.com/experience-builder/guide/install-guide/), version 1.16 to 1.21;
@@ -77,6 +77,38 @@ If after installing correctly the what3words locator across your ArcGIS platform
 
 To resolve this issue, please drag-and-drop the what3words locator at the top of the Geocoding service list, as it is shown on this screenshot. You can find this list under your `Organisation > Utility services > Geocoding section`. 
 ![Troubleshooting what3words locator display](./docs/ScreenShot-05-troubleshooting-w3w-locator.png)
+
+## Upgrading to a new Experience Builder version
+
+Steps for maintainers when Esri releases a new Experience Builder version.
+
+### 1. Set up the new Developer Edition
+1. Download [ArcGIS Experience Builder (Developer Edition)](https://developers.arcgis.com/experience-builder/guide/downloads/) and unzip it.
+2. Install the `client` and `server` dependencies with the package manager named in `client/package.json` (`packageManager`). Experience Builder 1.21 uses pnpm.
+3. Copy `server/public/signin-info.json` from your previous install to skip the sign-in form.
+4. Copy the `what3words` folder into `client/your-extensions/widgets/`.
+5. Start the server (`pnpm start` in `server`, setting `EXB_HTTP_PORT` if port 3000 is taken) and the client watcher (`pnpm start` in `client`), then open `https://localhost:3001`.
+
+### 2. Test the widget
+1. In a test app, check both modes (a map click returns an address), the Grid (zoom in, toggle it, pan), opening and closing the widget through a widget controller, the settings page and the browser console.
+2. Run `pnpm run tscheck` and `pnpm exec eslint your-extensions/widgets/what3words` in `client`.
+3. Failures usually come from ArcGIS Maps SDK for JavaScript APIs removed in a new major version, for example `esri/geometry/projection` in 5.0. Compare the widget's `esri/` imports with `client/node_modules/@arcgis/core`.
+
+### 3. Update the widget
+1. Fix the widget in this repository and copy it into the Developer Edition after each change.
+2. Test on the new version and on the oldest supported version. When an API differs between them, branch on the `esri/kernel` version, as `projectToWGS84` in `what3words/src/runtime/widget.tsx` does.
+3. Bump `version` in `what3words/manifest.json` using [semver](https://semver.org/), set `exbVersion` to the new Experience Builder version, update the supported versions under Prerequisites and add a Revision History entry.
+
+### 4. Update the demo app
+1. Set `EXB_VERSION` and `EXB_SHA256` in `scripts/build-demo.sh` to the new version and its SHA-256 from the downloads page (Checksums).
+2. Copy `demo/config.json` to `server/public/apps/1/config.json` and `server/public/apps/1/resources/config/config.json`, and `demo/info.json` to `server/public/apps/1/info.json`, in the new install.
+3. Open the app in the builder, check both what3words widgets, then Save and Publish.
+4. Copy `server/public/apps/1/resources/config/config.json` back to `demo/config.json`, and make sure `w3wApiKey` is `__W3W_API_KEY__` before committing.
+5. Run `scripts/build-demo.sh` and open `expBuilder_Widget/index.html` through a local web server to check the demo.
+
+### 5. Release
+1. Open a pull request into `main`. Merging it builds and deploys the demo.
+2. Create the release on `main`: `gh release create vX.Y.Z --target main --title vX.Y.Z --notes "..."`.
 
 
 ## Issues
