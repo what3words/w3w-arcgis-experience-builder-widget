@@ -35,10 +35,14 @@ jobs:
           sed -i "s|__W3W_API_KEY__|$W3W_API_KEY|g" expBuilder_Widget/cdn/1/config.json expBuilder_Widget/cdn/1/resources/config/config.json
       - name: Setup Pages
         uses: actions/configure-pages@v4
+      # Renders README.md as the site root, as the previous branch-based Pages build did
+      - name: Build with Jekyll
+        uses: actions/jekyll-build-pages@v1
+        with:
+          source: ./
+          destination: ./_site
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
-        with:
-          path: '.'
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
