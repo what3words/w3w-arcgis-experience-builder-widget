@@ -8,7 +8,11 @@ A custom widget for [ArcGIS Experience Builder](https://developers.arcgis.com/ex
 
 You can find the Custom Web AppBuilder what3words widget in this [Github page](https://what3words.github.io/w3w-arcgis-experience-builder-widget/expBuilder_Widget/).
 
-The demo is built on every push to `main` by `.github/workflows/static.yml`: `scripts/build-demo.sh` downloads ArcGIS Experience Builder (Developer Edition), adds the `what3words` widget and the demo app from `demo/`, and exports it. The what3words API key is injected at deploy time from the `W3W_DEMO_API_KEY` repository secret. To build the demo locally, run `scripts/build-demo.sh`; the output is in `expBuilder_Widget/`.
+The demo is built and deployed by `.github/workflows/static.yml` on every push to `main`: `scripts/build-demo.sh` downloads ArcGIS Experience Builder (Developer Edition) at the `exbVersion` in `what3words/manifest.json`, adds the `what3words` widget and the demo app from `demo/`, and exports it. The what3words API key is injected at deploy time from the `W3W_DEMO_API_KEY` repository secret.
+
+To deploy with another Experience Builder version or from another branch, run the "Deploy static content to Pages" workflow from the Actions tab and set `exb_version` (for example `1.16`, or `latest` for the newest stable release). To restore the default deployment, run it on `main` with `exb_version` empty.
+
+To build the demo locally, run `scripts/build-demo.sh`, or for example `EXB_VERSION=1.16 scripts/build-demo.sh`. The output is in `expBuilder_Widget/`.
 
 ## Prerequisites
 - An installed and configured instance of [ArcGIS Experience Builder (Developer Edition)](https://developers.arcgis.com/experience-builder/guide/install-guide/), version 1.16 to 1.21;
@@ -99,15 +103,12 @@ Steps for maintainers when Esri releases a new Experience Builder version.
 2. Test on the new version and on the oldest supported version. When an API differs between them, branch on the `esri/kernel` version, as `projectToWGS84` in `what3words/src/runtime/widget.tsx` does.
 3. Bump `version` in `what3words/manifest.json` using [semver](https://semver.org/), set `exbVersion` to the new Experience Builder version, update the supported versions under Prerequisites and add a Revision History entry.
 
-### 4. Update the demo app
-1. Set `EXB_VERSION` and `EXB_SHA256` in `scripts/build-demo.sh` to the new version and its SHA-256 from the downloads page (Checksums).
-2. Copy `demo/config.json` to `server/public/apps/1/config.json` and `server/public/apps/1/resources/config/config.json`, and `demo/info.json` to `server/public/apps/1/info.json`, in the new install.
-3. Open the app in the builder, check both what3words widgets, then Save and Publish.
-4. Copy `server/public/apps/1/resources/config/config.json` back to `demo/config.json`, and make sure `w3wApiKey` is `__W3W_API_KEY__` before committing.
-5. Run `scripts/build-demo.sh` and open `expBuilder_Widget/index.html` through a local web server to check the demo.
+### 4. Check the demo app
+1. Run `EXB_VERSION=<new version> scripts/build-demo.sh`, then serve the output (`python3 -m http.server --directory expBuilder_Widget`) and check the demo in a browser.
+2. `demo/config.json` stays on the oldest supported Experience Builder version (1.16), so one config works on every version: newer versions upgrade it when the app loads. Only re-save it when dropping support for older versions: copy `demo/config.json` to `server/public/apps/1/config.json` and `server/public/apps/1/resources/config/config.json` and `demo/info.json` to `server/public/apps/1/info.json` in the oldest version you keep, open the app in the builder, Save and Publish, copy `server/public/apps/1/resources/config/config.json` back to `demo/config.json`, and make sure `w3wApiKey` is `__W3W_API_KEY__` before committing.
 
 ### 5. Release
-1. Open a pull request into `main`. Merging it builds and deploys the demo.
+1. Open a pull request into `main`. Merging it deploys the demo on the new `exbVersion`.
 2. Create the release on `main`: `gh release create vX.Y.Z --target main --title vX.Y.Z --notes "..."`.
 
 

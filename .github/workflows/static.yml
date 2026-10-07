@@ -5,6 +5,11 @@ on:
   push:
     branches: ["main"]
   workflow_dispatch:
+    inputs:
+      exb_version:
+        description: 'Experience Builder version to build the demo with, e.g. 1.16 or "latest". Leave empty to use exbVersion from what3words/manifest.json.'
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -32,6 +37,7 @@ jobs:
       - name: Build the demo app
         env:
           COREPACK_ENABLE_DOWNLOAD_PROMPT: 0
+          EXB_VERSION: ${{ inputs.exb_version }}
         run: |
           corepack enable
           scripts/build-demo.sh
